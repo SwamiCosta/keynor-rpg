@@ -21,17 +21,17 @@ This project is paired with `keynor-rpg-client` (frontend). Both are architected
 
 ---
 
-## Stack (proposed — to confirm before first implementation)
+## Stack (confirmed 2026-06-25 — scaffolded in PR #3)
 
 | Concern | Technology |
 |---------|------------|
 | Language | Java 21 |
-| Framework | Spring Boot (version to match `keynor-core` for consistency) |
+| Framework | Spring Boot 3.5.0 — **pending reconciliation against `keynor-core`'s actual version** (Gaemes has no read access to `keynor-core`; picked a current stable default, escalate to Omnia to confirm/align) |
 | Database | PostgreSQL — **own instance, separate from keynor-core's** (game data is never stored in the lore database) |
 | Build tool | Maven |
 | Testing | JUnit 5 + Mockito + Testcontainers |
 
-Adding `pom.xml` and its dependencies is a protected action (workspace `CLAUDE.md` — Protected actions) and requires explicit user authorization before it is created.
+`pom.xml` was created 2026-06-25 after explicit user authorization — see PR #3. Any future dependency change still requires its own authorization.
 
 ---
 
@@ -61,7 +61,7 @@ keynor-rpg/
 │       └── java/com/keynor/rpg/
 │           ├── domain/                  ← unit tests for domain services
 │           └── infrastructure/          ← integration tests for adapters
-└── pom.xml                              ← not yet created (protected action)
+└── pom.xml                              ← Spring Boot 3.5.0 / Java 21 (created 2026-06-25, PR #3)
 ```
 
 ### Layer rules
@@ -121,4 +121,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-06-23*
+*Last updated: 2026-06-25*
