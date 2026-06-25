@@ -44,8 +44,10 @@ When a task touches only one of the two repositories, you still keep both `CLAUD
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Database | `keynor-rpg` has its own PostgreSQL database, separate from `keynor-core` | Game session/state data has different write patterns and consistency needs than lore content; keeps the lore API's bounded context clean |
-| Lore access | `keynor-rpg` consumes `keynor-core` exclusively via its REST API, never direct DB access | `keynor-core` is the sole source of truth for universe entities |
-| Frontend stack | Proposed default: React 19 + TypeScript + Vite, mirroring `aniannoth-overview` | Reuses proven tooling and design system; revisit if RPG-specific needs (e.g. real-time state, more complex interactions) require a different approach — not locked in until first implementation |
+| Lore access (BE) | `keynor-rpg` consumes `keynor-core` exclusively via its REST API, never direct DB access | `keynor-core` is the sole source of truth for universe entities |
+| Frontend stack | Confirmed 2026-06-24: React 19 + TypeScript + Vite, mirroring `aniannoth-overview` | Reuses proven tooling and design system |
+| Lore access (FE) | Confirmed 2026-06-24: `keynor-rpg-client` reads lore content via proxy through `keynor-rpg` — never calls `keynor-core` directly | Keeps `keynor-rpg` as the single contract surface the frontend depends on; `keynor-core` access stays backend-to-backend |
+| Jung's migration authority | Confirmed 2026-06-24: Jung (Level 2, `keynor-rpg`) may write Flyway migrations, not just seed scripts — unlike Siegmund in `keynor-core` | User-authorized exception to `SKILLS.md` Skill 05's default rule; formal Skill 05 amendment pending via Omnia — see `jung.md` |
 
 ---
 

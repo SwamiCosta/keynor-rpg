@@ -95,14 +95,18 @@ keynor-rpg/
 └── .claude/
     ├── CLAUDE.md              ← this file
     └── agents/
-        └── gaemes.md          ← Level 3 — architect for keynor-rpg AND keynor-rpg-client
+        ├── gaemes.md          ← Level 3 — architect for keynor-rpg AND keynor-rpg-client
+        ├── void.md            ← Level 2 — Java backend developer
+        └── jung.md            ← Level 2 — database schema (migrations) and data
 ```
 
 | Agent | Level | Scope |
 |-------|-------|-------|
 | Gaemes | 3 — Architect | Both `keynor-rpg` (backend) and `keynor-rpg-client` (frontend) |
+| Void | 2 — Developer | Java source: domain, application, infrastructure layers |
+| Jung | 2 — Developer | Flyway migrations, seed/maintenance scripts, read-only DB queries — see `jung.md` for the named exception to the workspace's default migration-authorship rule |
 
-Level 2 developer agents (Java backend, React frontend, tests) are proposed by Gaemes as implementation work begins, following the pattern established by Imaws (`keynor-core`) and Aniannoth (`aniannoth-overview`).
+No dedicated test agent exists yet for `keynor-rpg` — Gaemes will propose one as implementation work begins, following the pattern established by Judis (`keynor-core`).
 
 ---
 
