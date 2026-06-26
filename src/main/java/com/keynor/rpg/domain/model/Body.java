@@ -9,17 +9,22 @@ public class Body {
     private final BodyComponent rightFlank;
     private final BodyComponent leftFlank;
     private final BodyComponent torso;
+    private final BodyComponent rightHip;
+    private final BodyComponent leftHip;
     private final BodyComponent genitals;
     private final BodyComponent buttocks;
     private final BodyComponent lowerBody;
 
     private Body(BodyComponent skull, BodyComponent neck, BodyComponent rightFlank, BodyComponent leftFlank,
-                  BodyComponent torso, BodyComponent genitals, BodyComponent buttocks, BodyComponent lowerBody) {
+                  BodyComponent torso, BodyComponent rightHip, BodyComponent leftHip, BodyComponent genitals,
+                  BodyComponent buttocks, BodyComponent lowerBody) {
         this.skull = skull;
         this.neck = neck;
         this.rightFlank = rightFlank;
         this.leftFlank = leftFlank;
         this.torso = torso;
+        this.rightHip = rightHip;
+        this.leftHip = leftHip;
         this.genitals = genitals;
         this.buttocks = buttocks;
         this.lowerBody = lowerBody;
@@ -31,26 +36,36 @@ public class Body {
      */
     public static Body humanTemplate() {
         BodyComponent skull = buildSkull();
-        BodyComponent neck = BodyComponent.structural("Neck", 12, 2, true, 12);
+        BodyComponent neck = buildNeck();
         BodyComponent rightFlank = buildFlank("Right");
         BodyComponent leftFlank = buildFlank("Left");
         BodyComponent torso = buildTorso();
+        BodyComponent rightHip = BodyComponent.structural("RightHip", 14, 3, false, 10);
+        BodyComponent leftHip = BodyComponent.structural("LeftHip", 14, 3, false, 10);
         BodyComponent genitals = BodyComponent.structural("Genitals", 6, 1, false, 14);
         BodyComponent buttocks = BodyComponent.structural("Buttocks", 14, 3, false, 10);
         BodyComponent lowerBody = buildLowerBody();
 
-        return new Body(skull, neck, rightFlank, leftFlank, torso, genitals, buttocks, lowerBody);
+        return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks, lowerBody);
     }
 
     private static BodyComponent buildSkull() {
         BodyComponent skull = BodyComponent.structural("Skull", 20, 5, true, 8);
         skull.addChild(BodyComponent.protectedInternal("Brain", 10, 5, true, 18));
+        skull.addChild(BodyComponent.structural("Mandible", 7, 3, false, 13));
         skull.addChild(BodyComponent.attachedAppendage("RightEye", 3, 1, false, 16, 0.05, 0.5));
         skull.addChild(BodyComponent.attachedAppendage("LeftEye", 3, 1, false, 16, 0.05, 0.5));
         skull.addChild(BodyComponent.attachedAppendage("Nose", 4, 1, false, 14, 0.08, 0.4));
         skull.addChild(BodyComponent.attachedAppendage("RightEar", 3, 1, false, 16, 0.05, 0.4));
         skull.addChild(BodyComponent.attachedAppendage("LeftEar", 3, 1, false, 16, 0.05, 0.4));
         return skull;
+    }
+
+    private static BodyComponent buildNeck() {
+        BodyComponent neck = BodyComponent.structural("Neck", 12, 2, true, 12);
+        neck.addChild(BodyComponent.protectedInternal("CervicalSpine", 8, 5, true, 18));
+        neck.addChild(BodyComponent.protectedInternal("Esophagus", 6, 4, true, 17));
+        return neck;
     }
 
     private static BodyComponent buildFlank(String side) {
@@ -68,7 +83,9 @@ public class Body {
         BodyComponent chest = BodyComponent.structural("Chest", 20, 6, false, 8);
         chest.addChild(BodyComponent.protectedInternal("Heart", 12, 6, true, 16));
         chest.addChild(BodyComponent.protectedInternal("Lungs", 14, 6, true, 16));
-        chest.addChild(BodyComponent.protectedInternal("Liver", 10, 6, true, 16));
+
+        BodyComponent solarComplex = BodyComponent.structural("SolarComplex", 14, 5, false, 9);
+        solarComplex.addChild(BodyComponent.protectedInternal("Liver", 10, 6, true, 16));
 
         BodyComponent abdomen = BodyComponent.structural("Abdomen", 18, 4, false, 8);
         abdomen.addChild(BodyComponent.protectedInternal("Stomach", 8, 4, false, 16));
@@ -77,7 +94,10 @@ public class Body {
         abdomen.addChild(BodyComponent.protectedInternal("Bladder", 6, 4, false, 16));
 
         torso.addChild(chest);
+        torso.addChild(BodyComponent.protectedInternal("ThoracicSpine", 10, 5, true, 18));
+        torso.addChild(solarComplex);
         torso.addChild(abdomen);
+        torso.addChild(BodyComponent.protectedInternal("LumbarSpine", 10, 5, true, 18));
         return torso;
     }
 
@@ -97,7 +117,7 @@ public class Body {
     }
 
     public List<BodyComponent> rootComponents() {
-        return List.of(skull, neck, rightFlank, leftFlank, torso, genitals, buttocks, lowerBody);
+        return List.of(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks, lowerBody);
     }
 
     public BodyComponent getSkull() {
@@ -118,6 +138,14 @@ public class Body {
 
     public BodyComponent getTorso() {
         return torso;
+    }
+
+    public BodyComponent getRightHip() {
+        return rightHip;
+    }
+
+    public BodyComponent getLeftHip() {
+        return leftHip;
     }
 
     public BodyComponent getGenitals() {
