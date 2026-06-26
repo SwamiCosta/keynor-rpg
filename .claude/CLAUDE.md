@@ -101,6 +101,23 @@ keynor-rpg/
 - Player-facing output is always a qualitative label (e.g. "Resistente"), never the raw numeric stats above — this constrains the future DTO/API layer once it exists.
 - `Mente` (Mind) and `Alma` (Soul) pillars are not yet designed.
 
+### Biomechanics — genetics, body composition and output formulas (implemented)
+
+- `Biomechanics` lives **inside `Body`** (`Body.getBiomechanics()`), not as a separate member on `PlayableCharacter` — it is the physical-attribute side of the `Corpo` pillar, nested under the same root as the anatomical wound-tracking tree rather than floating alongside it. `Biomechanics.humanDefaults()` is built inside `Body.humanTemplate()` and mirrors its factory pattern.
+- Two-layer philosophy, per the user's design notes: a **genetic layer** (`Genetics` + `BloodSystem`) fixed once at character creation, and a **trainable layer** (`BodyComposition` + `NervousSystem` + `CardiacSystem` + `PulmonarySystem`) that changes through training/diet over the course of the game. The genetic layer does not feed the output formulas below directly — it is documented intent to modulate the *rate* at which the trainable layer changes (e.g. mesomorphs gaining muscle faster); that rate formula is not yet implemented.
+- **`Genetics`** is immutable (final fields, no setters) — this encodes "genetics cannot change after game start" as a type-level invariant rather than a runtime check. Holds `endomorphy`, `mesomorphy`, `ectomorphy` (three independent 0–10 axes, Heath-Carter inspired — not mutually exclusive categories), `height` (cm), `limbRatio` (~0.85–1.15), `boneDensity` (0–10). Defaults: all somatotype/density axes at 5, height 170cm, limbRatio 1.0.
+- **`BodyComposition`** is mutable (plain setters, since it trains over time). Holds `totalMass` (kg), `bodyFatPercentage` (0–1 — a value the player generally wants to *lower*, not raise), `muscleMass` (kg), `dominantFiberType` (-1 slow/endurance to +1 fast/power), `neuromuscularEfficiency` (0–1, fraction of theoretical force actually usable — the "technique vs. size" axis). `getFatMass()` is derived (`totalMass × bodyFatPercentage`). Defaults: 70kg total mass, 20% body fat, 30kg muscle mass, fiber type 0 (neutral mix), neuromuscular efficiency 0.5.
+- **`Biomechanics.getCardiovascularCapacity()` is a derived getter, not a stored field** — the live average of `BloodSystem.oxygenCarryingCapacity`, `CardiacSystem.cardiacOutput`, and `PulmonarySystem.pulmonaryCapacity`, per the user's instruction to treat it as a resultant aggregate of the other three systems.
+  - **`BloodSystem`** (`oxygenCarryingCapacity`, 0–10) — genetic, immutable (no setters), like `Genetics`.
+  - **`CardiacSystem`** (`cardiacOutput`, 0–10) and **`PulmonarySystem`** (`pulmonaryCapacity`, 0–10) — both trainable (mutable setters).
+  - All three default to 5 (mid-range).
+- **`NervousSystem`** (`neuralDrive`, 0–10, trainable) is a placeholder for a nervous-system model the user intends to detail later; `neuralDrive` is documented to eventually modulate `BodyComposition.dominantFiberType`, but is **not yet wired into any formula** — same "documented intent only" pattern as `Body`'s unimplemented side effects.
+- **`AttributePointBudget`** is a generic, reusable spend/remaining tracker (`totalPoints`, `spentPoints`, `spend(amount)` throwing on overspend or negative amounts, `remainingPoints()`). `Biomechanics` holds one instance for the genetic pool and one for the training pool, both seeded at 20 points in `humanDefaults()` — illustrative placeholders, same "not balanced game data" caveat as `Body`'s hit point values. The budget is deliberately unaware of which attribute it funds: **the per-attribute point cost of moving away from a default (e.g. points per cm of height vs. points per somatotype unit) is deferred to the character-creation use case, which does not exist yet.**
+- **Output formulas are implemented as plain instance methods on `Biomechanics`**, each usable at any time off the character's current state: `getStrength()`, `getSpeed()`, `getStaminaPool()`, `getFatigueRate(intensity)`, `getEnergyCost(intensity)`, `getDurability()`, plus `getCardiovascularCapacity()` above. `intensity` is a method parameter rather than stored state, since it represents the current activity, not a character trait.
+  - `getStrength()` / `getSpeed()` / `getStaminaPool()` / `getDurability()` follow the doc's formulas directly (²⁄₃-power square-cube law for Strength, Kleiber's ¾ law for the mass terms, log/sqrt for Durability's inertia/fat-cushion terms).
+  - `getEnergyCost(intensity)`'s `ActivityCost` and `Eficiencia` terms were left in the doc as named-but-unspecified functions of `(M, intensity)` / `(CV, FT)`; this implementation concretizes them as `kActivityCost × M × intensity` and `kEfficiency × CV × (1 − 0.3 × FT)` (the latter mirroring `getStaminaPool()`'s fiber-type shape) — flagged here since they are this implementation's own interpretation, not lifted directly from the doc.
+- **`BiomechanicsBalance`** holds every free coefficient as a mutable, independently settable field — `k1`..`k9` and `c`, matching the doc's own naming, plus `kBmr`/`kActivityCost`/`kEfficiency` for the three terms invented for `getEnergyCost`. All default to `1.0` (neutral multiplier) — same "not balanced game data" caveat as everywhere else in this domain; tune by playing, not by deriving a "correct" value.
+
 ---
 
 ## Agent structure
@@ -136,4 +153,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-06-26 (Body pillar anatomy expanded — Mandible, CervicalSpine, Esophagus, ThoracicSpine, LumbarSpine, SolarComplex, RightHip/LeftHip)*
+*Last updated: 2026-06-26 (Biomechanics added — Genetics, BodyComposition, NervousSystem, CardiacSystem, PulmonarySystem, BloodSystem, AttributePointBudget)*

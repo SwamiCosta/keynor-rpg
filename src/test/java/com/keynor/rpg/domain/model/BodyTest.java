@@ -140,4 +140,13 @@ class BodyTest {
         assertThat(body.getGenitals().getChildren()).isEmpty();
         assertThat(body.getButtocks().getChildren()).isEmpty();
     }
+
+    @Test
+    void humanTemplate_wiresUpBiomechanicsWithHumanDefaults() {
+        Body body = Body.humanTemplate();
+
+        assertThat(body.getBiomechanics()).isNotNull();
+        assertThat(body.getBiomechanics().getGenetics()).isNotNull();
+        assertThat(body.getBiomechanics().getBodyComposition()).isNotNull();
+    }
 }

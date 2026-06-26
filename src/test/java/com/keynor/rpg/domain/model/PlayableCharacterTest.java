@@ -12,6 +12,7 @@ class PlayableCharacterTest {
 
         assertThat(character.getName()).isEqualTo("Keynor");
         assertThat(character.getBody()).isNotNull();
+        assertThat(character.getBody().getBiomechanics()).isNotNull();
         assertThat(character.getLoreReference()).isNull();
     }
 
