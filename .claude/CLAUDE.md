@@ -101,6 +101,20 @@ keynor-rpg/
 - Player-facing output is always a qualitative label (e.g. "Resistente"), never the raw numeric stats above — this constrains the future DTO/API layer once it exists.
 - `Mente` (Mind) and `Alma` (Soul) pillars are not yet designed.
 
+### Biomechanics — genetics and body composition (implemented)
+
+- `Biomechanics` aggregates the physical-attribute side of the `Corpo` pillar, separate from `Body`'s anatomical wound-tracking tree. `PlayableCharacter` holds both `body` and `biomechanics` as two distinct, mandatory members. `Biomechanics.humanDefaults()` mirrors `Body.humanTemplate()`'s factory pattern.
+- Two-layer philosophy, per the user's design notes: a **genetic layer** (`Genetics` + `BloodSystem`) fixed once at character creation, and a **trainable layer** (`BodyComposition` + `NervousSystem` + `CardiacSystem` + `PulmonarySystem`) that changes through training/diet over the course of the game. The genetic layer does not feed combat formulas directly — it is documented intent to modulate the *rate* at which the trainable layer changes (e.g. mesomorphs gaining muscle faster); that rate formula is not yet implemented.
+- **`Genetics`** is immutable (final fields, no setters) — this encodes "genetics cannot change after game start" as a type-level invariant rather than a runtime check. Holds `endomorphy`, `mesomorphy`, `ectomorphy` (three independent 0–10 axes, Heath-Carter inspired — not mutually exclusive categories), `height` (cm), `limbRatio` (~0.85–1.15), `boneDensity` (0–10). Defaults: all somatotype/density axes at 5, height 170cm, limbRatio 1.0.
+- **`BodyComposition`** is mutable (plain setters, since it trains over time). Holds `totalMass` (kg), `bodyFatPercentage` (0–1 — a value the player generally wants to *lower*, not raise), `muscleMass` (kg), `dominantFiberType` (-1 slow/endurance to +1 fast/power), `neuromuscularEfficiency` (0–1, fraction of theoretical force actually usable — the "technique vs. size" axis). `getFatMass()` is derived (`totalMass × bodyFatPercentage`). Defaults: 70kg total mass, 20% body fat, 30kg muscle mass, fiber type 0 (neutral mix), neuromuscular efficiency 0.5.
+- **Cardiovascular capacity is intentionally not a field anywhere yet.** Per the user's explicit framing, it is "a case apart" — a future value *derived* from `BloodSystem`, `CardiacSystem`, and `PulmonarySystem` once that resultant formula is designed. For now these three systems exist only as minimal placeholder variable holders:
+  - **`BloodSystem`** (`oxygenCarryingCapacity`, 0–10) — genetic, immutable (no setters), like `Genetics`.
+  - **`CardiacSystem`** (`cardiacOutput`, 0–10) and **`PulmonarySystem`** (`pulmonaryCapacity`, 0–10) — both trainable (mutable setters).
+  - All three default to 5 (mid-range).
+- **`NervousSystem`** (`neuralDrive`, 0–10, trainable) is a placeholder for a nervous-system model the user intends to detail later; `neuralDrive` is documented to eventually modulate `BodyComposition.dominantFiberType`, but is **not yet wired into any formula** — same "documented intent only" pattern as `Body`'s unimplemented side effects.
+- **`AttributePointBudget`** is a generic, reusable spend/remaining tracker (`totalPoints`, `spentPoints`, `spend(amount)` throwing on overspend or negative amounts, `remainingPoints()`). `Biomechanics` holds one instance for the genetic pool and one for the training pool, both seeded at 20 points in `humanDefaults()` — illustrative placeholders, same "not balanced game data" caveat as `Body`'s hit point values. The budget is deliberately unaware of which attribute it funds: **the per-attribute point cost of moving away from a default (e.g. points per cm of height vs. points per somatotype unit) is deferred to the character-creation use case, which does not exist yet.**
+- The user's design doc (shared 2026-06-26) also specifies a full output-formula engine — Strength, Speed, Stamina, Energy Cost, Durability — built from `Genetics`/`BodyComposition` via biological exponents (², ⅔ power, Kleiber's ¾ law, log, sqrt) and two free balance coefficients, `k` (per-formula scaling) and `c` (specifically the leverage term in the Strength formula). **None of these formulas are implemented yet** — this task's scope was limited to the attribute data model and the genetic/trainable systems listed above, per the user's own framing ("para podermos seguir em frente" — so we can move forward). `k` and `c` are both configurable game-design constants, not derived values, whenever that formula engine is built.
+
 ---
 
 ## Agent structure
@@ -136,4 +150,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-06-26 (Body pillar anatomy expanded — Mandible, CervicalSpine, Esophagus, ThoracicSpine, LumbarSpine, SolarComplex, RightHip/LeftHip)*
+*Last updated: 2026-06-26 (Biomechanics added — Genetics, BodyComposition, NervousSystem, CardiacSystem, PulmonarySystem, BloodSystem, AttributePointBudget)*

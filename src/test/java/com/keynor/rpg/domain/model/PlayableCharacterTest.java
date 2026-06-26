@@ -8,16 +8,17 @@ class PlayableCharacterTest {
 
     @Test
     void newCharacter_hasNoLoreReferenceUntilLinked() {
-        PlayableCharacter character = new PlayableCharacter("Keynor", Body.humanTemplate());
+        PlayableCharacter character = new PlayableCharacter("Keynor", Body.humanTemplate(), Biomechanics.humanDefaults());
 
         assertThat(character.getName()).isEqualTo("Keynor");
         assertThat(character.getBody()).isNotNull();
+        assertThat(character.getBiomechanics()).isNotNull();
         assertThat(character.getLoreReference()).isNull();
     }
 
     @Test
     void linkToLore_setsLoreReference() {
-        PlayableCharacter character = new PlayableCharacter("Keynor", Body.humanTemplate());
+        PlayableCharacter character = new PlayableCharacter("Keynor", Body.humanTemplate(), Biomechanics.humanDefaults());
 
         character.linkToLore("character-keynor");
 
