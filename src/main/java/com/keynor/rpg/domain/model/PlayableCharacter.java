@@ -4,13 +4,11 @@ public class PlayableCharacter {
 
     private final String name;
     private final Body body;
-    private final Biomechanics biomechanics;
     private String loreReference;
 
-    public PlayableCharacter(String name, Body body, Biomechanics biomechanics) {
+    public PlayableCharacter(String name, Body body) {
         this.name = name;
         this.body = body;
-        this.biomechanics = biomechanics;
     }
 
     public void linkToLore(String loreReference) {
@@ -23,10 +21,6 @@ public class PlayableCharacter {
 
     public Body getBody() {
         return body;
-    }
-
-    public Biomechanics getBiomechanics() {
-        return biomechanics;
     }
 
     public String getLoreReference() {

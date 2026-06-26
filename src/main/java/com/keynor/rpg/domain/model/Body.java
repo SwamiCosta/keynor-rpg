@@ -14,10 +14,11 @@ public class Body {
     private final BodyComponent genitals;
     private final BodyComponent buttocks;
     private final BodyComponent lowerBody;
+    private final Biomechanics biomechanics;
 
     private Body(BodyComponent skull, BodyComponent neck, BodyComponent rightFlank, BodyComponent leftFlank,
                   BodyComponent torso, BodyComponent rightHip, BodyComponent leftHip, BodyComponent genitals,
-                  BodyComponent buttocks, BodyComponent lowerBody) {
+                  BodyComponent buttocks, BodyComponent lowerBody, Biomechanics biomechanics) {
         this.skull = skull;
         this.neck = neck;
         this.rightFlank = rightFlank;
@@ -28,6 +29,7 @@ public class Body {
         this.genitals = genitals;
         this.buttocks = buttocks;
         this.lowerBody = lowerBody;
+        this.biomechanics = biomechanics;
     }
 
     /**
@@ -45,8 +47,10 @@ public class Body {
         BodyComponent genitals = BodyComponent.structural("Genitals", 6, 1, false, 14);
         BodyComponent buttocks = BodyComponent.structural("Buttocks", 14, 3, false, 10);
         BodyComponent lowerBody = buildLowerBody();
+        Biomechanics biomechanics = Biomechanics.humanDefaults();
 
-        return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks, lowerBody);
+        return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks,
+                lowerBody, biomechanics);
     }
 
     private static BodyComponent buildSkull() {
@@ -158,5 +162,9 @@ public class Body {
 
     public BodyComponent getLowerBody() {
         return lowerBody;
+    }
+
+    public Biomechanics getBiomechanics() {
+        return biomechanics;
     }
 }
