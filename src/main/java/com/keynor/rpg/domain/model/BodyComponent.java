@@ -1,10 +1,15 @@
 package com.keynor.rpg.domain.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class BodyComponent {
+
+    private static final Logger log = LoggerFactory.getLogger(BodyComponent.class);
 
     private final String name;
     private final int maxHitPoints;
@@ -63,6 +68,8 @@ public class BodyComponent {
         if (irreversible) {
             irreversibleDamage = Math.min(maxHitPoints, irreversibleDamage + amount);
         }
+        log.debug("{} took {} damage{} -> {}/{} HP ({} irreversible)", name, amount,
+                irreversible ? " (irreversible)" : "", currentHitPoints, maxHitPoints, irreversibleDamage);
     }
 
     public int getReversibleDamage() {
