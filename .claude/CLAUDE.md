@@ -35,6 +35,16 @@ This project is paired with `keynor-rpg-client` (frontend). Both are architected
 
 ---
 
+## Local environment assumptions
+
+`keynor-rpg` expects two things already running before any agent is invoked: its own PostgreSQL instance (separate from `keynor-core`'s — see Boundary with keynor-core below) and the Spring Boot application itself. Agents never start, stop, or restart either, and never provision a disposable substitute (e.g. a one-off container) for a missing one.
+
+Any task that needs real lore data (characters, places, items) additionally depends on `keynor-core`'s REST API being reachable — that service belongs to `keynor-core`'s own agents, never started or restarted from here.
+
+If something required is not running or not reachable, stop and report instead of working around it. See workspace `SKILLS.md` — Skill 13 for the general rule this follows.
+
+---
+
 ## Architecture
 
 Hexagonal architecture (ports & adapters), mirroring the pattern established in `keynor-core`. The domain layer has zero framework dependencies.
@@ -153,4 +163,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-06-26 (Biomechanics added — Genetics, BodyComposition, NervousSystem, CardiacSystem, PulmonarySystem, BloodSystem, AttributePointBudget)*
+*Last updated: 2026-06-27 (Local environment assumptions added — Skill 13)*
