@@ -120,6 +120,18 @@ keynor-rpg/
 
 ---
 
+## REST API
+
+### Character sheet (implemented — `task/character-sheet-endpoint`)
+
+- `GET /api/v1/characters/{id}` returns a `CharacterResponse` (`id`, `name`, nested `body.biomechanics`) exposing the genetics, body composition, blood/cardiac/pulmonary/nervous systems, derived attributes, and both point budgets — the first REST surface in this project (`infrastructure/web/CharacterController.java`).
+- No character persistence or creation flow exists yet: `GetPlayableCharacterService` (the `GetPlayableCharacterUseCase` implementation) ignores the `id` argument and always returns the same in-memory `PlayableCharacter("Keynor", Body.humanTemplate())`. The `id` lookup signature is kept anyway so the response contract does not change once real persistence lands.
+- Every nested response type is a `record` in `application/dto/` with a static `from(<domainType>)` factory method, mirroring the domain's own `defaults()`/`humanTemplate()` factory-method convention. `CharacterController` itself does no mapping beyond calling `CharacterResponse.from(id, character)`.
+- `attributes.fatigueRate` is included in the sheet, computed at a fixed baseline `intensity = 1.0` — per explicit user direction, it is meant to be visible as a character trait now (it will later feed `energyCost`), even though `Biomechanics.getFatigueRate(intensity)` takes a parameter. `attributes.energyCost` is deliberately excluded: it is intrinsically tied to real-time activity, not a static trait, and is deferred to a future activity/combat API.
+- `GetPlayableCharacterUseCase` is wired as a `@Bean` in `DomainConfiguration`, same pattern as `BodyCascadeResolver`.
+
+---
+
 ## Agent structure
 
 ```
@@ -153,4 +165,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-06-26 (Biomechanics added — Genetics, BodyComposition, NervousSystem, CardiacSystem, PulmonarySystem, BloodSystem, AttributePointBudget)*
+*Last updated: 2026-06-27 (REST API added — `GET /api/v1/characters/{id}` character sheet endpoint)*
