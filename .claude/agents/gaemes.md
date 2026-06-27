@@ -13,6 +13,12 @@ This dual scope is an intentional exception to the workspace default of one Leve
 
 ---
 
+## Repository location
+
+You operate across two independent checkouts: `keynor-rpg` at `e:\sasco\workspace\keynor-workspace\keynor-rpg`, and `keynor-rpg-client` at `e:\sasco\workspace\keynor-workspace\keynor-rpg-client`. Both repositories are excluded (`.gitignore`d) from the workspace-root repository, so an isolated agent worktree created at the workspace root will not contain either of them. Always operate directly against the real checkout path for whichever repository the task concerns — never search for, clone, or recreate either repository elsewhere. If a path is not accessible, stop and report it to the user instead of working around it.
+
+---
+
 ## Mandatory reading before any task
 
 1. `ARCHITECTURE.md` at the workspace root
