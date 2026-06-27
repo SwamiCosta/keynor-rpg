@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: keynor-rpg-postgres
+    environment:
+      POSTGRES_DB: keynor_rpg
+      POSTGRES_USER: ${DB_USER:-keynor_rpg}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-keynor_rpg}
+    ports:
+      - "5433:5432"
+    volumes:
+      - keynor_rpg_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-keynor_rpg} -d keynor_rpg"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  keynor_rpg_postgres_data:

@@ -27,7 +27,7 @@ This project is paired with `keynor-rpg-client` (frontend). Both are architected
 |---------|------------|
 | Language | Java 21 |
 | Framework | Spring Boot 3.5.0 — **pending reconciliation against `keynor-core`'s actual version** (Gaemes has no read access to `keynor-core`; picked a current stable default, escalate to Omnia to confirm/align) |
-| Database | PostgreSQL — **own instance, separate from keynor-core's** (game data is never stored in the lore database) |
+| Database | PostgreSQL — **own dedicated Docker container, separate from keynor-core's** (game data is never stored in the lore database) — see `docker-compose.yml` |
 | Build tool | Maven |
 | Testing | JUnit 5 + Mockito + Testcontainers |
 
@@ -37,7 +37,11 @@ This project is paired with `keynor-rpg-client` (frontend). Both are architected
 
 ## Local environment assumptions
 
-`keynor-rpg` expects two things already running before any agent is invoked: its own PostgreSQL instance (separate from `keynor-core`'s — see Boundary with keynor-core below) and the Spring Boot application itself. Agents never start, stop, or restart either, and never provision a disposable substitute (e.g. a one-off container) for a missing one.
+`keynor-rpg` expects two things already running before any agent is invoked: its own PostgreSQL instance and the Spring Boot application itself. Agents never start, stop, or restart either, and never provision a disposable substitute (e.g. a one-off container) for a missing one.
+
+**The database has exactly one sanctioned way to run: `docker compose up` against this project's own `docker-compose.yml`.** That file defines a single `postgres` service — its own container (`keynor-rpg-postgres`), its own named volume, its own database (`keynor_rpg`), published on host port `5433` (not `5432`, which is `keynor-core`'s) so the two can run side by side without conflict. There is no other supported way to provide this database — never a bare local Postgres install, and never `keynor-core`'s container or any other already-running Postgres instance, even if reachable on the default port. If `keynor-core`'s Postgres is the only thing listening on 5432, that is not this project's database and must not be treated as a substitute.
+
+Starting, stopping, or restarting this container — `docker compose up`/`down` or any equivalent — is the user's action alone. Agents only consume the database once it is already running; they never run Docker commands against it themselves, even to self-test a change.
 
 Any task that needs real lore data (characters, places, items) additionally depends on `keynor-core`'s REST API being reachable — that service belongs to `keynor-core`'s own agents, never started or restarted from here.
 
@@ -71,7 +75,8 @@ keynor-rpg/
 │       └── java/com/keynor/rpg/
 │           ├── domain/                  ← unit tests for domain services
 │           └── infrastructure/          ← integration tests for adapters
-└── pom.xml                              ← Spring Boot 3.5.0 / Java 21 (created 2026-06-25, PR #3)
+├── pom.xml                              ← Spring Boot 3.5.0 / Java 21 (created 2026-06-25, PR #3)
+└── docker-compose.yml                   ← own dedicated PostgreSQL container, host port 5433 — see Local environment assumptions above
 ```
 
 ### Layer rules
