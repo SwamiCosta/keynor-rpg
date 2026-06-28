@@ -1,7 +1,9 @@
 package com.keynor.rpg.infrastructure.config;
 
 import com.keynor.rpg.application.usecase.GetPlayableCharacterService;
+import com.keynor.rpg.application.usecase.PreviewAttributesService;
 import com.keynor.rpg.domain.port.in.GetPlayableCharacterUseCase;
+import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 import com.keynor.rpg.domain.port.out.RandomSource;
 import com.keynor.rpg.domain.service.BodyCascadeResolver;
 import org.springframework.context.annotation.Bean;
@@ -18,5 +20,10 @@ public class DomainConfiguration {
     @Bean
     public GetPlayableCharacterUseCase getPlayableCharacterUseCase() {
         return new GetPlayableCharacterService();
+    }
+
+    @Bean
+    public PreviewAttributesUseCase previewAttributesUseCase() {
+        return new PreviewAttributesService();
     }
 }

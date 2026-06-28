@@ -145,6 +145,14 @@ keynor-rpg/
 - `attributes.fatigueRate` is included in the sheet, computed at a fixed baseline `intensity = 1.0` — per explicit user direction, it is meant to be visible as a character trait now (it will later feed `energyCost`), even though `Biomechanics.getFatigueRate(intensity)` takes a parameter. `attributes.energyCost` is deliberately excluded: it is intrinsically tied to real-time activity, not a static trait, and is deferred to a future activity/combat API.
 - `GetPlayableCharacterUseCase` is wired as a `@Bean` in `DomainConfiguration`, same pattern as `BodyCascadeResolver`.
 
+### Biomechanics preview (implemented — `task/biomechanics-attributes-preview`)
+
+- `POST /api/v1/biomechanics/preview` takes a `BiomechanicsPreviewRequest` (raw `genetics`, `bodyComposition`, `bloodSystem`, `cardiacSystem`, `pulmonarySystem`, `nervousSystem` input objects) and returns an `AttributesResponse` — the same derived-attributes shape already used by the character sheet (`infrastructure/web/BiomechanicsPreviewController.java`).
+- **This endpoint is stateless and exists solely to support the `keynor-rpg-client` character-creation simulator's live preview** — it has no persistence, no character identity, and is **not** the eventual character-creation contract. Per the workspace's FE-prototype-before-contract workflow (decided 2026-06-27), the real `POST`/`PUT` creation endpoints and their payload shape are deferred until the user has felt the FE prototype's UX and hands down the actual contract.
+- Each of the six input objects is its own record in `application/dto/` (`GeneticsInput`, `BodyCompositionInput`, `BloodSystemInput`, `CardiacSystemInput`, `PulmonarySystemInput`, `NervousSystemInput`), mirroring the corresponding domain class's raw constructor fields one-to-one, each with a `toDomain()` method — the inverse of the existing `*Response.from(domainType)` convention.
+- `PreviewAttributesService` (the `PreviewAttributesUseCase` implementation) builds a transient `Biomechanics` from the six converted domain objects plus placeholder point budgets (20/20) and `BiomechanicsBalance.defaults()` — safe because none of `Biomechanics`'s output formulas (`getStrength()`, `getSpeed()`, etc.) read the point budgets or `balance`'s actual values beyond its coefficients, which stay at their neutral `1.0` default either way.
+- `PreviewAttributesUseCase` is wired as a `@Bean` in `DomainConfiguration`, same pattern as `GetPlayableCharacterUseCase`.
+
 ---
 
 ## Agent structure
