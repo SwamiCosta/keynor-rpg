@@ -2,48 +2,35 @@ package com.keynor.rpg.domain.model;
 
 /**
  * Trainable layer of physical attributes — changes through training/diet over the course
- * of the game, unlike {@link Genetics}. {@code bodyFatPercentage} is intentionally a value
- * the player generally wants to lower, not raise.
+ * of the game, unlike {@link Genetics}. {@code bodyFat} (kg) is intentionally a value the
+ * player generally wants to lower, not raise. {@code totalMass} is not stored here — it is
+ * derived on {@link Biomechanics}, alongside bone and organ/fluid mass.
  */
 public class BodyComposition {
 
-    private double totalMass;
-    private double bodyFatPercentage;
+    private double bodyFat;
     private double muscleMass;
     private double dominantFiberType;
     private double neuromuscularEfficiency;
 
-    public BodyComposition(double totalMass, double bodyFatPercentage, double muscleMass,
-                            double dominantFiberType, double neuromuscularEfficiency) {
-        this.totalMass = totalMass;
-        this.bodyFatPercentage = bodyFatPercentage;
+    public BodyComposition(double bodyFat, double muscleMass, double dominantFiberType,
+                            double neuromuscularEfficiency) {
+        this.bodyFat = bodyFat;
         this.muscleMass = muscleMass;
         this.dominantFiberType = dominantFiberType;
         this.neuromuscularEfficiency = neuromuscularEfficiency;
     }
 
     public static BodyComposition defaults() {
-        return new BodyComposition(70, 0.20, 30, 0.0, 0.5);
+        return new BodyComposition(14, 30, 0.0, 0.5);
     }
 
-    public double getFatMass() {
-        return totalMass * bodyFatPercentage;
+    public double getBodyFat() {
+        return bodyFat;
     }
 
-    public double getTotalMass() {
-        return totalMass;
-    }
-
-    public void setTotalMass(double totalMass) {
-        this.totalMass = totalMass;
-    }
-
-    public double getBodyFatPercentage() {
-        return bodyFatPercentage;
-    }
-
-    public void setBodyFatPercentage(double bodyFatPercentage) {
-        this.bodyFatPercentage = bodyFatPercentage;
+    public void setBodyFat(double bodyFat) {
+        this.bodyFat = bodyFat;
     }
 
     public double getMuscleMass() {

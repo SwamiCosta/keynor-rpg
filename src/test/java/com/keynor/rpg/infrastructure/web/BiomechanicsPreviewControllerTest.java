@@ -39,7 +39,7 @@ class BiomechanicsPreviewControllerTest {
     void preview_returnsAttributesComputedFromRequestBody() throws Exception {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
                 new GeneticsInput(5, 5, 5, 170, 1.0, 5),
-                new BodyCompositionInput(70, 0.20, 30, 0.0, 0.5),
+                new BodyCompositionInput(14, 30, 0.0, 0.5),
                 new BloodSystemInput(5),
                 new CardiacSystemInput(5),
                 new PulmonarySystemInput(5),
@@ -52,11 +52,14 @@ class BiomechanicsPreviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.strength").exists())
-                .andExpect(jsonPath("$.speed").exists())
-                .andExpect(jsonPath("$.staminaPool").exists())
-                .andExpect(jsonPath("$.durability").exists())
-                .andExpect(jsonPath("$.cardiovascularCapacity").exists())
-                .andExpect(jsonPath("$.fatigueRate").exists());
+                .andExpect(jsonPath("$.attributes.strength").exists())
+                .andExpect(jsonPath("$.attributes.speed").exists())
+                .andExpect(jsonPath("$.attributes.staminaPool").exists())
+                .andExpect(jsonPath("$.attributes.durability").exists())
+                .andExpect(jsonPath("$.attributes.cardiovascularCapacity").exists())
+                .andExpect(jsonPath("$.attributes.fatigueRate").exists())
+                .andExpect(jsonPath("$.calculatedValues.totalMass").exists())
+                .andExpect(jsonPath("$.calculatedValues.boneMass").exists())
+                .andExpect(jsonPath("$.calculatedValues.organWaterMass").exists());
     }
 }

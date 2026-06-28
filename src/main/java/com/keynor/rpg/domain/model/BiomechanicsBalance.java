@@ -5,8 +5,11 @@ package com.keynor.rpg.domain.model;
  * and c match the naming used in the user's design document; kBmr/kActivityCost/kEfficiency
  * are additional coefficients introduced to make the EnergyCost formula concrete, since the
  * document left {@code ActivityCost} and {@code Eficiencia} as named-but-unspecified terms.
- * All default to 1.0 (neutral multiplier): there is no "scientifically correct" value, only
+ * Most default to 1.0 (neutral multiplier): there is no "scientifically correct" value, only
  * what plays well — same caveat as {@code Body}'s illustrative hit point placeholders.
+ * {@code kBoneMass}/{@code kBoneDensity}/{@code kOrganWaterMass} are the exception — their
+ * defaults (2.7 / 0.06 / 6.3) were chosen so {@link Biomechanics#getTotalMass()} reproduces
+ * the previous hardcoded 70kg human default almost exactly at {@code Genetics.defaults()}.
  */
 public class BiomechanicsBalance {
 
@@ -23,6 +26,9 @@ public class BiomechanicsBalance {
     private double k7 = 1; // Durability - bone density / mesomorphy term
     private double k8 = 1; // Durability - mass inertia term
     private double k9 = 1; // Durability - fat cushion term
+    private double kBoneMass = 2.7;        // BoneMass - height^2 base term
+    private double kBoneDensity = 0.06;    // BoneMass - density deviation modifier
+    private double kOrganWaterMass = 6.3;  // OrganWaterMass - height^2 base term
 
     public static BiomechanicsBalance defaults() {
         return new BiomechanicsBalance();
@@ -66,4 +72,13 @@ public class BiomechanicsBalance {
 
     public double getK9() { return k9; }
     public void setK9(double k9) { this.k9 = k9; }
+
+    public double getKBoneMass() { return kBoneMass; }
+    public void setKBoneMass(double kBoneMass) { this.kBoneMass = kBoneMass; }
+
+    public double getKBoneDensity() { return kBoneDensity; }
+    public void setKBoneDensity(double kBoneDensity) { this.kBoneDensity = kBoneDensity; }
+
+    public double getKOrganWaterMass() { return kOrganWaterMass; }
+    public void setKOrganWaterMass(double kOrganWaterMass) { this.kOrganWaterMass = kOrganWaterMass; }
 }

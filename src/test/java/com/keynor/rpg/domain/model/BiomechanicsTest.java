@@ -47,7 +47,7 @@ class BiomechanicsTest {
     @Test
     void getStrength_appliesLeverageCoefficientCToLimbRatioAndScalesWithK1() {
         Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5);
-        BodyComposition composition = new BodyComposition(70, 0.2, 40, 0.5, 0.8);
+        BodyComposition composition = new BodyComposition(14, 40, 0.5, 0.8);
         BiomechanicsBalance balance = BiomechanicsBalance.defaults();
         balance.setK1(1.5);
         balance.setC(2);
@@ -66,14 +66,14 @@ class BiomechanicsTest {
         Biomechanics biomechanics = Biomechanics.humanDefaults();
 
         double strideF = 170 * 1.0;
-        double expected = (biomechanics.getStrength() * (1 + 0.4 * 0.0) / 70) * strideF;
+        double expected = (biomechanics.getStrength() * (1 + 0.4 * 0.0) / biomechanics.getTotalMass()) * strideF;
 
         assertThat(biomechanics.getSpeed()).isCloseTo(expected, within(TOLERANCE));
     }
 
     @Test
     void getStaminaPool_isReducedByFastTwitchFiberTypeBias() {
-        BodyComposition fastTwitch = new BodyComposition(70, 0.2, 30, 1.0, 0.5);
+        BodyComposition fastTwitch = new BodyComposition(14, 30, 1.0, 0.5);
         Biomechanics biomechanics = new Biomechanics(Genetics.defaults(), BloodSystem.defaults(), fastTwitch,
                 NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
                 new AttributePointBudget(20), new AttributePointBudget(20), BiomechanicsBalance.defaults());
@@ -88,7 +88,8 @@ class BiomechanicsTest {
     void getFatigueRate_combinesKleiberMassBaseMuscleMassIntensityAndCardioRecovery() {
         Biomechanics biomechanics = Biomechanics.humanDefaults();
 
-        double expected = Math.pow(70, 0.75) + 30 * 2.0 - biomechanics.getCardiovascularCapacity();
+        double expected = Math.pow(biomechanics.getTotalMass(), 0.75) + 30 * 2.0
+                - biomechanics.getCardiovascularCapacity();
 
         assertThat(biomechanics.getFatigueRate(2.0)).isCloseTo(expected, within(TOLERANCE));
     }
@@ -97,8 +98,8 @@ class BiomechanicsTest {
     void getEnergyCost_combinesBmrBaseAndActivityCostMinusEfficiency() {
         Biomechanics biomechanics = Biomechanics.humanDefaults();
 
-        double bmrBase = Math.pow(70, 0.75);
-        double activityCost = 70 * 1.5;
+        double bmrBase = Math.pow(biomechanics.getTotalMass(), 0.75);
+        double activityCost = biomechanics.getTotalMass() * 1.5;
         double efficiency = biomechanics.getCardiovascularCapacity() * (1 - 0.3 * 0.0);
         double expected = bmrBase + activityCost - efficiency;
 
@@ -109,8 +110,84 @@ class BiomechanicsTest {
     void getDurability_combinesBoneDensityMesomorphyMassInertiaAndFatCushion() {
         Biomechanics biomechanics = Biomechanics.humanDefaults();
 
-        double expected = (5 + 0.5 * 5) + Math.log(70) + Math.sqrt(70 * 0.20);
+        double expected = (5 + 0.5 * 5) + Math.log(biomechanics.getTotalMass()) + Math.sqrt(14);
 
         assertThat(biomechanics.getDurability()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getBoneMass_onHumanDefaults_appliesHeightSquaredWithNeutralDensityDeviation() {
+        Biomechanics biomechanics = Biomechanics.humanDefaults();
+
+        double expected = 2.7 * Math.pow(1.70, 2) * (1 + 0.06 * (5 - 5));
+
+        assertThat(biomechanics.getBoneMass()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(biomechanics.getBoneMass()).isCloseTo(7.80, within(0.01));
+    }
+
+    @Test
+    void getBoneMass_doesNotCollapseToZeroAtMinimumBoneDensity() {
+        Genetics brittleBones = new Genetics(5, 5, 5, 170, 1.0, 0);
+        Biomechanics biomechanics = new Biomechanics(brittleBones, BloodSystem.defaults(),
+                BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
+                BiomechanicsBalance.defaults());
+
+        assertThat(biomechanics.getBoneMass()).isGreaterThan(0);
+    }
+
+    @Test
+    void getBoneMass_increasesWithBoneDensityAboveTheMidRangeDefault() {
+        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
+        Biomechanics biomechanics = new Biomechanics(denseBones, BloodSystem.defaults(),
+                BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
+                BiomechanicsBalance.defaults());
+
+        assertThat(biomechanics.getBoneMass()).isGreaterThan(Biomechanics.humanDefaults().getBoneMass());
+    }
+
+    @Test
+    void getOrganWaterMass_onHumanDefaults_scalesOnlyWithHeightSquared() {
+        Biomechanics biomechanics = Biomechanics.humanDefaults();
+
+        double expected = 6.3 * Math.pow(1.70, 2);
+
+        assertThat(biomechanics.getOrganWaterMass()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(biomechanics.getOrganWaterMass()).isCloseTo(18.21, within(0.01));
+    }
+
+    @Test
+    void getOrganWaterMass_isUnaffectedByBoneDensity() {
+        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
+        Biomechanics biomechanics = new Biomechanics(denseBones, BloodSystem.defaults(),
+                BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
+                BiomechanicsBalance.defaults());
+
+        assertThat(biomechanics.getOrganWaterMass())
+                .isCloseTo(Biomechanics.humanDefaults().getOrganWaterMass(), within(TOLERANCE));
+    }
+
+    @Test
+    void getTotalMass_onHumanDefaults_matchesThePreviousHardcoded70kgDefaultAlmostExactly() {
+        Biomechanics biomechanics = Biomechanics.humanDefaults();
+
+        double expected = 14 + 30 + biomechanics.getBoneMass() + biomechanics.getOrganWaterMass();
+
+        assertThat(biomechanics.getTotalMass()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(biomechanics.getTotalMass()).isCloseTo(70.01, within(0.01));
+    }
+
+    @Test
+    void getTotalMass_sumsBodyFatMuscleMassBoneMassAndOrganWaterMass() {
+        BodyComposition composition = new BodyComposition(10, 40, 0.0, 0.5);
+        Biomechanics biomechanics = new Biomechanics(Genetics.defaults(), BloodSystem.defaults(), composition,
+                NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
+                new AttributePointBudget(20), new AttributePointBudget(20), BiomechanicsBalance.defaults());
+
+        double expected = 10 + 40 + biomechanics.getBoneMass() + biomechanics.getOrganWaterMass();
+
+        assertThat(biomechanics.getTotalMass()).isCloseTo(expected, within(TOLERANCE));
     }
 }
