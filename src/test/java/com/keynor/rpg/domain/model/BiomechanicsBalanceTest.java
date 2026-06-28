@@ -26,6 +26,15 @@ class BiomechanicsBalanceTest {
     }
 
     @Test
+    void defaults_massCoefficientsMatchTheHumanDefaultReconciliation() {
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+
+        assertThat(balance.getKBoneMass()).isEqualTo(2.7);
+        assertThat(balance.getKBoneDensity()).isEqualTo(0.06);
+        assertThat(balance.getKOrganWaterMass()).isEqualTo(6.3);
+    }
+
+    @Test
     void setters_allowRebalancingEachCoefficientIndependently() {
         BiomechanicsBalance balance = BiomechanicsBalance.defaults();
 
@@ -35,5 +44,18 @@ class BiomechanicsBalanceTest {
         assertThat(balance.getK1()).isEqualTo(2.5);
         assertThat(balance.getC()).isEqualTo(0.5);
         assertThat(balance.getK2()).isEqualTo(1);
+    }
+
+    @Test
+    void setters_allowRebalancingMassCoefficientsIndependently() {
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+
+        balance.setKBoneMass(3.0);
+        balance.setKBoneDensity(0.1);
+        balance.setKOrganWaterMass(7.0);
+
+        assertThat(balance.getKBoneMass()).isEqualTo(3.0);
+        assertThat(balance.getKBoneDensity()).isEqualTo(0.1);
+        assertThat(balance.getKOrganWaterMass()).isEqualTo(7.0);
     }
 }

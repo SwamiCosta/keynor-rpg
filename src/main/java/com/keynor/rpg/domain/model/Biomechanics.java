@@ -49,6 +49,37 @@ public class Biomechanics {
     }
 
     /**
+     * BoneMass = kBoneMass x (Height/100)^2 x (1 + kBoneDensity x (BoneDensity - 5)). The
+     * height term follows the same square-cube intuition as {@link #getStrength()}'s mass
+     * terms; the density term is a deviation from the mid-range default (5), not an absolute
+     * multiplier, so {@code boneDensity = 0} does not collapse bone mass to zero.
+     */
+    public double getBoneMass() {
+        double heightMeters = genetics.getHeight() / 100.0;
+        return balance.getKBoneMass() * Math.pow(heightMeters, 2)
+                * (1 + balance.getKBoneDensity() * (genetics.getBoneDensity() - 5));
+    }
+
+    /**
+     * OrganWaterMass = kOrganWaterMass x (Height/100)^2. Covers organs, blood, skin and water —
+     * mass that {@code bodyFat + muscleMass + boneMass} structurally excludes. Scales only with
+     * height, not density: there is no genetic trait modeling organ size.
+     */
+    public double getOrganWaterMass() {
+        double heightMeters = genetics.getHeight() / 100.0;
+        return balance.getKOrganWaterMass() * Math.pow(heightMeters, 2);
+    }
+
+    /**
+     * TotalMass = BodyFat + MuscleMass + BoneMass + OrganWaterMass — fully derived from the
+     * trainable layer's player-set fields plus the two height/density-driven components above.
+     */
+    public double getTotalMass() {
+        return bodyComposition.getBodyFat() + bodyComposition.getMuscleMass()
+                + getBoneMass() + getOrganWaterMass();
+    }
+
+    /**
      * Strength = k1 x MuscleMass^(2/3) x (1 + 0.3 x FiberType) x NeuromuscularEfficiency x LeverageF,
      * LeverageF = 1 + c x (LimbRatio - 1). The 2/3 exponent is the square-cube law: cross-sectional
      * area (force) scales slower than volume (mass).
@@ -67,7 +98,7 @@ public class Biomechanics {
     public double getSpeed() {
         double strideF = genetics.getHeight() * genetics.getLimbRatio();
         return balance.getK2() * (getStrength() * (1 + 0.4 * bodyComposition.getDominantFiberType())
-                / bodyComposition.getTotalMass()) * strideF;
+                / getTotalMass()) * strideF;
     }
 
     /**
@@ -84,7 +115,7 @@ public class Biomechanics {
      * validated intra-species metabolic model.
      */
     public double getFatigueRate(double intensity) {
-        return balance.getK4() * Math.pow(bodyComposition.getTotalMass(), 0.75)
+        return balance.getK4() * Math.pow(getTotalMass(), 0.75)
                 + balance.getK5() * bodyComposition.getMuscleMass() * intensity
                 - balance.getK6() * getCardiovascularCapacity();
     }
@@ -97,8 +128,8 @@ public class Biomechanics {
      * own concretization, each behind its own free coefficient.
      */
     public double getEnergyCost(double intensity) {
-        double bmrBase = balance.getKBmr() * Math.pow(bodyComposition.getTotalMass(), 0.75);
-        double activityCost = balance.getKActivityCost() * bodyComposition.getTotalMass() * intensity;
+        double bmrBase = balance.getKBmr() * Math.pow(getTotalMass(), 0.75);
+        double activityCost = balance.getKActivityCost() * getTotalMass() * intensity;
         double efficiency = balance.getKEfficiency() * getCardiovascularCapacity()
                 * (1 - 0.3 * bodyComposition.getDominantFiberType());
         return bmrBase + activityCost - efficiency;
@@ -109,8 +140,8 @@ public class Biomechanics {
      */
     public double getDurability() {
         return balance.getK7() * (genetics.getBoneDensity() + 0.5 * genetics.getMesomorphy())
-                + balance.getK8() * Math.log(bodyComposition.getTotalMass())
-                + balance.getK9() * Math.sqrt(bodyComposition.getFatMass());
+                + balance.getK8() * Math.log(getTotalMass())
+                + balance.getK9() * Math.sqrt(bodyComposition.getBodyFat());
     }
 
     public Genetics getGenetics() {

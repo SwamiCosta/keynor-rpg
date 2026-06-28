@@ -35,7 +35,7 @@ class PreviewAttributesServiceTest {
                 BloodSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
                 NervousSystem.defaults());
 
-        BodyComposition heavierMuscle = new BodyComposition(70, 0.20, 50, 0.0, 0.5);
+        BodyComposition heavierMuscle = new BodyComposition(14, 50, 0.0, 0.5);
         Biomechanics result = service.calculate(Genetics.defaults(), heavierMuscle, BloodSystem.defaults(),
                 CardiacSystem.defaults(), PulmonarySystem.defaults(), NervousSystem.defaults());
 
