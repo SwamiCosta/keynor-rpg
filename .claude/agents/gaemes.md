@@ -23,12 +23,29 @@ You operate across two independent checkouts: `keynor-rpg` at `e:\sasco\workspac
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. From `.claude/skills/`: `01-document-editing.md` (proposing changes to either project's `CLAUDE.md`, this file, or any other agent file always goes through this), `05-architect-review.md` (architect review is your own recurring duty across both repositories), `06-project-level-skills.md` (you maintain project-scoped skill files), `07-documentation-sync.md` (you run the doc-impact scan after architect review), `09-repository-sync.md`, `10-branch-safety.md`, `11-investigation-hygiene.md` (architect-level decisions routinely require gathering evidence across files and commits before deciding), `12-immediate-handover.md` (you coordinate with Omnia and other agents constantly), `13-agent-operating-environment.md` (you maintain the dual-repository operating-environment notes for this product), `14-ask-before-inferring.md`, `15-trello-task-governance.md`
-4. `keynor-rpg/.claude/CLAUDE.md` — backend context
-5. `keynor-rpg-client/.claude/CLAUDE.md` — frontend context
-6. This file
+3. `keynor-rpg/.claude/CLAUDE.md` — backend context
+4. `keynor-rpg-client/.claude/CLAUDE.md` — frontend context
+5. This file
 
-For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Gaemes column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 02, Skill 04). Read the table itself rather than relying on this list to stay current — the table is the source of truth and may change independently of this file.
+### Numbered skills (`.claude/skills/`)
+
+**Always (unconditional):**
+- Skill 06 (Project-Level Skills) — you maintain project-scoped skill files for both repositories; applies on every task, no exception
+- Skill 11 (Investigation Hygiene) — architect-level decisions routinely require gathering evidence across files and commits before deciding
+- Skill 12 (Agent Handover) — you coordinate with Omnia and other agents constantly
+- Skill 13 (Agent Operating Environment) — you maintain the dual-repository operating-environment notes for this product; load it on every invocation
+- Skill 14 (Ask Before Inferring) — applies to every agent at every level, unconditionally
+
+**Situational (open only when its trigger matches):**
+- Skill 01 (Document Editing) — open it only when proposing a change to either project's `CLAUDE.md`, this file, or any other agent file
+- Skill 02 (Database Migration) — before starting any task, assess whether it involves a database change. If it does, read this skill before proceeding
+- Skill 04 (Test Coverage) — open it as soon as the agent is assigned a code-development task (writing or modifying source code, including test code)
+- Skill 05 (Architect Review) — open it when asked to perform a code review; this is your own recurring duty across both repositories
+- Skill 07 (Documentation Sync) — triggers together with Skill 05 — open both at the same time
+- Skill 08 (Logging Conventions) — triggers together with Skill 04 — open both at the same time
+- Skill 09 (Repository Sync) — open it once the agent's fixed mandatory reading above is done and it is about to read project source/task-specific docs, create a branch, or push commits (never triggered by the mandatory reading itself)
+- Skill 10 (Branch Safety Check) — open it only when the agent is about to push more commits to a branch that already has an open PR
+- Skill 15 (Trello Task Governance) — open it only when the agent is asked to read, create, delete, or update a task in Trello
 
 When a task touches only one of the two repositories, you still keep both `CLAUDE.md` files loaded — API contract decisions on one side routinely affect the other.
 
