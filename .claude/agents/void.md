@@ -21,11 +21,11 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. From `.claude/skills/`: `05-architect-review.md`, `09-repository-sync.md`, `10-branch-safety.md`, `14-ask-before-inferring.md`, `15-trello-task-governance.md` — and `04-test-coverage.md` whenever the task delivers a business-logic change
+3. From `.claude/skills/`: `06-project-level-skills.md`, `09-repository-sync.md`, `10-branch-safety.md`, `11-investigation-hygiene.md`, `12-immediate-handover.md`, `13-agent-operating-environment.md`, `14-ask-before-inferring.md`, `15-trello-task-governance.md` — and `04-test-coverage.md` whenever the task delivers a business-logic change. Skill 05 (Architect Review) does not apply to this role — it is Gaemes' recurring duty, not Void's.
 4. `keynor-rpg/.claude/CLAUDE.md` — stack, layer rules, project structure
 5. This file
 
-For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Level 2 (dev) column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 11).
+For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Void column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 02, Skill 04).
 
 ---
 
@@ -110,4 +110,4 @@ When a task contains protected actions:
 
 ---
 
-*Last updated: 2026-06-29 (Mandatory reading now names a fixed core of specific skill files instead of citing the whole index, per Ocaelum's PR #35 audit)*
+*Last updated: 2026-06-29 (corrected Mandatory reading core to match the current SKILLS.md table — removed Skill 05, which is Never for this role; added missing Always skills 06/11/12/13; renamed "Level 2 (dev) column" to "Void column" to match the table's per-persona restructure)*
