@@ -38,7 +38,7 @@ class BiomechanicsPreviewControllerTest {
     @Test
     void preview_returnsAttributesComputedFromRequestBody() throws Exception {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
-                new GeneticsInput(5, 5, 5, 170, 1.0, 5),
+                new GeneticsInput(5, 5, 5, 170, 1.0, 5, 5),
                 new BodyCompositionInput(14, 30, 0.0, 0.5),
                 new BloodSystemInput(5),
                 new CardiacSystemInput(5),
@@ -54,6 +54,7 @@ class BiomechanicsPreviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attributes.strength").exists())
                 .andExpect(jsonPath("$.attributes.speed").exists())
+                .andExpect(jsonPath("$.attributes.maxMovementSpeed").exists())
                 .andExpect(jsonPath("$.attributes.staminaPool").exists())
                 .andExpect(jsonPath("$.attributes.durability").exists())
                 .andExpect(jsonPath("$.attributes.cardiovascularCapacity").exists())

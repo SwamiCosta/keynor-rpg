@@ -7,9 +7,15 @@ package com.keynor.rpg.domain.model;
  * document left {@code ActivityCost} and {@code Eficiencia} as named-but-unspecified terms.
  * Most default to 1.0 (neutral multiplier): there is no "scientifically correct" value, only
  * what plays well — same caveat as {@code Body}'s illustrative hit point placeholders.
- * {@code kBoneMass}/{@code kBoneDensity}/{@code kOrganWaterMass} are the exception — their
+ * {@code kBoneMass}/{@code kBoneDensity}/{@code kOrganWaterMass} are one exception — their
  * defaults (2.7 / 0.06 / 6.3) were chosen so {@link Biomechanics#getTotalMass()} reproduces
  * the previous hardcoded 70kg human default almost exactly at {@code Genetics.defaults()}.
+ * {@code kMuscleDistributionStrength}/{@code kMuscleDistributionSpeed} are a second exception:
+ * unlike k1..k9 (neutral multipliers on a whole formula), these scale a deviation term
+ * ({@code muscleDistribution - 5}, range -5..+5) directly, so a neutral 1.0 default would
+ * swing the formula by up to +-500% instead of producing the "slight" effect the design
+ * calls for — their small defaults (0.02 / 0.04) keep the effect modest, with Speed's
+ * deliberately twice Strength's per the design's "smaller-magnitude effect" instruction.
  */
 public class BiomechanicsBalance {
 
@@ -29,6 +35,8 @@ public class BiomechanicsBalance {
     private double kBoneMass = 2.7;        // BoneMass - height^2 base term
     private double kBoneDensity = 0.06;    // BoneMass - density deviation modifier
     private double kOrganWaterMass = 6.3;  // OrganWaterMass - height^2 base term
+    private double kMuscleDistributionStrength = 0.02; // Strength - muscleDistribution deviation modifier
+    private double kMuscleDistributionSpeed = 0.04;     // MaxMovementSpeed - muscleDistribution deviation modifier
 
     public static BiomechanicsBalance defaults() {
         return new BiomechanicsBalance();
@@ -81,4 +89,14 @@ public class BiomechanicsBalance {
 
     public double getKOrganWaterMass() { return kOrganWaterMass; }
     public void setKOrganWaterMass(double kOrganWaterMass) { this.kOrganWaterMass = kOrganWaterMass; }
+
+    public double getKMuscleDistributionStrength() { return kMuscleDistributionStrength; }
+    public void setKMuscleDistributionStrength(double kMuscleDistributionStrength) {
+        this.kMuscleDistributionStrength = kMuscleDistributionStrength;
+    }
+
+    public double getKMuscleDistributionSpeed() { return kMuscleDistributionSpeed; }
+    public void setKMuscleDistributionSpeed(double kMuscleDistributionSpeed) {
+        this.kMuscleDistributionSpeed = kMuscleDistributionSpeed;
+    }
 }

@@ -16,11 +16,12 @@ class GeneticsTest {
         assertThat(genetics.getHeight()).isEqualTo(170);
         assertThat(genetics.getLimbRatio()).isEqualTo(1.0);
         assertThat(genetics.getBoneDensity()).isEqualTo(5);
+        assertThat(genetics.getMuscleDistribution()).isEqualTo(5);
     }
 
     @Test
     void constructor_storesEachAxisIndependently() {
-        Genetics genetics = new Genetics(8, 2, 6, 182, 1.1, 7);
+        Genetics genetics = new Genetics(8, 2, 6, 182, 1.1, 7, 3);
 
         assertThat(genetics.getEndomorphy()).isEqualTo(8);
         assertThat(genetics.getMesomorphy()).isEqualTo(2);
@@ -28,5 +29,6 @@ class GeneticsTest {
         assertThat(genetics.getHeight()).isEqualTo(182);
         assertThat(genetics.getLimbRatio()).isEqualTo(1.1);
         assertThat(genetics.getBoneDensity()).isEqualTo(7);
+        assertThat(genetics.getMuscleDistribution()).isEqualTo(3);
     }
 }
