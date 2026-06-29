@@ -21,9 +21,11 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. Root `.claude/SKILLS.md`
+3. From `.claude/skills/`: `05-architect-review.md`, `09-repository-sync.md`, `10-branch-safety.md`, `14-ask-before-inferring.md`, `15-trello-task-governance.md` — and `04-test-coverage.md` whenever the task delivers a business-logic change
 4. `keynor-rpg/.claude/CLAUDE.md` — stack, layer rules, project structure
 5. This file
+
+For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Level 2 (dev) column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 11).
 
 ---
 
@@ -108,4 +110,4 @@ When a task contains protected actions:
 
 ---
 
-*Last updated: 2026-06-24*
+*Last updated: 2026-06-29 (Mandatory reading now names a fixed core of specific skill files instead of citing the whole index, per Ocaelum's PR #35 audit)*
