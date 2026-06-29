@@ -3,8 +3,11 @@ package com.keynor.rpg.domain.model;
 /**
  * Genetic layer of physical attributes — set once at character creation and immutable
  * afterward (no setters), since genetics cannot be changed once the game starts.
- * Does not feed combat formulas directly; it will modulate how fast {@link BodyComposition}
- * changes through training (rate formulas not yet implemented).
+ * Most axes do not feed combat formulas directly; they will modulate how fast
+ * {@link BodyComposition} changes through training (rate formulas not yet implemented).
+ * {@code muscleDistribution} is the exception — a leg-biased (low) to arm-biased (high)
+ * axis around a balanced midpoint (5) that does feed {@link Biomechanics#getStrength()}
+ * and {@link Biomechanics#getMaxMovementSpeed()} directly.
  */
 public class Genetics {
 
@@ -14,19 +17,21 @@ public class Genetics {
     private final double height;
     private final double limbRatio;
     private final double boneDensity;
+    private final double muscleDistribution;
 
     public Genetics(double endomorphy, double mesomorphy, double ectomorphy, double height,
-                     double limbRatio, double boneDensity) {
+                     double limbRatio, double boneDensity, double muscleDistribution) {
         this.endomorphy = endomorphy;
         this.mesomorphy = mesomorphy;
         this.ectomorphy = ectomorphy;
         this.height = height;
         this.limbRatio = limbRatio;
         this.boneDensity = boneDensity;
+        this.muscleDistribution = muscleDistribution;
     }
 
     public static Genetics defaults() {
-        return new Genetics(5, 5, 5, 170, 1.0, 5);
+        return new Genetics(5, 5, 5, 170, 1.0, 5, 5);
     }
 
     public double getEndomorphy() {
@@ -51,5 +56,9 @@ public class Genetics {
 
     public double getBoneDensity() {
         return boneDensity;
+    }
+
+    public double getMuscleDistribution() {
+        return muscleDistribution;
     }
 }

@@ -80,25 +80,50 @@ public class Biomechanics {
     }
 
     /**
-     * Strength = k1 x MuscleMass^(2/3) x (1 + 0.3 x FiberType) x NeuromuscularEfficiency x LeverageF,
-     * LeverageF = 1 + c x (LimbRatio - 1). The 2/3 exponent is the square-cube law: cross-sectional
-     * area (force) scales slower than volume (mass).
+     * Strength = k1 x MuscleMass^(2/3) x (1 + 0.3 x FiberType) x NeuromuscularEfficiency x LeverageF
+     * x MuscleDistributionF, LeverageF = 1 + c x (LimbRatio - 1). The 2/3 exponent is the
+     * square-cube law: cross-sectional area (force) scales slower than volume (mass).
+     * MuscleDistributionF is a slight bonus for arm-biased characters (and penalty for
+     * leg-biased ones) — see {@link #getMuscleDistributionDeviation()}.
      */
     public double getStrength() {
         double leverageF = 1 + balance.getC() * (genetics.getLimbRatio() - 1);
+        double muscleDistributionF = 1 + balance.getKMuscleDistributionStrength() * getMuscleDistributionDeviation();
         return balance.getK1() * Math.pow(bodyComposition.getMuscleMass(), 2.0 / 3.0)
                 * (1 + 0.3 * bodyComposition.getDominantFiberType())
                 * bodyComposition.getNeuromuscularEfficiency()
-                * leverageF;
+                * leverageF
+                * muscleDistributionF;
     }
 
     /**
      * Speed = k2 x [Strength x (1 + 0.4 x FiberType) / TotalMass] x StrideF, StrideF = Height x LimbRatio.
+     * Generic movement-capable speed, used by any movement-involving action (including attacks) —
+     * unaffected by {@code muscleDistribution}; see {@link #getMaxMovementSpeed()} for that.
      */
     public double getSpeed() {
         double strideF = genetics.getHeight() * genetics.getLimbRatio();
         return balance.getK2() * (getStrength() * (1 + 0.4 * bodyComposition.getDominantFiberType())
                 / getTotalMass()) * strideF;
+    }
+
+    /**
+     * MaxMovementSpeed = Speed x (1 - kMuscleDistributionSpeed x MuscleDistributionDeviation): the
+     * character's max displacement/travel speed, derived from the generic {@link #getSpeed()} plus
+     * a leg-bias bonus (arm-bias penalty) — the opposite direction of {@link #getStrength()}'s
+     * muscle-distribution modifier, and a larger magnitude per the design's instruction.
+     */
+    public double getMaxMovementSpeed() {
+        return getSpeed() * (1 - balance.getKMuscleDistributionSpeed() * getMuscleDistributionDeviation());
+    }
+
+    /**
+     * Deviation from the balanced midpoint (5) of {@code muscleDistribution}, in -5..+5. Positive
+     * means arm-biased, negative means leg-biased — the single source both muscle-distribution
+     * modifiers above scale from, each applying it with the sign matching its own direction.
+     */
+    private double getMuscleDistributionDeviation() {
+        return genetics.getMuscleDistribution() - 5;
     }
 
     /**

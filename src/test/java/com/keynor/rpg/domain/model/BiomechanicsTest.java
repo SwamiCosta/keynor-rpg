@@ -46,7 +46,7 @@ class BiomechanicsTest {
 
     @Test
     void getStrength_appliesLeverageCoefficientCToLimbRatioAndScalesWithK1() {
-        Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5);
+        Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5, 5);
         BodyComposition composition = new BodyComposition(14, 40, 0.5, 0.8);
         BiomechanicsBalance balance = BiomechanicsBalance.defaults();
         balance.setK1(1.5);
@@ -62,6 +62,32 @@ class BiomechanicsTest {
     }
 
     @Test
+    void getStrength_appliesMuscleDistributionDeviationAsArmBiasBonus() {
+        Genetics armBiased = new Genetics(5, 5, 5, 170, 1.0, 5, 8);
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+        balance.setKMuscleDistributionStrength(0.05);
+        Biomechanics biomechanics = new Biomechanics(armBiased, BloodSystem.defaults(), BodyComposition.defaults(),
+                NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
+                new AttributePointBudget(20), new AttributePointBudget(20), balance);
+
+        double muscleDistributionF = 1 + 0.05 * (8 - 5);
+        double expected = Math.pow(30, 2.0 / 3.0) * (1 + 0.3 * 0.0) * 0.5 * muscleDistributionF;
+
+        assertThat(biomechanics.getStrength()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getStrength_legBiasedMuscleDistribution_isLowerThanBalanced() {
+        Genetics legBiased = new Genetics(5, 5, 5, 170, 1.0, 5, 2);
+        Biomechanics legBiasedBiomechanics = new Biomechanics(legBiased, BloodSystem.defaults(),
+                BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
+                BiomechanicsBalance.defaults());
+
+        assertThat(legBiasedBiomechanics.getStrength()).isLessThan(Biomechanics.humanDefaults().getStrength());
+    }
+
+    @Test
     void getSpeed_combinesStrengthFiberTypeBonusOverMassWithStrideF() {
         Biomechanics biomechanics = Biomechanics.humanDefaults();
 
@@ -69,6 +95,48 @@ class BiomechanicsTest {
         double expected = (biomechanics.getStrength() * (1 + 0.4 * 0.0) / biomechanics.getTotalMass()) * strideF;
 
         assertThat(biomechanics.getSpeed()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getMaxMovementSpeed_onBalancedMuscleDistribution_equalsSpeed() {
+        Biomechanics biomechanics = Biomechanics.humanDefaults();
+
+        assertThat(biomechanics.getMaxMovementSpeed()).isCloseTo(biomechanics.getSpeed(), within(TOLERANCE));
+    }
+
+    @Test
+    void getMaxMovementSpeed_legBiasedMuscleDistribution_isHigherThanSpeed() {
+        Genetics legBiased = new Genetics(5, 5, 5, 170, 1.0, 5, 0);
+        Biomechanics biomechanics = new Biomechanics(legBiased, BloodSystem.defaults(), BodyComposition.defaults(),
+                NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
+                new AttributePointBudget(20), new AttributePointBudget(20), BiomechanicsBalance.defaults());
+
+        assertThat(biomechanics.getMaxMovementSpeed()).isGreaterThan(biomechanics.getSpeed());
+    }
+
+    @Test
+    void getMaxMovementSpeed_armBiasedMuscleDistribution_isLowerThanSpeed() {
+        Genetics armBiased = new Genetics(5, 5, 5, 170, 1.0, 5, 10);
+        Biomechanics biomechanics = new Biomechanics(armBiased, BloodSystem.defaults(), BodyComposition.defaults(),
+                NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
+                new AttributePointBudget(20), new AttributePointBudget(20), BiomechanicsBalance.defaults());
+
+        assertThat(biomechanics.getMaxMovementSpeed()).isLessThan(biomechanics.getSpeed());
+    }
+
+    @Test
+    void getMaxMovementSpeed_appliesExplicitCoefficientToDeviation() {
+        Genetics legBiased = new Genetics(5, 5, 5, 170, 1.0, 5, 1);
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+        balance.setKMuscleDistributionSpeed(0.1);
+        Biomechanics biomechanics = new Biomechanics(legBiased, BloodSystem.defaults(), BodyComposition.defaults(),
+                NervousSystem.defaults(), CardiacSystem.defaults(), PulmonarySystem.defaults(),
+                new AttributePointBudget(20), new AttributePointBudget(20), balance);
+
+        double deviation = 1 - 5;
+        double expected = biomechanics.getSpeed() * (1 - 0.1 * deviation);
+
+        assertThat(biomechanics.getMaxMovementSpeed()).isCloseTo(expected, within(TOLERANCE));
     }
 
     @Test
@@ -127,7 +195,7 @@ class BiomechanicsTest {
 
     @Test
     void getBoneMass_doesNotCollapseToZeroAtMinimumBoneDensity() {
-        Genetics brittleBones = new Genetics(5, 5, 5, 170, 1.0, 0);
+        Genetics brittleBones = new Genetics(5, 5, 5, 170, 1.0, 0, 5);
         Biomechanics biomechanics = new Biomechanics(brittleBones, BloodSystem.defaults(),
                 BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
@@ -138,7 +206,7 @@ class BiomechanicsTest {
 
     @Test
     void getBoneMass_increasesWithBoneDensityAboveTheMidRangeDefault() {
-        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
+        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10, 5);
         Biomechanics biomechanics = new Biomechanics(denseBones, BloodSystem.defaults(),
                 BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),
@@ -159,7 +227,7 @@ class BiomechanicsTest {
 
     @Test
     void getOrganWaterMass_isUnaffectedByBoneDensity() {
-        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
+        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10, 5);
         Biomechanics biomechanics = new Biomechanics(denseBones, BloodSystem.defaults(),
                 BodyComposition.defaults(), NervousSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), new AttributePointBudget(20), new AttributePointBudget(20),

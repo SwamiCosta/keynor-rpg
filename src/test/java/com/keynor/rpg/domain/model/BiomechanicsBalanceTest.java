@@ -35,6 +35,15 @@ class BiomechanicsBalanceTest {
     }
 
     @Test
+    void defaults_muscleDistributionCoefficientsAreSmallAndSpeedIsLargerThanStrength() {
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+
+        assertThat(balance.getKMuscleDistributionStrength()).isEqualTo(0.02);
+        assertThat(balance.getKMuscleDistributionSpeed()).isEqualTo(0.04);
+        assertThat(balance.getKMuscleDistributionSpeed()).isGreaterThan(balance.getKMuscleDistributionStrength());
+    }
+
+    @Test
     void setters_allowRebalancingEachCoefficientIndependently() {
         BiomechanicsBalance balance = BiomechanicsBalance.defaults();
 
@@ -57,5 +66,16 @@ class BiomechanicsBalanceTest {
         assertThat(balance.getKBoneMass()).isEqualTo(3.0);
         assertThat(balance.getKBoneDensity()).isEqualTo(0.1);
         assertThat(balance.getKOrganWaterMass()).isEqualTo(7.0);
+    }
+
+    @Test
+    void setters_allowRebalancingMuscleDistributionCoefficientsIndependently() {
+        BiomechanicsBalance balance = BiomechanicsBalance.defaults();
+
+        balance.setKMuscleDistributionStrength(0.1);
+        balance.setKMuscleDistributionSpeed(0.2);
+
+        assertThat(balance.getKMuscleDistributionStrength()).isEqualTo(0.1);
+        assertThat(balance.getKMuscleDistributionSpeed()).isEqualTo(0.2);
     }
 }
