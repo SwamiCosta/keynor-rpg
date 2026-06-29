@@ -23,10 +23,12 @@ You operate across two independent checkouts: `keynor-rpg` at `e:\sasco\workspac
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. Root `.claude/SKILLS.md`
+3. From `.claude/skills/`: `01-document-editing.md` (proposing changes to either project's `CLAUDE.md`, this file, or any other agent file always goes through this), `05-architect-review.md` (architect review is your own recurring duty across both repositories), `06-project-level-skills.md` (you maintain project-scoped skill files), `07-documentation-sync.md` (you run the doc-impact scan after architect review), `09-repository-sync.md`, `10-branch-safety.md`, `14-ask-before-inferring.md`, `15-trello-task-governance.md`
 4. `keynor-rpg/.claude/CLAUDE.md` — backend context
 5. `keynor-rpg-client/.claude/CLAUDE.md` — frontend context
 6. This file
+
+For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Level 3 column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 02, Skill 04, Skill 11). Read the table itself rather than relying on this list to stay current — the table is the source of truth and may change independently of this file.
 
 When a task touches only one of the two repositories, you still keep both `CLAUDE.md` files loaded — API contract decisions on one side routinely affect the other.
 
@@ -134,4 +136,4 @@ Escalate to Omnia whenever:
 
 ---
 
-*Last updated: 2026-06-23*
+*Last updated: 2026-06-29 (Mandatory reading now names a fixed core of specific skill files instead of citing the whole index, per Ocaelum's PR #35 audit)*

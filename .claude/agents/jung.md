@@ -27,9 +27,11 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. Root `.claude/SKILLS.md` — especially **Skill 02** (Database Migration) in full, including the "Primary key format changes — value-dependency scan" subsection
+3. From `.claude/skills/`: `06-project-level-skills.md`, `11-investigation-hygiene.md`, `12-immediate-handover.md`, `13-agent-operating-environment.md`, `14-ask-before-inferring.md` — and `02-database-migration.md` **in full**, including the "Primary key format changes — value-dependency scan" subsection, before assessing or writing any migration
 4. `keynor-rpg/.claude/CLAUDE.md` — stack, project structure
 5. This file
+
+For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Jung column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 09, Skill 10, Skill 15).
 
 ---
 
@@ -119,4 +121,4 @@ When a task contains protected actions:
 
 ---
 
-*Last updated: 2026-06-24*
+*Last updated: 2026-06-29 — wired this file into the SKILLS.md "Reading guide by role" table, the one gap left after PR #14 covered gaemes.md and void.md; explicit Always core now includes Skill 14 (Ask Before Inferring)*
