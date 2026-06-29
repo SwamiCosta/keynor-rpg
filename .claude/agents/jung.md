@@ -27,11 +27,25 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 
 1. `ARCHITECTURE.md` at the workspace root
 2. Root `.claude/CLAUDE.md`
-3. From `.claude/skills/`: `06-project-level-skills.md`, `11-investigation-hygiene.md`, `12-immediate-handover.md`, `13-agent-operating-environment.md`, `14-ask-before-inferring.md` — and `02-database-migration.md` **in full**, including the "Primary key format changes — value-dependency scan" subsection, before assessing or writing any migration
-4. `keynor-rpg/.claude/CLAUDE.md` — stack, project structure
-5. This file
+3. `keynor-rpg/.claude/CLAUDE.md` — stack, project structure
+4. This file
 
-For any other skill not listed above, consult `.claude/SKILLS.md` — its "Reading guide by role" table gives the current Jung column, and its Trigger map gives the situational/just-in-time skills (e.g. Skill 09, Skill 10, Skill 15).
+### Numbered skills (`.claude/skills/`)
+
+**Always (unconditional):**
+- Skill 06 (Project-Level Skills) — mandatory for every agent, on every task, with no exception
+- Skill 11 (Investigation Hygiene) — answering the request requires gathering evidence from more than one file, commit, or location
+- Skill 12 (Agent Handover) — about to signal, notify, or hand off to another named agent per a documented workflow
+- Skill 13 (Agent Operating Environment) — defines the fixed repo-path and infrastructure-usage rules this role operates under; load it on every invocation
+- Skill 14 (Ask Before Inferring) — applies to every agent at every level, unconditionally
+
+**Situational (open only when its trigger matches):**
+- Skill 02 (Database Migration) — read it **in full**, including the "Primary key format changes — value-dependency scan" subsection, before assessing or writing any migration
+- Skill 09 (Repository Sync) — open it once the agent's fixed mandatory reading above is done and it is about to read project source/task-specific docs, create a branch, or push commits (never triggered by the mandatory reading itself)
+- Skill 10 (Branch Safety Check) — open it only when the agent is about to push more commits to a branch that already has an open PR
+- Skill 15 (Trello Task Governance) — open it only when the agent is asked to read, create, delete, or update a task in Trello
+
+**Not applicable to this agent:** Skills 01, 04, 05, 07, and 08 — Skill 01 (Document Editing) and Skill 05 (Architect Review) are Gaemes' recurring duties, not Jung's; Skill 04 (Test Coverage) and Skill 08 (Logging Conventions) concern application source code, which Jung never writes; Skill 07 (Documentation Sync) follows from an architect review Jung never performs.
 
 ---
 
