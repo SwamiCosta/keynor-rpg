@@ -2,6 +2,7 @@ package com.keynor.rpg.infrastructure.web;
 
 import com.keynor.rpg.application.dto.BiomechanicsPreviewRequest;
 import com.keynor.rpg.application.dto.BiomechanicsPreviewResponse;
+import com.keynor.rpg.domain.model.Biomechanics;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +21,11 @@ public class BiomechanicsPreviewController {
 
     @PostMapping("/preview")
     public BiomechanicsPreviewResponse preview(@RequestBody BiomechanicsPreviewRequest request) {
+        Biomechanics biomechanics = new Biomechanics(
+                request.genetics().toDomain(), request.bodyComposition().toDomain());
         return BiomechanicsPreviewResponse.from(previewAttributesUseCase.calculate(
-                request.genetics().toDomain(),
-                request.bodyComposition().toDomain(),
-                request.bloodSystem().toDomain(),
-                request.cardiacSystem().toDomain(),
-                request.pulmonarySystem().toDomain(),
-                request.nervousSystem().toDomain()));
+                biomechanics,
+                request.bodySystems().toDomain(),
+                request.spatialIntelligence().toDomain()));
     }
 }

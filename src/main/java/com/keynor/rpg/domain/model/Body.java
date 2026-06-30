@@ -15,10 +15,18 @@ public class Body {
     private final BodyComponent buttocks;
     private final BodyComponent lowerBody;
     private final Biomechanics biomechanics;
+    private final BodySystems bodySystems;
+    private final SpatialIntelligence spatialIntelligence;
+    private final BodyCoefficients coefficients;
+    private final AttributePointBudget geneticPoints;
+    private final AttributePointBudget trainingPoints;
 
     private Body(BodyComponent skull, BodyComponent neck, BodyComponent rightFlank, BodyComponent leftFlank,
                   BodyComponent torso, BodyComponent rightHip, BodyComponent leftHip, BodyComponent genitals,
-                  BodyComponent buttocks, BodyComponent lowerBody, Biomechanics biomechanics) {
+                  BodyComponent buttocks, BodyComponent lowerBody, Biomechanics biomechanics,
+                  BodySystems bodySystems, SpatialIntelligence spatialIntelligence,
+                  BodyCoefficients coefficients, AttributePointBudget geneticPoints,
+                  AttributePointBudget trainingPoints) {
         this.skull = skull;
         this.neck = neck;
         this.rightFlank = rightFlank;
@@ -30,13 +38,32 @@ public class Body {
         this.buttocks = buttocks;
         this.lowerBody = lowerBody;
         this.biomechanics = biomechanics;
+        this.bodySystems = bodySystems;
+        this.spatialIntelligence = spatialIntelligence;
+        this.coefficients = coefficients;
+        this.geneticPoints = geneticPoints;
+        this.trainingPoints = trainingPoints;
     }
 
     /**
-     * Hit point / resistance / hit difficulty values below are illustrative placeholders
-     * wiring up the component tree and cascade relations — not balanced game data.
+     * Full human template with all data groups at their defaults and the standard
+     * anatomical wound tree.
      */
     public static Body humanTemplate() {
+        return fromDataGroups(Biomechanics.defaults(), BodySystems.defaults(), SpatialIntelligence.defaults());
+    }
+
+    /**
+     * Builds a body with the provided data groups (for stateless previews and tests) using
+     * the standard anatomical wound tree and default coefficients and point budgets.
+     */
+    public static Body previewTemplate(Biomechanics biomechanics, BodySystems bodySystems,
+                                        SpatialIntelligence spatialIntelligence) {
+        return fromDataGroups(biomechanics, bodySystems, spatialIntelligence);
+    }
+
+    private static Body fromDataGroups(Biomechanics biomechanics, BodySystems bodySystems,
+                                        SpatialIntelligence spatialIntelligence) {
         BodyComponent skull = buildSkull();
         BodyComponent neck = buildNeck();
         BodyComponent rightFlank = buildFlank("Right");
@@ -47,10 +74,10 @@ public class Body {
         BodyComponent genitals = BodyComponent.structural("Genitals", 6, 1, false, 14);
         BodyComponent buttocks = BodyComponent.structural("Buttocks", 14, 3, false, 10);
         BodyComponent lowerBody = buildLowerBody();
-        Biomechanics biomechanics = Biomechanics.humanDefaults();
 
         return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks,
-                lowerBody, biomechanics);
+                lowerBody, biomechanics, bodySystems, spatialIntelligence,
+                BodyCoefficients.defaults(), new AttributePointBudget(20), new AttributePointBudget(20));
     }
 
     private static BodyComponent buildSkull() {
@@ -124,47 +151,20 @@ public class Body {
         return List.of(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks, lowerBody);
     }
 
-    public BodyComponent getSkull() {
-        return skull;
-    }
-
-    public BodyComponent getNeck() {
-        return neck;
-    }
-
-    public BodyComponent getRightFlank() {
-        return rightFlank;
-    }
-
-    public BodyComponent getLeftFlank() {
-        return leftFlank;
-    }
-
-    public BodyComponent getTorso() {
-        return torso;
-    }
-
-    public BodyComponent getRightHip() {
-        return rightHip;
-    }
-
-    public BodyComponent getLeftHip() {
-        return leftHip;
-    }
-
-    public BodyComponent getGenitals() {
-        return genitals;
-    }
-
-    public BodyComponent getButtocks() {
-        return buttocks;
-    }
-
-    public BodyComponent getLowerBody() {
-        return lowerBody;
-    }
-
-    public Biomechanics getBiomechanics() {
-        return biomechanics;
-    }
+    public BodyComponent getSkull() { return skull; }
+    public BodyComponent getNeck() { return neck; }
+    public BodyComponent getRightFlank() { return rightFlank; }
+    public BodyComponent getLeftFlank() { return leftFlank; }
+    public BodyComponent getTorso() { return torso; }
+    public BodyComponent getRightHip() { return rightHip; }
+    public BodyComponent getLeftHip() { return leftHip; }
+    public BodyComponent getGenitals() { return genitals; }
+    public BodyComponent getButtocks() { return buttocks; }
+    public BodyComponent getLowerBody() { return lowerBody; }
+    public Biomechanics getBiomechanics() { return biomechanics; }
+    public BodySystems getBodySystems() { return bodySystems; }
+    public SpatialIntelligence getSpatialIntelligence() { return spatialIntelligence; }
+    public BodyCoefficients getCoefficients() { return coefficients; }
+    public AttributePointBudget getGeneticPoints() { return geneticPoints; }
+    public AttributePointBudget getTrainingPoints() { return trainingPoints; }
 }

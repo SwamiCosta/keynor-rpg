@@ -24,7 +24,7 @@ class CharacterControllerTest {
     private GetPlayableCharacterUseCase getPlayableCharacterUseCase;
 
     @Test
-    void getById_returnsCharacterSheetWithBiomechanics() throws Exception {
+    void getById_returnsCharacterSheetWithAllBodyGroups() throws Exception {
         PlayableCharacter character = new PlayableCharacter("Keynor", Body.humanTemplate());
         when(getPlayableCharacterUseCase.getById("keynor-1")).thenReturn(character);
 
@@ -34,12 +34,19 @@ class CharacterControllerTest {
                 .andExpect(jsonPath("$.name").value("Keynor"))
                 .andExpect(jsonPath("$.body.biomechanics.genetics.height").value(170.0))
                 .andExpect(jsonPath("$.body.biomechanics.bodyComposition.bodyFat").value(14.0))
-                .andExpect(jsonPath("$.body.biomechanics.calculatedValues.totalMass").exists())
-                .andExpect(jsonPath("$.body.biomechanics.calculatedValues.boneMass").exists())
-                .andExpect(jsonPath("$.body.biomechanics.calculatedValues.organWaterMass").exists())
-                .andExpect(jsonPath("$.body.biomechanics.attributes.fatigueRate").exists())
-                .andExpect(jsonPath("$.body.biomechanics.attributes.energyCost").doesNotExist())
-                .andExpect(jsonPath("$.body.biomechanics.geneticPoints.total").value(20))
-                .andExpect(jsonPath("$.body.biomechanics.trainingPoints.total").value(20));
+                .andExpect(jsonPath("$.body.bodySystems.nervousSystem.neuralDrive").value(5.0))
+                .andExpect(jsonPath("$.body.spatialIntelligence.perception").value(5.0))
+                .andExpect(jsonPath("$.body.calculatedValues.totalMass").exists())
+                .andExpect(jsonPath("$.body.calculatedValues.boneMass").exists())
+                .andExpect(jsonPath("$.body.calculatedValues.organWaterMass").exists())
+                .andExpect(jsonPath("$.body.attributes.fatigueRate").exists())
+                .andExpect(jsonPath("$.body.attributes.sight").exists())
+                .andExpect(jsonPath("$.body.attributes.evasion").exists())
+                .andExpect(jsonPath("$.body.attributes.acrobatics").exists())
+                .andExpect(jsonPath("$.body.attributes.meleeAccuracy").exists())
+                .andExpect(jsonPath("$.body.attributes.aim").exists())
+                .andExpect(jsonPath("$.body.attributes.energyCost").doesNotExist())
+                .andExpect(jsonPath("$.body.geneticPoints.total").value(20))
+                .andExpect(jsonPath("$.body.trainingPoints.total").value(20));
     }
 }
