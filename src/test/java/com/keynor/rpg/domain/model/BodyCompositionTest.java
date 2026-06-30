@@ -13,7 +13,8 @@ class BodyCompositionTest {
         assertThat(composition.getBodyFat()).isEqualTo(14);
         assertThat(composition.getMuscleMass()).isEqualTo(30);
         assertThat(composition.getDominantFiberType()).isEqualTo(0.0);
-        assertThat(composition.getNeuromuscularEfficiency()).isEqualTo(0.5);
+        assertThat(composition.getMuscleDistribution()).isEqualTo(5.0);
+        assertThat(composition.getFlexibility()).isEqualTo(5.0);
     }
 
     @Test
@@ -23,11 +24,13 @@ class BodyCompositionTest {
         composition.setMuscleMass(35);
         composition.setBodyFat(10);
         composition.setDominantFiberType(0.4);
-        composition.setNeuromuscularEfficiency(0.7);
+        composition.setMuscleDistribution(7.0);
+        composition.setFlexibility(8.0);
 
         assertThat(composition.getMuscleMass()).isEqualTo(35);
         assertThat(composition.getBodyFat()).isEqualTo(10);
         assertThat(composition.getDominantFiberType()).isEqualTo(0.4);
-        assertThat(composition.getNeuromuscularEfficiency()).isEqualTo(0.7);
+        assertThat(composition.getMuscleDistribution()).isEqualTo(7.0);
+        assertThat(composition.getFlexibility()).isEqualTo(8.0);
     }
 }

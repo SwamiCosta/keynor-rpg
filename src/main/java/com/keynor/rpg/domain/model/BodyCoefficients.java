@@ -1,23 +1,29 @@
 package com.keynor.rpg.domain.model;
 
 /**
- * Free, mutable balance coefficients for every {@link Biomechanics} output formula — k1..k9
- * and c match the naming used in the user's design document; kBmr/kActivityCost/kEfficiency
+ * Free, mutable coefficients for every {@link PlayableCharacter} physical attribute formula.
+ * k1..k9 and c match the naming used in the user's design document; kBmr/kActivityCost/kEfficiency
  * are additional coefficients introduced to make the EnergyCost formula concrete, since the
  * document left {@code ActivityCost} and {@code Eficiencia} as named-but-unspecified terms.
- * Most default to 1.0 (neutral multiplier): there is no "scientifically correct" value, only
+ * kSense/kEvasion/kEvasionNeural/kEvasionFlex/kAcrobatics/kMelee/kAim are coefficients for the
+ * {@link SpatialIntelligence}-derived attribute formulas.
+ *
+ * <p>Most default to 1.0 (neutral multiplier): there is no "scientifically correct" value, only
  * what plays well — same caveat as {@code Body}'s illustrative hit point placeholders.
- * {@code kBoneMass}/{@code kBoneDensity}/{@code kOrganWaterMass} are one exception — their
- * defaults (2.7 / 0.06 / 6.3) were chosen so {@link Biomechanics#getTotalMass()} reproduces
- * the previous hardcoded 70kg human default almost exactly at {@code Genetics.defaults()}.
- * {@code kMuscleDistributionStrength}/{@code kMuscleDistributionSpeed} are a second exception:
- * unlike k1..k9 (neutral multipliers on a whole formula), these scale a deviation term
- * ({@code muscleDistribution - 5}, range -5..+5) directly, so a neutral 1.0 default would
- * swing the formula by up to +-500% instead of producing the "slight" effect the design
- * calls for — their small defaults (0.02 / 0.04) keep the effect modest, with Speed's
- * deliberately twice Strength's per the design's "smaller-magnitude effect" instruction.
+ *
+ * <p><b>Exceptions to the 1.0 default:</b>
+ * <ul>
+ *   <li>{@code kBoneMass} (2.7), {@code kBoneDensity} (0.06), {@code kOrganWaterMass} (6.3) —
+ *       calibrated so {@link PlayableCharacter#getTotalMass()} reproduces the previous hardcoded
+ *       70 kg human default almost exactly at {@code Genetics.defaults()}.
+ *   <li>{@code kMuscleDistributionStrength} (0.02) and {@code kMuscleDistributionSpeed} (0.04) —
+ *       scale a deviation term ({@code muscleDistribution - 5}, range -5..+5) rather than a whole
+ *       formula, so 1.0 would swing the result by up to +-500%.
+ *   <li>{@code kEvasionNeural} (0.1) and {@code kEvasionFlex} (0.1) — scale raw 0-10 trait values
+ *       inside a {@code (1 + k * x)} modifier; 1.0 would produce multipliers up to 11x.
+ * </ul>
  */
-public class BiomechanicsBalance {
+public class BodyCoefficients {
 
     private double k1 = 1; // Strength
     private double c = 1;  // Strength's leverage term
@@ -32,14 +38,22 @@ public class BiomechanicsBalance {
     private double k7 = 1; // Durability - bone density / mesomorphy term
     private double k8 = 1; // Durability - mass inertia term
     private double k9 = 1; // Durability - fat cushion term
+    private double kFlexibilityDurability = 1; // Durability - flexibility deviation modifier
     private double kBoneMass = 2.7;        // BoneMass - height^2 base term
     private double kBoneDensity = 0.06;    // BoneMass - density deviation modifier
     private double kOrganWaterMass = 6.3;  // OrganWaterMass - height^2 base term
     private double kMuscleDistributionStrength = 0.02; // Strength - muscleDistribution deviation modifier
-    private double kMuscleDistributionSpeed = 0.04;     // MaxMovementSpeed - muscleDistribution deviation modifier
+    private double kMuscleDistributionSpeed = 0.04;    // MaxMovementSpeed - muscleDistribution deviation modifier
+    private double kSense = 1;          // Sight / Hearing / Smell
+    private double kEvasion = 1;        // Evasion - leading scale
+    private double kEvasionNeural = 0.1; // Evasion - neural drive modifier
+    private double kEvasionFlex = 0.1;   // Evasion - flexibility modifier
+    private double kAcrobatics = 1;     // Acrobatics
+    private double kMelee = 1;          // Melee Accuracy
+    private double kAim = 1;            // Aim
 
-    public static BiomechanicsBalance defaults() {
-        return new BiomechanicsBalance();
+    public static BodyCoefficients defaults() {
+        return new BodyCoefficients();
     }
 
     public double getK1() { return k1; }
@@ -81,6 +95,11 @@ public class BiomechanicsBalance {
     public double getK9() { return k9; }
     public void setK9(double k9) { this.k9 = k9; }
 
+    public double getKFlexibilityDurability() { return kFlexibilityDurability; }
+    public void setKFlexibilityDurability(double kFlexibilityDurability) {
+        this.kFlexibilityDurability = kFlexibilityDurability;
+    }
+
     public double getKBoneMass() { return kBoneMass; }
     public void setKBoneMass(double kBoneMass) { this.kBoneMass = kBoneMass; }
 
@@ -99,4 +118,25 @@ public class BiomechanicsBalance {
     public void setKMuscleDistributionSpeed(double kMuscleDistributionSpeed) {
         this.kMuscleDistributionSpeed = kMuscleDistributionSpeed;
     }
+
+    public double getKSense() { return kSense; }
+    public void setKSense(double kSense) { this.kSense = kSense; }
+
+    public double getKEvasion() { return kEvasion; }
+    public void setKEvasion(double kEvasion) { this.kEvasion = kEvasion; }
+
+    public double getKEvasionNeural() { return kEvasionNeural; }
+    public void setKEvasionNeural(double kEvasionNeural) { this.kEvasionNeural = kEvasionNeural; }
+
+    public double getKEvasionFlex() { return kEvasionFlex; }
+    public void setKEvasionFlex(double kEvasionFlex) { this.kEvasionFlex = kEvasionFlex; }
+
+    public double getKAcrobatics() { return kAcrobatics; }
+    public void setKAcrobatics(double kAcrobatics) { this.kAcrobatics = kAcrobatics; }
+
+    public double getKMelee() { return kMelee; }
+    public void setKMelee(double kMelee) { this.kMelee = kMelee; }
+
+    public double getKAim() { return kAim; }
+    public void setKAim(double kAim) { this.kAim = kAim; }
 }

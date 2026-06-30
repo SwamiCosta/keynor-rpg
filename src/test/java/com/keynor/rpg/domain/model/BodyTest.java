@@ -142,11 +142,18 @@ class BodyTest {
     }
 
     @Test
-    void humanTemplate_wiresUpBiomechanicsWithHumanDefaults() {
+    void humanTemplate_wiresUpAllDataGroupsWithDefaults() {
         Body body = Body.humanTemplate();
 
         assertThat(body.getBiomechanics()).isNotNull();
         assertThat(body.getBiomechanics().getGenetics()).isNotNull();
         assertThat(body.getBiomechanics().getBodyComposition()).isNotNull();
+        assertThat(body.getBodySystems()).isNotNull();
+        assertThat(body.getBodySystems().getBloodSystem()).isNotNull();
+        assertThat(body.getBodySystems().getNervousSystem()).isNotNull();
+        assertThat(body.getSpatialIntelligence()).isNotNull();
+        assertThat(body.getCoefficients()).isNotNull();
+        assertThat(body.getGeneticPoints().remainingPoints()).isEqualTo(20);
+        assertThat(body.getTrainingPoints().remainingPoints()).isEqualTo(20);
     }
 }
