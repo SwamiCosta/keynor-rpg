@@ -25,7 +25,8 @@ class PreviewAttributesServiceTest {
         assertThat(result.getSpeed()).isEqualTo(expected.getSpeed());
         assertThat(result.getStaminaPool()).isEqualTo(expected.getStaminaPool());
         assertThat(result.getDurability()).isEqualTo(expected.getDurability());
-        assertThat(result.getCardiovascularCapacity()).isEqualTo(expected.getCardiovascularCapacity());
+        assertThat(result.getFatigueResistance()).isEqualTo(expected.getFatigueResistance());
+        assertThat(result.getStaminaRecovery()).isEqualTo(expected.getStaminaRecovery());
         assertThat(result.getSight()).isEqualTo(expected.getSight());
         assertThat(result.getEvasion()).isEqualTo(expected.getEvasion());
         assertThat(result.getAcrobatics()).isEqualTo(expected.getAcrobatics());
@@ -36,7 +37,7 @@ class PreviewAttributesServiceTest {
         PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
                 SpatialIntelligence.defaults());
 
-        BodyComposition heavierMuscle = new BodyComposition(14, 50, 0.0, 5.0, 5.0);
+        BodyComposition heavierMuscle = new BodyComposition(3, 12, 5, 5, 5);
         PlayableCharacter result = service.calculate(new Biomechanics(Genetics.defaults(), heavierMuscle),
                 BodySystems.defaults(), SpatialIntelligence.defaults());
 

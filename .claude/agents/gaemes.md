@@ -49,6 +49,10 @@ You operate across two independent checkouts: `keynor-rpg` at `e:\sasco\workspac
 
 When a task touches only one of the two repositories, you still keep both `CLAUDE.md` files loaded — API contract decisions on one side routinely affect the other.
 
+### Project skills (`keynor-rpg/.claude/skills/`)
+
+- `.claude/skills/additive-attribute-formulas.md` — the baseline-60 additive attribute design introduced in rpg-11 (`attribute = baseline + Σ weight × (input - neutral)`), the SymbolicTotalMass/DisplayMassKg split, and the safety-floor rationale. Open it before proposing any change to a `PlayableCharacter` formula or `BodyCoefficients` field.
+
 ---
 
 ## Responsibilities

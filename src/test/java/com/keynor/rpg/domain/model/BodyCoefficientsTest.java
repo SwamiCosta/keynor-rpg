@@ -7,98 +7,72 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BodyCoefficientsTest {
 
     @Test
-    void defaults_mainFormulaCoefficientsAreAllNeutralMultipliers() {
-        BodyCoefficients coeff = BodyCoefficients.defaults();
-
-        assertThat(coeff.getK1()).isEqualTo(1);
-        assertThat(coeff.getC()).isEqualTo(1);
-        assertThat(coeff.getK2()).isEqualTo(1);
-        assertThat(coeff.getK3()).isEqualTo(1);
-        assertThat(coeff.getK4()).isEqualTo(1);
-        assertThat(coeff.getK5()).isEqualTo(1);
-        assertThat(coeff.getK6()).isEqualTo(1);
-        assertThat(coeff.getKBmr()).isEqualTo(1);
-        assertThat(coeff.getKActivityCost()).isEqualTo(1);
-        assertThat(coeff.getKEfficiency()).isEqualTo(1);
-        assertThat(coeff.getK7()).isEqualTo(1);
-        assertThat(coeff.getK8()).isEqualTo(1);
-        assertThat(coeff.getK9()).isEqualTo(1);
-        assertThat(coeff.getKFlexibilityDurability()).isEqualTo(1);
-        assertThat(coeff.getKLimbRatioSpeed()).isEqualTo(1);
-        assertThat(coeff.getKSense()).isEqualTo(1);
-        assertThat(coeff.getKEvasion()).isEqualTo(1);
-        assertThat(coeff.getKAcrobatics()).isEqualTo(1);
-        assertThat(coeff.getKMelee()).isEqualTo(1);
-        assertThat(coeff.getKAim()).isEqualTo(1);
+    void defaults_baselineIsSixty() {
+        assertThat(BodyCoefficients.defaults().getBaseline()).isEqualTo(60);
     }
 
     @Test
-    void defaults_massCoefficientsMatchTheHumanDefaultReconciliation() {
+    void defaults_strengthWeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKBoneMass()).isEqualTo(2.7);
-        assertThat(coeff.getKBoneDensity()).isEqualTo(0.06);
-        assertThat(coeff.getKOrganWaterMass()).isEqualTo(6.3);
+        assertThat(coeff.getKStrengthMuscleMass()).isEqualTo(4);
+        assertThat(coeff.getKStrengthNeuromuscular()).isEqualTo(2);
+        assertThat(coeff.getKStrengthFiberType()).isEqualTo(1);
+        assertThat(coeff.getKStrengthLimbRatio()).isEqualTo(2);
+        assertThat(coeff.getKStrengthMuscleDistribution()).isEqualTo(1);
     }
 
     @Test
-    void defaults_muscleDistributionCoefficientsAreSmallAndSpeedIsLargerThanStrength() {
+    void defaults_speedWeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKMuscleDistributionStrength()).isEqualTo(0.02);
-        assertThat(coeff.getKMuscleDistributionSpeed()).isEqualTo(0.04);
-        assertThat(coeff.getKMuscleDistributionSpeed()).isGreaterThan(coeff.getKMuscleDistributionStrength());
+        assertThat(coeff.getKSpeedNeuromuscular()).isEqualTo(4);
+        assertThat(coeff.getKSpeedMuscleMass()).isEqualTo(1);
+        assertThat(coeff.getKSpeedFiberType()).isEqualTo(2);
+        assertThat(coeff.getKSpeedMassNeutral()).isEqualTo(25);
+        assertThat(coeff.getKSpeedMassDivisor()).isEqualTo(3);
     }
 
     @Test
-    void defaults_evasionModifiersAreSmallToAvoidOverwhelming11xMultipliers() {
+    void defaults_fatigueResistanceWeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKEvasionNeural()).isEqualTo(0.1);
-        assertThat(coeff.getKEvasionFlex()).isEqualTo(0.1);
+        assertThat(coeff.getKFatigueResistanceCardiac()).isEqualTo(3);
+        assertThat(coeff.getKFatigueResistancePulmonary()).isEqualTo(1);
+        assertThat(coeff.getKFatigueResistanceOxygen()).isEqualTo(1);
+        assertThat(coeff.getKFatigueResistanceNeuromuscular()).isEqualTo(2);
+        assertThat(coeff.getKFatigueResistanceMassNeutral()).isEqualTo(25);
+        assertThat(coeff.getKFatigueResistanceMassDivisor()).isEqualTo(2);
+        assertThat(coeff.getKFatigueResistanceMuscleMass()).isEqualTo(1);
     }
 
     @Test
-    void setters_allowRebalancingEachCoefficientIndependently() {
+    void defaults_loadCapacityFractionsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        coeff.setK1(2.5);
-        coeff.setC(0.5);
-
-        assertThat(coeff.getK1()).isEqualTo(2.5);
-        assertThat(coeff.getC()).isEqualTo(0.5);
-        assertThat(coeff.getK2()).isEqualTo(1);
+        assertThat(coeff.getKLightLoadFraction()).isEqualTo(0.3);
+        assertThat(coeff.getKHeavyLoadFraction()).isEqualTo(0.7);
+        assertThat(coeff.getKMaxCapacityDivisor()).isEqualTo(25);
+        assertThat(coeff.getKDragCapacityMultiplier()).isEqualTo(2);
+        assertThat(coeff.getKDragCapacityMassFraction()).isEqualTo(0.5);
     }
 
     @Test
-    void setters_allowRebalancingMassCoefficientsIndependently() {
-        BodyCoefficients coeff = BodyCoefficients.defaults();
-
-        coeff.setKBoneMass(3.0);
-        coeff.setKBoneDensity(0.1);
-        coeff.setKOrganWaterMass(7.0);
-
-        assertThat(coeff.getKBoneMass()).isEqualTo(3.0);
-        assertThat(coeff.getKBoneDensity()).isEqualTo(0.1);
-        assertThat(coeff.getKOrganWaterMass()).isEqualTo(7.0);
+    void defaults_attributeFloorIsFive() {
+        assertThat(BodyCoefficients.defaults().getAttributeFloor()).isEqualTo(5);
     }
 
     @Test
-    void setters_allowRebalancingMuscleDistributionAndSpatialCoefficients() {
+    void setters_allowRebalancingBaselineAndWeightsIndependently() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        coeff.setKMuscleDistributionStrength(0.1);
-        coeff.setKMuscleDistributionSpeed(0.2);
-        coeff.setKLimbRatioSpeed(0.5);
-        coeff.setKSense(1.5);
-        coeff.setKEvasion(0.8);
-        coeff.setKAcrobatics(1.2);
+        coeff.setBaseline(70);
+        coeff.setKStrengthMuscleMass(5);
+        coeff.setAttributeFloor(10);
 
-        assertThat(coeff.getKMuscleDistributionStrength()).isEqualTo(0.1);
-        assertThat(coeff.getKMuscleDistributionSpeed()).isEqualTo(0.2);
-        assertThat(coeff.getKLimbRatioSpeed()).isEqualTo(0.5);
-        assertThat(coeff.getKSense()).isEqualTo(1.5);
-        assertThat(coeff.getKEvasion()).isEqualTo(0.8);
-        assertThat(coeff.getKAcrobatics()).isEqualTo(1.2);
+        assertThat(coeff.getBaseline()).isEqualTo(70);
+        assertThat(coeff.getKStrengthMuscleMass()).isEqualTo(5);
+        assertThat(coeff.getAttributeFloor()).isEqualTo(10);
+        assertThat(coeff.getKStrengthNeuromuscular()).isEqualTo(2);
     }
 }

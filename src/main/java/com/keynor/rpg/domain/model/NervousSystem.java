@@ -1,43 +1,42 @@
 package com.keynor.rpg.domain.model;
 
 /**
- * Trainable neural layer. {@code neuralDrive} will modulate {@link BodyComposition}'s
- * dominant fiber type once the nervous system is detailed further — not yet wired into
- * body-composition rate formulas. It does feed the {@link SpatialIntelligence} derived
- * attributes ({@link PlayableCharacter#getSight()}, {@link PlayableCharacter#getEvasion()},
- * etc.) and the {@link PlayableCharacter#getStrength()} formula via
- * {@code neuromuscularEfficiency}.
+ * Trainable neural layer. Feeds the {@link SpatialIntelligence}-derived attributes
+ * ({@link PlayableCharacter#getSight()}, {@link PlayableCharacter#getEvasion()}, etc.)
+ * and the {@link PlayableCharacter#getStrength()}/{@link PlayableCharacter#getSpeed()}
+ * formulas via {@code neuromuscularEfficiency}.
  *
- * <p>{@code neuromuscularEfficiency} (0-1) is the fraction of theoretical force actually
- * usable — the "technique vs. size" axis. Trainable, unlike {@link BloodSystem}.
+ * <p>Additive-standard discrete scale (rpg-11): both fields are 1-9, neutral 5 (formulas
+ * use the {@code value - 5} deviation). {@code neuromuscularEfficiency} moved from a 0-1
+ * float to this same 1-9 int scale as part of rpg-11's full-scale standardization.
  */
 public class NervousSystem {
 
-    private double neuralDrive;
-    private double neuromuscularEfficiency;
+    private int neuralDrive;
+    private int neuromuscularEfficiency;
 
-    public NervousSystem(double neuralDrive, double neuromuscularEfficiency) {
+    public NervousSystem(int neuralDrive, int neuromuscularEfficiency) {
         this.neuralDrive = neuralDrive;
         this.neuromuscularEfficiency = neuromuscularEfficiency;
     }
 
     public static NervousSystem defaults() {
-        return new NervousSystem(5, 0.5);
+        return new NervousSystem(5, 5);
     }
 
-    public double getNeuralDrive() {
+    public int getNeuralDrive() {
         return neuralDrive;
     }
 
-    public void setNeuralDrive(double neuralDrive) {
+    public void setNeuralDrive(int neuralDrive) {
         this.neuralDrive = neuralDrive;
     }
 
-    public double getNeuromuscularEfficiency() {
+    public int getNeuromuscularEfficiency() {
         return neuromuscularEfficiency;
     }
 
-    public void setNeuromuscularEfficiency(double neuromuscularEfficiency) {
+    public void setNeuromuscularEfficiency(int neuromuscularEfficiency) {
         this.neuromuscularEfficiency = neuromuscularEfficiency;
     }
 }

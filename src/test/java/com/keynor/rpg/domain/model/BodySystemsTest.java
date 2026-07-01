@@ -18,7 +18,7 @@ class BodySystemsTest {
         assertThat(bodySystems.getCardiacSystem().getCardiacOutput()).isEqualTo(5);
         assertThat(bodySystems.getPulmonarySystem().getPulmonaryCapacity()).isEqualTo(5);
         assertThat(bodySystems.getNervousSystem().getNeuralDrive()).isEqualTo(5);
-        assertThat(bodySystems.getNervousSystem().getNeuromuscularEfficiency()).isEqualTo(0.5);
+        assertThat(bodySystems.getNervousSystem().getNeuromuscularEfficiency()).isEqualTo(5);
     }
 
     @Test
@@ -26,7 +26,7 @@ class BodySystemsTest {
         BloodSystem blood = new BloodSystem(7);
         CardiacSystem cardiac = new CardiacSystem(8);
         PulmonarySystem pulmonary = new PulmonarySystem(6);
-        NervousSystem nervous = new NervousSystem(9, 0.8);
+        NervousSystem nervous = new NervousSystem(9, 8);
         BodySystems bodySystems = new BodySystems(blood, cardiac, pulmonary, nervous);
 
         assertThat(bodySystems.getBloodSystem()).isSameAs(blood);
