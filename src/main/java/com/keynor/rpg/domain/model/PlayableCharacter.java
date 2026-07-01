@@ -85,23 +85,29 @@ public class PlayableCharacter {
     }
 
     /**
-     * Speed = k2 x [Strength x (1 + 0.4 x FiberType) / TotalMass] x StrideF,
-     * StrideF = Height x LimbRatio. Generic movement-capable speed used by any
-     * movement-involving action (including attacks). Unaffected by muscleDistribution.
+     * Speed = k2 x MuscleMass^(2/3) x (1 + 0.4 x FiberType) x NeuromuscularEfficiency / TotalMass.
+     * Pure power-to-weight formula, independent of Strength. Same muscle-quality inputs as
+     * {@link #getStrength()} but without the leverage term (LimbRatio) — LimbRatio affects only
+     * {@link #getMaxMovementSpeed()} via its stride modifier. Feeds Evasion and MaxMovementSpeed.
      */
     public double getSpeed() {
-        double strideF = genetics().getHeight() * genetics().getLimbRatio();
-        return coeff().getK2() * (getStrength() * (1 + 0.4 * composition().getDominantFiberType())
-                / getTotalMass()) * strideF;
+        return coeff().getK2()
+                * Math.pow(composition().getMuscleMass(), 2.0 / 3.0)
+                * (1 + 0.4 * composition().getDominantFiberType())
+                * nervousSystem().getNeuromuscularEfficiency()
+                / getTotalMass();
     }
 
     /**
-     * MaxMovementSpeed = Speed x (1 - kMuscleDistributionSpeed x MuscleDistributionDeviation).
-     * The character's max displacement/travel speed — opposite direction to
-     * {@link #getStrength()}'s modifier and a larger magnitude per design intent.
+     * MaxMovementSpeed = Speed x (1 + kLimbRatioSpeed x (LimbRatio - 1))
+     * x (1 - kMuscleDistributionSpeed x MuscleDistributionDeviation).
+     * Displacement/travel speed, extended from Speed with a stride-length modifier (longer limbs
+     * increase it, shorter limbs reduce it) and the muscle-distribution modifier (leg-bias
+     * increases it, arm-bias reduces it). LimbRatio is expressed as a deviation from 1.0 (neutral).
      */
     public double getMaxMovementSpeed() {
-        return getSpeed() * (1 - coeff().getKMuscleDistributionSpeed() * muscleDistributionDeviation());
+        double limbF = 1 + coeff().getKLimbRatioSpeed() * (genetics().getLimbRatio() - 1);
+        return getSpeed() * limbF * (1 - coeff().getKMuscleDistributionSpeed() * muscleDistributionDeviation());
     }
 
     /**
