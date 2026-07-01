@@ -58,6 +58,14 @@ class BodyCoefficientsTest {
     }
 
     @Test
+    void defaults_loadCapacityStrengthOffsetUndoesTheBaselineSixtyShift() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKLoadCapacityStrengthOffset()).isEqualTo(25);
+        assertThat(coeff.getBaseline() - coeff.getKLoadCapacityStrengthOffset()).isEqualTo(35);
+    }
+
+    @Test
     void defaults_attributeFloorIsFive() {
         assertThat(BodyCoefficients.defaults().getAttributeFloor()).isEqualTo(5);
     }

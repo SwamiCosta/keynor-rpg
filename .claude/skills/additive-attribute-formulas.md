@@ -36,7 +36,13 @@ At `baseline = 35` (the design document's original value before the user raised 
 
 ## Load capacity (new in rpg-11)
 
-`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `Strength` (and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section. They inherit `Strength`'s floor transitively: since `Strength` can never go below 5, `MaxCapacityKg` can never go below `floor(25/25) + 5 = 6`.
+`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `Strength` (and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section.
+
+**Load capacity does not use raw `Strength` — it uses `Strength - kLoadCapacityStrengthOffset` (offset defaults to 25).** When `baseline` was raised from 35 to 60 partway through rpg-11, every other formula's output rose by 25 along with it — but the Load Capacity formulas (`MaxCapacityKg = floor(LoadStrength² / 25) + LoadStrength`) were tuned against the original baseline-35 numbers and would have produced inflated, uncalibrated results if fed the new baseline-60 `Strength` directly. Subtracting the offset reconstructs "Strength as it was before the baseline change" for load-capacity purposes only — `Strength` itself, and every other formula that reads it (e.g. none currently do), stays at baseline 60. The result is re-floored (`floor(Strength - offset)`) so an already-floored `Strength` (5) can't produce a negative `LoadStrength` (5-25=-20 → re-floored to 5).
+
+At human defaults: `Strength = 60`, `LoadStrength = 35`, `MaxCapacityKg = floor(35²/25) + 35 = 84`.
+
+`MaxCapacityKg` inherits `Strength`'s floor transitively through `LoadStrength`'s own re-floor: it can never go below `floor(5²/25) + 5 = 6`.
 
 ## Removed and renamed (breaking changes)
 

@@ -151,6 +151,8 @@ Every derived attribute in `PlayableCharacter` was rewritten from the multiplica
 
 **Added:** `getStaminaRecovery()` (new attribute), `getFatigueResistance()` (replaces `FatigueRate` with inverted semantics — higher is now better), and a Load Capacity group — `getLightLoadKg()`, `getHeavyLoadKg()`, `getMaxCapacityKg()`, `getDragCapacityKg()` — all derived from `Strength` (`DragCapacityKg` additionally mixes in `DisplayMassKg`).
 
+**Load Capacity uses `Strength - 25` (`kLoadCapacityStrengthOffset`), not raw `Strength` (corrected same day, 2026-07-01):** the Load Capacity formulas were tuned against the original baseline-35 numbers before `baseline` was raised to 60 — feeding them the baseline-60 `Strength` directly would have inflated every load figure. Subtracting the offset (then re-flooring) reconstructs the pre-baseline-increase `Strength` for load purposes only; `Strength` itself stays at baseline 60 everywhere else. At human defaults, `MaxCapacityKg = 84` (not 204).
+
 ---
 
 ## REST API
@@ -213,4 +215,4 @@ A second pull is not required within the same task session. See workspace `SKILL
 
 ---
 
-*Last updated: 2026-07-01 (rpg-11: full replacement of every derived-attribute formula — including the same-day rpg-10 Speed redesign — with the additive standard, baseline 60; all Body input scales moved from double/float to discrete int; CardiovascularCapacity and FatigueRate removed, FatigueResistance and StaminaRecovery added; new Load Capacity group; BodyCoefficients rewritten; see `.claude/skills/additive-attribute-formulas.md`)*
+*Last updated: 2026-07-01 (rpg-11: full replacement of every derived-attribute formula — including the same-day rpg-10 Speed redesign — with the additive standard, baseline 60; all Body input scales moved from double/float to discrete int; CardiovascularCapacity and FatigueRate removed, FatigueResistance and StaminaRecovery added; new Load Capacity group; BodyCoefficients rewritten; corrected same day so Load Capacity subtracts kLoadCapacityStrengthOffset (25) from Strength, keeping load numbers calibrated to the pre-baseline-60 design; see `.claude/skills/additive-attribute-formulas.md`)*

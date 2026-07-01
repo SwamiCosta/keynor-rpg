@@ -13,6 +13,12 @@ package com.keynor.rpg.domain.model;
  * fields (not inlined into {@link PlayableCharacter}) so game balance can be tuned without
  * touching formula code, same principle as the pre-rpg-11 coefficient set.
  *
+ * <p>{@code kLoadCapacityStrengthOffset} (25) is a deliberate exception to the "baseline
+ * feeds every formula" rule: the Load Capacity group subtracts it from {@code Strength}
+ * before applying {@link PlayableCharacter#getMaxCapacityKg()}'s formula, so load numbers
+ * stay calibrated to the original baseline-35 design rather than inflating when
+ * {@code baseline} was later raised to 60.
+ *
  * <p>Neutral points (5 for every 1-9 trait, 3 for {@code limbRatio}... — see each domain
  * class) are not coefficients: they are fixed scale midpoints, not tunable weights, so they
  * stay as literals inside {@link PlayableCharacter}'s formulas, matching the pre-rpg-11
@@ -103,6 +109,7 @@ public class BodyCoefficients {
     private double kMaxCapacityDivisor = 25;
     private double kDragCapacityMultiplier = 2;
     private double kDragCapacityMassFraction = 0.5;
+    private double kLoadCapacityStrengthOffset = 25; // undoes the baseline-60 shift for load formulas only
 
     // Safety floor shared by Strength, FatigueResistance, Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
@@ -275,6 +282,9 @@ public class BodyCoefficients {
 
     public double getKDragCapacityMassFraction() { return kDragCapacityMassFraction; }
     public void setKDragCapacityMassFraction(double v) { this.kDragCapacityMassFraction = v; }
+
+    public double getKLoadCapacityStrengthOffset() { return kLoadCapacityStrengthOffset; }
+    public void setKLoadCapacityStrengthOffset(double v) { this.kLoadCapacityStrengthOffset = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

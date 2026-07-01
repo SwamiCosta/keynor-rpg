@@ -257,12 +257,16 @@ public class PlayableCharacter {
     // -------------------------------------------------------------------------
 
     /**
-     * MaxCapacityKg = floor(Strength^2 / kMaxCapacityDivisor) + Strength. Non-linear so
-     * heroic Strength values yield disproportionately large capacity.
+     * MaxCapacityKg = floor(LoadStrength^2 / kMaxCapacityDivisor) + LoadStrength, where
+     * LoadStrength = floor(Strength - kLoadCapacityStrengthOffset). The offset (25) undoes
+     * the baseline-60 shift so load capacity stays calibrated to the original baseline-35
+     * design the load formulas were tuned against, instead of inflating alongside the
+     * general attribute baseline. Non-linear so heroic Strength values yield
+     * disproportionately large capacity.
      */
     public double getMaxCapacityKg() {
-        double strength = getStrength();
-        return Math.floor(Math.pow(strength, 2) / coeff().getKMaxCapacityDivisor()) + strength;
+        double loadStrength = floor(getStrength() - coeff().getKLoadCapacityStrengthOffset());
+        return Math.floor(Math.pow(loadStrength, 2) / coeff().getKMaxCapacityDivisor()) + loadStrength;
     }
 
     /** LightLoadKg = MaxCapacityKg x kLightLoadFraction. */
