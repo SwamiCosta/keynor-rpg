@@ -24,6 +24,7 @@ class BodyCoefficientsTest {
         assertThat(coeff.getK8()).isEqualTo(1);
         assertThat(coeff.getK9()).isEqualTo(1);
         assertThat(coeff.getKFlexibilityDurability()).isEqualTo(1);
+        assertThat(coeff.getKLimbRatioSpeed()).isEqualTo(1);
         assertThat(coeff.getKSense()).isEqualTo(1);
         assertThat(coeff.getKEvasion()).isEqualTo(1);
         assertThat(coeff.getKAcrobatics()).isEqualTo(1);
@@ -88,12 +89,14 @@ class BodyCoefficientsTest {
 
         coeff.setKMuscleDistributionStrength(0.1);
         coeff.setKMuscleDistributionSpeed(0.2);
+        coeff.setKLimbRatioSpeed(0.5);
         coeff.setKSense(1.5);
         coeff.setKEvasion(0.8);
         coeff.setKAcrobatics(1.2);
 
         assertThat(coeff.getKMuscleDistributionStrength()).isEqualTo(0.1);
         assertThat(coeff.getKMuscleDistributionSpeed()).isEqualTo(0.2);
+        assertThat(coeff.getKLimbRatioSpeed()).isEqualTo(0.5);
         assertThat(coeff.getKSense()).isEqualTo(1.5);
         assertThat(coeff.getKEvasion()).isEqualTo(0.8);
         assertThat(coeff.getKAcrobatics()).isEqualTo(1.2);

@@ -21,6 +21,8 @@ package com.keynor.rpg.domain.model;
  *       formula, so 1.0 would swing the result by up to +-500%.
  *   <li>{@code kEvasionNeural} (0.1) and {@code kEvasionFlex} (0.1) — scale raw 0-10 trait values
  *       inside a {@code (1 + k * x)} modifier; 1.0 would produce multipliers up to 11x.
+ *   <li>{@code kLimbRatioSpeed} defaults to 1.0 and scales a deviation term
+ *       ({@code limbRatio - 1}, range ~-0.15..+0.15) — a sensible scale for a stride modifier.
  * </ul>
  */
 public class BodyCoefficients {
@@ -44,6 +46,7 @@ public class BodyCoefficients {
     private double kOrganWaterMass = 6.3;  // OrganWaterMass - height^2 base term
     private double kMuscleDistributionStrength = 0.02; // Strength - muscleDistribution deviation modifier
     private double kMuscleDistributionSpeed = 0.04;    // MaxMovementSpeed - muscleDistribution deviation modifier
+    private double kLimbRatioSpeed = 1;                // MaxMovementSpeed - limb ratio stride modifier
     private double kSense = 1;          // Sight / Hearing / Smell
     private double kEvasion = 1;        // Evasion - leading scale
     private double kEvasionNeural = 0.1; // Evasion - neural drive modifier
@@ -118,6 +121,9 @@ public class BodyCoefficients {
     public void setKMuscleDistributionSpeed(double kMuscleDistributionSpeed) {
         this.kMuscleDistributionSpeed = kMuscleDistributionSpeed;
     }
+
+    public double getKLimbRatioSpeed() { return kLimbRatioSpeed; }
+    public void setKLimbRatioSpeed(double kLimbRatioSpeed) { this.kLimbRatioSpeed = kLimbRatioSpeed; }
 
     public double getKSense() { return kSense; }
     public void setKSense(double kSense) { this.kSense = kSense; }

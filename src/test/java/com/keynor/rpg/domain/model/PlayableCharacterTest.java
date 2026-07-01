@@ -185,13 +185,24 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getSpeed_combinesStrengthFiberTypeBonusOverMassWithStrideF() {
+    void getSpeed_isIndependentOfStrengthAndUsesMuscleMassFiberTypeAndNeuromuscularEfficiency() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double strideF = 170 * 1.0;
-        double expected = (character.getStrength() * (1 + 0.4 * 0.0) / character.getTotalMass()) * strideF;
+        // Human defaults: muscleMass=30, fiberType=0, neuromuscularEfficiency=0.5
+        double expected = Math.pow(30, 2.0 / 3.0) * (1 + 0.4 * 0.0) * 0.5 / character.getTotalMass();
 
         assertThat(character.getSpeed()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getSpeed_isNotAffectedByLimbRatio() {
+        Genetics longLimbs = new Genetics(5, 5, 5, 170, 1.5, 5);
+        PlayableCharacter longLimbed = new PlayableCharacter("test",
+                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
+                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(longLimbed.getSpeed()).isCloseTo(defaults.getSpeed(), within(TOLERANCE));
     }
 
     @Test
@@ -226,8 +237,46 @@ class PlayableCharacterTest {
         body.getCoefficients().setKMuscleDistributionSpeed(0.1);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
+        // LimbRatio at default 1.0 — limbF is neutral (1.0)
         double deviation = 1 - 5;
         double expected = character.getSpeed() * (1 - 0.1 * deviation);
+
+        assertThat(character.getMaxMovementSpeed()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getMaxMovementSpeed_longerLimbRatio_increasesMaxMovementSpeed() {
+        Genetics longLimbs = new Genetics(5, 5, 5, 170, 1.3, 5);
+        PlayableCharacter longLimbed = new PlayableCharacter("test",
+                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
+                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(longLimbed.getMaxMovementSpeed()).isGreaterThan(defaults.getMaxMovementSpeed());
+    }
+
+    @Test
+    void getMaxMovementSpeed_shorterLimbRatio_reducesMaxMovementSpeed() {
+        Genetics shortLimbs = new Genetics(5, 5, 5, 170, 0.8, 5);
+        PlayableCharacter shortLimbed = new PlayableCharacter("test",
+                Body.previewTemplate(new Biomechanics(shortLimbs, BodyComposition.defaults()),
+                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(shortLimbed.getMaxMovementSpeed()).isLessThan(defaults.getMaxMovementSpeed());
+    }
+
+    @Test
+    void getMaxMovementSpeed_appliesKLimbRatioSpeedCoefficientExplicitly() {
+        Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5);
+        Body body = Body.previewTemplate(new Biomechanics(genetics, BodyComposition.defaults()),
+                BodySystems.defaults(), SpatialIntelligence.defaults());
+        body.getCoefficients().setKLimbRatioSpeed(0.5);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        // MuscleDistribution is at default 5 — muscleDistF is neutral (1.0)
+        double limbF = 1 + 0.5 * (1.2 - 1.0);
+        double expected = character.getSpeed() * limbF;
 
         assertThat(character.getMaxMovementSpeed()).isCloseTo(expected, within(TOLERANCE));
     }
