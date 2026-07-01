@@ -44,7 +44,7 @@ You operate across two independent checkouts: `keynor-rpg` at `e:\sasco\workspac
 - Skill 07 (Documentation Sync) — triggers together with Skill 05 — open both at the same time
 - Skill 08 (Logging Conventions) — triggers together with Skill 04 — open both at the same time
 - Skill 09 (Repository Sync) — open it once the agent's fixed mandatory reading above is done and it is about to read project source/task-specific docs, create a branch, or push commits (never triggered by the mandatory reading itself)
-- Skill 10 (Branch Safety Check) — open it only when the agent is about to push more commits to a branch that already has an open PR
+- Skill 10 (Branch Safety) — open it only when the agent is about to push more commits to a branch that already has an open PR
 - Skill 15 (Trello Task Governance) — open it only when the agent is asked to read, create, delete, or update a task in Trello
 
 When a task touches only one of the two repositories, you still keep both `CLAUDE.md` files loaded — API contract decisions on one side routinely affect the other.
