@@ -10,7 +10,8 @@ public record AttributesResponse(double strength, double speed, double maxMoveme
                                   double stressResistance, double poisonResistance, double diseaseResistance,
                                   double bleedingResistance, double thermalResistance, double breathOutput,
                                   double dehydrationResistance, double starvationResistance,
-                                  double foodPoisoningAlcoholResistance) {
+                                  double foodPoisoningAlcoholResistance, double fatGainRate, double muscleGainRate,
+                                  double intimidation, double diplomacy, double enfactuation, double command) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -42,6 +43,12 @@ public record AttributesResponse(double strength, double speed, double maxMoveme
                 character.getBreathOutput(),
                 character.getDehydrationResistance(),
                 character.getStarvationResistance(),
-                character.getFoodPoisoningAlcoholResistance());
+                character.getFoodPoisoningAlcoholResistance(),
+                character.getFatGainRate(),
+                character.getMuscleGainRate(),
+                character.getIntimidation(),
+                character.getDiplomacy(),
+                character.getEnfactuation(),
+                character.getCommand());
     }
 }

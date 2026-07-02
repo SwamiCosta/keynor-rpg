@@ -1,4 +1,4 @@
-# Additive Attribute Standard (rpg-11, extended rpg-13)
+# Additive Attribute Standard (rpg-11, extended rpg-13, extended rpg-14)
 
 **Scope:** `PlayableCharacter`'s derived-attribute formulas and `BodyCoefficients`, in this project only. Maintained by Gaemes; referenced from `gaemes.md`'s Mandatory reading (Skill 06 pattern — see workspace `SKILLS.md`).
 
@@ -18,10 +18,11 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 - **Neutral points are scale midpoints, not coefficients.** Most 1-9 inputs are neutral at 5; `limbRatio` (1-5) is neutral at 3; `bodyFat` (1-10) is neutral at 3, not 5, only inside `getDurability()` — everywhere else `bodyFat` is used as a direct (non-deviation) mass input. Neutral points are literals inside `PlayableCharacter`'s formulas, not `BodyCoefficients` fields, since they describe the scale itself rather than a tunable weight.
 - **Weights are `BodyCoefficients` fields**, named `k<Formula><Term>` (e.g. `kStrengthMuscleMass`). Every weight in the design document is exposed this way so game balance can be tuned without touching formula code — this was already the pre-rpg-11 convention and rpg-11 preserves it even though the underlying formula shape changed completely.
 
-### The two exceptions
+### The three exceptions
 
 - **`Speed`** does not add a `(input - neutral)` term for mass — it *subtracts* a mass **penalty**: `floor((SymbolicTotalMass - kSpeedMassNeutral) / kSpeedMassDivisor)`. This is what keeps Speed's worst case positive (see Safety floors below) instead of needing a hard floor like Strength does.
 - **`Evasion`** and **`MaxMovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
+- **`FatGainRate`** and **`MuscleGainRate`** (rpg-14) do not add `baseline` at all — they are zero-baseline **rate** attributes (positive = gaining faster, negative = losing/gaining slower, zero = stable at every input's neutral value), not absolute stat values. See the rpg-14 section below.
 
 ## Two mass numbers, not one
 
@@ -84,6 +85,35 @@ All new attributes follow the same `baseline + Σ weight × (input - neutral)` s
 `ThermalResistance` is the one attribute with a documented sub-100 human ceiling: with `skinThickness` UI-locked to 4, the human-reachable maximum is 83 (`BodyFat`=10, `Hypothalamus`=9); the true domain ceiling (`skinThickness`=7, reserved for future races) is 98 — see `getThermalResistance_humanUiCeiling_isEightyThree` / `..._trueRaceCeiling_neverExceedsOneHundred`.
 
 Two pre-existing formulas gained a term in rpg-13: `StaminaPool` (+`kStaminaPoolNutrientAbsorption × (NutrientAbsorption-5)`) and `FatigueResistance` (+`kFatigueResistanceHypothalamus × (Hypothalamus-5)` + `kFatigueResistanceThyroid × (Thyroid-5)`).
+
+## Physical Traits, hormonal modifiers, and 6 new attributes (rpg-14)
+
+A new top-level `Body` sibling, `PhysicalTraits`, joins `Biomechanics` and `BodySystems` — it groups two new sub-groups: `SensorialOrgans` (`eyesSensitivity`, `earsSensitivity`, `noseSensitivity`, all 1-9 neutral 5, mutable) and `BodyStructure` (`skinThickness` — **moved from `Genetics`, unchanged in nature: still immutable/genetic, 1-7 neutral 3** — plus new `shapeAesthetics` and `cellularHealth`, both 1-9 neutral 5, mutable). `boneDensity` **moved from `Genetics` to `BodyComposition`** and became mutable/trainable in the move (previously genetic/immutable) — the user's spec put it under "Biomechanics / Body Composition", the already-trainable class, so this was treated as a real semantic change, not just a relocation. `BodyComposition` also gained `tendonsAndLigaments` (1-9 neutral 5, mutable). `HormonalSystem` gained `predominantMorphicHormone` (1-9, neutral 5 — "theoretical" neutral, see below).
+
+### Testosterone/Progesterone modifiers (T_mod / P_mod)
+
+`predominantMorphicHormone` drives two private `PlayableCharacter` helpers, symmetric around its neutral point (5):
+
+```
+Tmod = (input < 5) ? 5 - input : 0   // 1-4, active only below neutral
+Pmod = (input > 5) ? input - 5 : 0   // 1-4, active only above neutral
+```
+
+At input 5, both are 0 — this is why the frontend requires the player to move this slider away from neutral before finishing character creation (see the FE skill's "hormone-neutral lock" section): an undecided predisposition is a valid *default* but not a valid *finished* character, unlike every other neutral-default field in this domain.
+
+### Formula changes
+
+- **`Sight`/`Hearing`/`Smell` diverged** — each now reads its own `SensorialOrgans` input (`kSightEyesSensitivity`, `kHearingEarsSensitivity`, `kSmellNoseSensitivity`, all weight 6) plus the shared `Hippocampus`/`NeuralDrive` terms (now weight 1 each, down from the old shared `kSensePerception`=3/`kSenseNeuralDrive`=1) and `+ kSightPmod × Pmod` (weight 2). `getHearing()`/`getSmell()` no longer delegate to `getSight()` — they're independent formulas that happen to equal 60 at defaults because every input is at its own neutral.
+- **`Balance`** gained `+ kBalanceTendons × (TendonsAndLigaments-5)` (weight 2); `kBalanceHippocampus` was reweighted 3→1 to make room for it.
+- **`Strength`** gained `+ kStrengthTendons × (TendonsAndLigaments-5)` (weight 1).
+- **`Durability`** gained `+ kDurabilitySkin × (SkinThickness-3)` (weight 1) — note SkinThickness's own neutral (3), same as BodyFat's inside this formula.
+- **`MentalHealthPool`** (and `Will`, which still delegates to it) gained `- kMentalHealthTmod × Tmod + kMentalHealthPmod × Pmod` (both weight 5); `kMentalHealthAmygdala` was reweighted 10→5 to keep the extremes at the same [20,100] bounds now that two more terms contribute.
+- **`PoisonResistance`, `DiseaseResistance`, `FoodPoisoningAlcoholResistance`** each gained `+ 2 × (CellularHealth-5)`. This widens their true (all-inputs-maxed) extremes beyond the old exact [20,100] — e.g. `PoisonResistance` now ranges [12,108] at the true combined worst/best case, not [20,100]. No floor was added (worst case well above `attributeFloor`=5) — this is a design observation, not a bug, comparable to `ThermalResistance`'s pre-existing asymmetric human-UI ceiling.
+
+### 6 new attributes
+
+- **Body-growth rates** (zero-baseline, see the exceptions above): `FatGainRate = (Endomorphy-5) - (Ectomorphy-5) + (NutrientAbsorption-5) - (KetosisQuality-5) - 0.5×(CellularHealth-5)`; `MuscleGainRate = (Mesomorphy-5) - (Ectomorphy-5) + (NutrientAbsorption-5) + Tmod`. These are the first formulas to read `Genetics.endomorphy`/`ectomorphy` (previously unused by any formula) and `Genetics.mesomorphy` outside `Durability`.
+- **Social attributes** (baseline 60, driven by `BodyStructure.shapeAesthetics` and the hormone modifiers): `Intimidation = 60 - 5×(ShapeAesthetics-5) + 5×Tmod + 2×(SymbolicTotalMass-25)`, `Diplomacy = 60 + 7×(ShapeAesthetics-5) + 3×Pmod`, `Enfactuation = 60 + 7×(ShapeAesthetics-5) + 3×Pmod` (**currently identical to `Diplomacy`** — the design doc gave both the same formula; kept as specified and documented as a known duplication expected to diverge once the Mind pillar exists, not a copy-paste bug to silently fix), `Command = 60 + 10×|ShapeAesthetics-5|` (V-shaped — both repulsive and attractive extremes raise Command equally). `Intimidation` is unbounded in practice (uses raw `SymbolicTotalMass`, not a small deviation) — it is not expected to stay within [20,100] the way most other attributes do; this is intentional (an imposingly massive character should have no intimidation ceiling).
 
 ## Extending this pattern
 

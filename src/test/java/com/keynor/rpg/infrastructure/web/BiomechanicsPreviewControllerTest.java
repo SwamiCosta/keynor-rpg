@@ -10,7 +10,10 @@ import com.keynor.rpg.application.dto.DigestiveSystemInput;
 import com.keynor.rpg.application.dto.GeneticsInput;
 import com.keynor.rpg.application.dto.HormonalSystemInput;
 import com.keynor.rpg.application.dto.NeuralSystemInput;
+import com.keynor.rpg.application.dto.PhysicalTraitsInput;
 import com.keynor.rpg.application.dto.PulmonarySystemInput;
+import com.keynor.rpg.application.dto.BodyStructureInput;
+import com.keynor.rpg.application.dto.SensorialOrgansInput;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
@@ -42,13 +45,14 @@ class BiomechanicsPreviewControllerTest {
     @Test
     void preview_returnsAttributesComputedFromRequestBody() throws Exception {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
-                new GeneticsInput(5, 5, 5, 7, 3, 5, 3),
-                new BodyCompositionInput(3, 5, 5, 5, 5),
+                new GeneticsInput(5, 5, 5, 7, 3),
+                new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
                 new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5),
                         new PulmonarySystemInput(5), new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5),
-                        new HormonalSystemInput(5, 5), new DigestiveSystemInput(5, 5, 5)));
+                        new HormonalSystemInput(5, 5, 5), new DigestiveSystemInput(5, 5, 5)),
+                new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5)));
 
-        when(previewAttributesUseCase.calculate(any(), any()))
+        when(previewAttributesUseCase.calculate(any(), any(), any()))
                 .thenReturn(new PlayableCharacter("preview", Body.humanTemplate()));
 
         mockMvc.perform(post("/api/v1/biomechanics/preview")
@@ -86,6 +90,12 @@ class BiomechanicsPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.dehydrationResistance").exists())
                 .andExpect(jsonPath("$.attributes.starvationResistance").exists())
                 .andExpect(jsonPath("$.attributes.foodPoisoningAlcoholResistance").exists())
+                .andExpect(jsonPath("$.attributes.fatGainRate").exists())
+                .andExpect(jsonPath("$.attributes.muscleGainRate").exists())
+                .andExpect(jsonPath("$.attributes.intimidation").exists())
+                .andExpect(jsonPath("$.attributes.diplomacy").exists())
+                .andExpect(jsonPath("$.attributes.enfactuation").exists())
+                .andExpect(jsonPath("$.attributes.command").exists())
                 .andExpect(jsonPath("$.calculatedValues.symbolicTotalMass").exists())
                 .andExpect(jsonPath("$.calculatedValues.displayMassKg").exists())
                 .andExpect(jsonPath("$.loadCapacity.lightLoadKg").exists())

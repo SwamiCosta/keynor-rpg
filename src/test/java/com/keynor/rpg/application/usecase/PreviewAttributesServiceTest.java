@@ -6,6 +6,7 @@ import com.keynor.rpg.domain.model.BodySystems;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.Genetics;
 import com.keynor.rpg.domain.model.NeuralSystem;
+import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,8 @@ class PreviewAttributesServiceTest {
 
     @Test
     void calculate_withDefaults_returnsCharacterWithSameAttributesAsHumanTemplate() {
-        PlayableCharacter result = service.calculate(Biomechanics.defaults(), BodySystems.defaults());
+        PlayableCharacter result = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+                PhysicalTraits.defaults());
 
         PlayableCharacter expected = new PlayableCharacter("expected", Body.humanTemplate());
         assertThat(result.getStrength()).isEqualTo(expected.getStrength());
@@ -31,28 +33,32 @@ class PreviewAttributesServiceTest {
         assertThat(result.getAcrobatics()).isEqualTo(expected.getAcrobatics());
         assertThat(result.getMemoryPool()).isEqualTo(expected.getMemoryPool());
         assertThat(result.getThermalResistance()).isEqualTo(expected.getThermalResistance());
+        assertThat(result.getIntimidation()).isEqualTo(expected.getIntimidation());
+        assertThat(result.getFatGainRate()).isEqualTo(expected.getFatGainRate());
     }
 
     @Test
     void calculate_reactsToInputChanges_higherMuscleMassIncreasesStrength() {
-        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults());
+        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+                PhysicalTraits.defaults());
 
-        BodyComposition heavierMuscle = new BodyComposition(3, 12, 5, 5, 5);
+        BodyComposition heavierMuscle = new BodyComposition(3, 12, 5, 5, 5, 5, 5);
         PlayableCharacter result = service.calculate(new Biomechanics(Genetics.defaults(), heavierMuscle),
-                BodySystems.defaults());
+                BodySystems.defaults(), PhysicalTraits.defaults());
 
         assertThat(result.getStrength()).isGreaterThan(baseline.getStrength());
     }
 
     @Test
     void calculate_reactsToInputChanges_higherAgilityIncreasesEvasion() {
-        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults());
+        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+                PhysicalTraits.defaults());
 
         NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5);
         BodySystems bodySystems = new BodySystems(BodySystems.defaults().getBloodSystem(),
                 BodySystems.defaults().getCardiacSystem(), BodySystems.defaults().getPulmonarySystem(), agileNeural,
                 BodySystems.defaults().getHormonalSystem(), BodySystems.defaults().getDigestiveSystem());
-        PlayableCharacter result = service.calculate(Biomechanics.defaults(), bodySystems);
+        PlayableCharacter result = service.calculate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults());
 
         assertThat(result.getEvasion()).isGreaterThan(baseline.getEvasion());
     }

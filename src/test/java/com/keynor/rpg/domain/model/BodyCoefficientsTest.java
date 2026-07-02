@@ -68,8 +68,8 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKShortMemoryCerebral()).isEqualTo(4);
         assertThat(coeff.getKShortMemorySynapsis()).isEqualTo(4);
         assertThat(coeff.getKShortMemoryHippocampus()).isEqualTo(2);
-        assertThat(coeff.getKMentalHealthAmygdala()).isEqualTo(10);
-        assertThat(coeff.getKBalanceHippocampus()).isEqualTo(3);
+        assertThat(coeff.getKMentalHealthAmygdala()).isEqualTo(5);
+        assertThat(coeff.getKBalanceHippocampus()).isEqualTo(1);
         assertThat(coeff.getKBalanceNeuralDrive()).isEqualTo(1);
         assertThat(coeff.getKStressResistanceAmygdala()).isEqualTo(5);
         assertThat(coeff.getKStressResistanceAdrenal()).isEqualTo(5);
@@ -94,6 +94,34 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKStaminaPoolNutrientAbsorption()).isEqualTo(2);
         assertThat(coeff.getKFatigueResistanceHypothalamus()).isEqualTo(1);
         assertThat(coeff.getKFatigueResistanceThyroid()).isEqualTo(2);
+    }
+
+    @Test
+    void defaults_rpg14WeightsMatchTheDesignDocument() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKStrengthTendons()).isEqualTo(1);
+        assertThat(coeff.getKDurabilitySkin()).isEqualTo(1);
+        assertThat(coeff.getKBalanceTendons()).isEqualTo(2);
+        assertThat(coeff.getKSightEyesSensitivity()).isEqualTo(6);
+        assertThat(coeff.getKSightHippocampus()).isEqualTo(1);
+        assertThat(coeff.getKSightNeuralDrive()).isEqualTo(1);
+        assertThat(coeff.getKSightPmod()).isEqualTo(2);
+        assertThat(coeff.getKHearingEarsSensitivity()).isEqualTo(6);
+        assertThat(coeff.getKSmellNoseSensitivity()).isEqualTo(6);
+        assertThat(coeff.getKMentalHealthTmod()).isEqualTo(5);
+        assertThat(coeff.getKMentalHealthPmod()).isEqualTo(5);
+        assertThat(coeff.getKPoisonResistanceCellularHealth()).isEqualTo(2);
+        assertThat(coeff.getKDiseaseResistanceCellularHealth()).isEqualTo(2);
+        assertThat(coeff.getKFoodPoisoningCellularHealth()).isEqualTo(2);
+        assertThat(coeff.getKFatGainRateEndomorphy()).isEqualTo(1.0);
+        assertThat(coeff.getKFatGainRateCellularHealth()).isEqualTo(0.5);
+        assertThat(coeff.getKMuscleGainRateTmod()).isEqualTo(1.0);
+        assertThat(coeff.getKIntimidationShapeAesthetics()).isEqualTo(5);
+        assertThat(coeff.getKIntimidationMassNeutral()).isEqualTo(25);
+        assertThat(coeff.getKDiplomacyShapeAesthetics()).isEqualTo(7);
+        assertThat(coeff.getKEnfactuationShapeAesthetics()).isEqualTo(7);
+        assertThat(coeff.getKCommandShapeAesthetics()).isEqualTo(10);
     }
 
     @Test

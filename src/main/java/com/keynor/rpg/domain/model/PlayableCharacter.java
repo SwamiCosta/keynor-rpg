@@ -48,7 +48,7 @@ public class PlayableCharacter {
                 + genetics().getHeight()
                 + composition().getMuscleMass()
                 + composition().getBodyFat()
-                + (genetics().getBoneDensity() - 5);
+                + (composition().getBoneDensity() - 5);
         return (int) Math.round(raw);
     }
 
@@ -64,7 +64,7 @@ public class PlayableCharacter {
         double frameKg = coeff().getKFrameKgBase()
                 + Math.floor((genetics().getHeight() * coeff().getKFrameKgHeightMultiplier())
                         / coeff().getKFrameKgDivisor());
-        double boneModKg = genetics().getBoneDensity() - 5;
+        double boneModKg = composition().getBoneDensity() - 5;
         return muscleKg + fatKg + frameKg + boneModKg;
     }
 
@@ -75,9 +75,10 @@ public class PlayableCharacter {
     /**
      * Strength = baseline + kStrengthMuscleMass x (MuscleMass-5) + kStrengthNeuromuscular x
      * (NeuromuscularEfficiency-5) + kStrengthFiberType x (FiberType-5) + kStrengthLimbRatio x
-     * (LimbRatio-3) + kStrengthMuscleDistribution x (MuscleDistribution-5). Floored at
-     * {@link BodyCoefficients#getAttributeFloor()} — MuscleMass's 1-15 range is asymmetric
-     * around its neutral (5), so extreme low-mass builds can otherwise go negative.
+     * (LimbRatio-3) + kStrengthMuscleDistribution x (MuscleDistribution-5) + kStrengthTendons x
+     * (TendonsAndLigaments-5). Floored at {@link BodyCoefficients#getAttributeFloor()} —
+     * MuscleMass's 1-15 range is asymmetric around its neutral (5), so extreme low-mass builds
+     * can otherwise go negative.
      */
     public double getStrength() {
         double raw = coeff().getBaseline()
@@ -85,7 +86,8 @@ public class PlayableCharacter {
                 + coeff().getKStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
                 + coeff().getKStrengthFiberType() * (composition().getDominantFiberType() - 5)
                 + coeff().getKStrengthLimbRatio() * (genetics().getLimbRatio() - 3)
-                + coeff().getKStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5);
+                + coeff().getKStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5)
+                + coeff().getKStrengthTendons() * (composition().getTendonsAndLigaments() - 5);
         return floor(raw);
     }
 
@@ -184,15 +186,17 @@ public class PlayableCharacter {
     /**
      * Durability = baseline + kDurabilityBoneDensity x (BoneDensity-5) + kDurabilityMesomorphy
      * x (Mesomorphy-5) + kDurabilityBodyFat x (BodyFat-3) - kDurabilityFlexibility x
-     * (Flexibility-5). Note BodyFat's own neutral is 3, not 5. Dense bones, a mesomorphic
-     * build, and extra fat cushioning raise durability; high flexibility lowers it.
+     * (Flexibility-5) + kDurabilitySkin x (SkinThickness-3). Note BodyFat's own neutral is 3,
+     * not 5, same as SkinThickness's. Dense bones, a mesomorphic build, extra fat cushioning,
+     * and thick skin all raise durability; high flexibility lowers it.
      */
     public double getDurability() {
         return coeff().getBaseline()
-                + coeff().getKDurabilityBoneDensity() * (genetics().getBoneDensity() - 5)
+                + coeff().getKDurabilityBoneDensity() * (composition().getBoneDensity() - 5)
                 + coeff().getKDurabilityMesomorphy() * (genetics().getMesomorphy() - 5)
                 + coeff().getKDurabilityBodyFat() * (composition().getBodyFat() - 3)
-                - coeff().getKDurabilityFlexibility() * (composition().getFlexibility() - 5);
+                - coeff().getKDurabilityFlexibility() * (composition().getFlexibility() - 5)
+                + coeff().getKDurabilitySkin() * (bodyStructure().getSkinThickness() - 3);
     }
 
     // -------------------------------------------------------------------------
@@ -200,24 +204,41 @@ public class PlayableCharacter {
     // -------------------------------------------------------------------------
 
     /**
-     * Sight = baseline + kSensePerception x (Perception-5) + kSenseNeuralDrive x
-     * (NeuralDrive-5). Shares the same formula as {@link #getHearing()} and
-     * {@link #getSmell()} — each can be trained independently in the future.
+     * Sight = baseline + kSightEyesSensitivity x (EyesSensitivity-5) + kSightHippocampus x
+     * (Hippocampus-5) + kSightNeuralDrive x (NeuralDrive-5) + kSightPmod x Pmod. Diverged from
+     * {@link #getHearing()}/{@link #getSmell()} in rpg-14 — each sense now reads its own
+     * {@link SensorialOrgans} input instead of sharing one shared formula.
      */
     public double getSight() {
         return coeff().getBaseline()
-                + coeff().getKSensePerception() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKSenseNeuralDrive() * (neuralSystem().getNeuralDrive() - 5);
+                + coeff().getKSightEyesSensitivity() * (sensorialOrgans().getEyesSensitivity() - 5)
+                + coeff().getKSightHippocampus() * (neuralSystem().getHippocampus() - 5)
+                + coeff().getKSightNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
+                + coeff().getKSightPmod() * progesteroneModifier();
     }
 
-    /** Hearing — same base formula as {@link #getSight()}. */
+    /**
+     * Hearing = baseline + kHearingEarsSensitivity x (EarsSensitivity-5) + kHearingHippocampus
+     * x (Hippocampus-5) + kHearingNeuralDrive x (NeuralDrive-5) + kHearingPmod x Pmod.
+     */
     public double getHearing() {
-        return getSight();
+        return coeff().getBaseline()
+                + coeff().getKHearingEarsSensitivity() * (sensorialOrgans().getEarsSensitivity() - 5)
+                + coeff().getKHearingHippocampus() * (neuralSystem().getHippocampus() - 5)
+                + coeff().getKHearingNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
+                + coeff().getKHearingPmod() * progesteroneModifier();
     }
 
-    /** Smell — same base formula as {@link #getSight()}. */
+    /**
+     * Smell = baseline + kSmellNoseSensitivity x (NoseSensitivity-5) + kSmellHippocampus x
+     * (Hippocampus-5) + kSmellNeuralDrive x (NeuralDrive-5) + kSmellPmod x Pmod.
+     */
     public double getSmell() {
-        return getSight();
+        return coeff().getBaseline()
+                + coeff().getKSmellNoseSensitivity() * (sensorialOrgans().getNoseSensitivity() - 5)
+                + coeff().getKSmellHippocampus() * (neuralSystem().getHippocampus() - 5)
+                + coeff().getKSmellNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
+                + coeff().getKSmellPmod() * progesteroneModifier();
     }
 
     /**
@@ -291,12 +312,16 @@ public class PlayableCharacter {
     }
 
     /**
-     * MentalHealthPool = baseline - kMentalHealthAmygdala x (AmygdalaAndCingulum-5). Reserve
-     * for future Mind-pillar mechanics — deliberately simplified until that pillar exists.
+     * MentalHealthPool = baseline - kMentalHealthAmygdala x (AmygdalaAndCingulum-5) -
+     * kMentalHealthTmod x Tmod + kMentalHealthPmod x Pmod. {@code kMentalHealthAmygdala} was
+     * reweighted 10->5 in rpg-14 alongside the two new hormone-modifier terms. Reserve for
+     * future Mind-pillar mechanics — deliberately simplified until that pillar exists.
      */
     public double getMentalHealthPool() {
         return coeff().getBaseline()
-                - coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5);
+                - coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+                - coeff().getKMentalHealthTmod() * testosteroneModifier()
+                + coeff().getKMentalHealthPmod() * progesteroneModifier();
     }
 
     /**
@@ -311,11 +336,16 @@ public class PlayableCharacter {
     // Sensory / Hormonal / Stress (rpg-13)
     // -------------------------------------------------------------------------
 
-    /** Balance = baseline + kBalanceHippocampus x (Hippocampus-5) + kBalanceNeuralDrive x (NeuralDrive-5). */
+    /**
+     * Balance = baseline + kBalanceHippocampus x (Hippocampus-5) + kBalanceNeuralDrive x
+     * (NeuralDrive-5) + kBalanceTendons x (TendonsAndLigaments-5). {@code kBalanceHippocampus}
+     * was reweighted 3->1 in rpg-14 when the new tendons term was introduced.
+     */
     public double getBalance() {
         return coeff().getBaseline()
                 + coeff().getKBalanceHippocampus() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5);
+                + coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
+                + coeff().getKBalanceTendons() * (composition().getTendonsAndLigaments() - 5);
     }
 
     /**
@@ -335,24 +365,27 @@ public class PlayableCharacter {
     /**
      * PoisonResistance = baseline + kPoisonResistanceImmunity x (Immunity-5) -
      * kPoisonResistanceCardiac x (CardiacOutput-5) - kPoisonResistanceBloodThickness x
-     * (BloodThickness-3).
+     * (BloodThickness-3) + kPoisonResistanceCellularHealth x (CellularHealth-5) (added rpg-14).
      */
     public double getPoisonResistance() {
         return coeff().getBaseline()
                 + coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5)
                 - coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
                 - coeff().getKPoisonResistanceBloodThickness()
-                        * (bodySystems().getBloodSystem().getBloodThickness() - 3);
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)
+                + coeff().getKPoisonResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5);
     }
 
     /**
      * DiseaseResistance = baseline + kDiseaseResistanceImmunity x (Immunity-5) +
-     * kDiseaseResistanceAmygdala x (AmygdalaAndCingulum-5).
+     * kDiseaseResistanceAmygdala x (AmygdalaAndCingulum-5) + kDiseaseResistanceCellularHealth x
+     * (CellularHealth-5) (added rpg-14).
      */
     public double getDiseaseResistance() {
         return coeff().getBaseline()
                 + coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5)
-                + coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5);
+                + coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+                + coeff().getKDiseaseResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5);
     }
 
     /**
@@ -378,7 +411,7 @@ public class PlayableCharacter {
      */
     public double getThermalResistance() {
         return coeff().getBaseline()
-                + coeff().getKThermalResistanceSkin() * (genetics().getSkinThickness() - 3)
+                + coeff().getKThermalResistanceSkin() * (bodyStructure().getSkinThickness() - 3)
                 + coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3)
                 + coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5);
     }
@@ -416,12 +449,14 @@ public class PlayableCharacter {
 
     /**
      * FoodPoisoningAlcoholResistance = baseline + kFoodPoisoningImpurity x (ImpurityCleaning-5)
-     * + kFoodPoisoningImmunity x (Immunity-5).
+     * + kFoodPoisoningImmunity x (Immunity-5) + kFoodPoisoningCellularHealth x
+     * (CellularHealth-5) (added rpg-14).
      */
     public double getFoodPoisoningAlcoholResistance() {
         return coeff().getBaseline()
                 + coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5)
-                + coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5);
+                + coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5)
+                + coeff().getKFoodPoisoningCellularHealth() * (bodyStructure().getCellularHealth() - 5);
     }
 
     // -------------------------------------------------------------------------
@@ -465,6 +500,91 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
+    // Body-growth rates (rpg-14) — zero-baseline, unlike every other derived attribute above.
+    // These express a rate of change (can be negative), not an absolute stat value, so they
+    // deliberately do NOT add BodyCoefficients.getBaseline(). A third documented exception to
+    // the additive standard, alongside Speed's mass penalty and Evasion/MaxMovementSpeed's
+    // Speed-anchoring — see .claude/skills/additive-attribute-formulas.md.
+    // -------------------------------------------------------------------------
+
+    /**
+     * FatGainRate = kFatGainRateEndomorphy x (Endomorphy-5) - kFatGainRateEctomorphy x
+     * (Ectomorphy-5) + kFatGainRateNutrientAbsorption x (NutrientAbsorption-5) -
+     * kFatGainRateKetosis x (KetosisQuality-5) - kFatGainRateCellularHealth x
+     * (CellularHealth-5). Zero-baseline: positive means gaining fat faster, negative means
+     * losing it faster, zero means stable at every input's neutral value.
+     */
+    public double getFatGainRate() {
+        return coeff().getKFatGainRateEndomorphy() * (genetics().getEndomorphy() - 5)
+                - coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5)
+                + coeff().getKFatGainRateNutrientAbsorption()
+                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
+                - coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
+                - coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5);
+    }
+
+    /**
+     * MuscleGainRate = kMuscleGainRateMesomorphy x (Mesomorphy-5) - kMuscleGainRateEctomorphy x
+     * (Ectomorphy-5) + kMuscleGainRateNutrientAbsorption x (NutrientAbsorption-5) +
+     * kMuscleGainRateTmod x Tmod. Zero-baseline, same semantics as {@link #getFatGainRate()}.
+     */
+    public double getMuscleGainRate() {
+        return coeff().getKMuscleGainRateMesomorphy() * (genetics().getMesomorphy() - 5)
+                - coeff().getKMuscleGainRateEctomorphy() * (genetics().getEctomorphy() - 5)
+                + coeff().getKMuscleGainRateNutrientAbsorption()
+                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
+                + coeff().getKMuscleGainRateTmod() * testosteroneModifier();
+    }
+
+    // -------------------------------------------------------------------------
+    // Social attributes (rpg-14) — baseline 60, morphology/hormone-driven.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Intimidation = baseline - kIntimidationShapeAesthetics x (ShapeAesthetics-5) +
+     * kIntimidationTmod x Tmod + kIntimidationMass x (SymbolicTotalMass-kIntimidationMassNeutral).
+     * Unattractive, testosterone-driven, physically imposing characters intimidate more.
+     */
+    public double getIntimidation() {
+        return coeff().getBaseline()
+                - coeff().getKIntimidationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
+                + coeff().getKIntimidationTmod() * testosteroneModifier()
+                + coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral());
+    }
+
+    /**
+     * Diplomacy = baseline + kDiplomacyShapeAesthetics x (ShapeAesthetics-5) + kDiplomacyPmod x
+     * Pmod.
+     */
+    public double getDiplomacy() {
+        return coeff().getBaseline()
+                + coeff().getKDiplomacyShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
+                + coeff().getKDiplomacyPmod() * progesteroneModifier();
+    }
+
+    /**
+     * Enfactuation = baseline + kEnfactuationShapeAesthetics x (ShapeAesthetics-5) +
+     * kEnfactuationPmod x Pmod. Currently identical in shape to {@link #getDiplomacy()} — both
+     * read the same morphology/hormone inputs today; expected to diverge once the Mind pillar
+     * adds cognitive/social inputs that only one of the two should use.
+     */
+    public double getEnfactuation() {
+        return coeff().getBaseline()
+                + coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
+                + coeff().getKEnfactuationPmod() * progesteroneModifier();
+    }
+
+    /**
+     * Command = baseline + kCommandShapeAesthetics x |ShapeAesthetics-5|. V-shaped: both
+     * extremes (very repulsive or very attractive) raise Command equally — commanding presence
+     * comes from being memorable, not from being liked.
+     */
+    public double getCommand() {
+        return coeff().getBaseline()
+                + coeff().getKCommandShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5);
+    }
+
+    // -------------------------------------------------------------------------
     // Lore link
     // -------------------------------------------------------------------------
 
@@ -488,10 +608,31 @@ public class PlayableCharacter {
     private BodyComposition composition() { return body.getBiomechanics().getBodyComposition(); }
     private BodySystems bodySystems() { return body.getBodySystems(); }
     private NeuralSystem neuralSystem() { return body.getBodySystems().getNeuralSystem(); }
+    private PhysicalTraits physicalTraits() { return body.getPhysicalTraits(); }
+    private SensorialOrgans sensorialOrgans() { return body.getPhysicalTraits().getSensorialOrgans(); }
+    private BodyStructure bodyStructure() { return body.getPhysicalTraits().getBodyStructure(); }
     private BodyCoefficients coeff() { return body.getCoefficients(); }
 
     /** Applies the shared safety floor used by Strength, FatigueResistance, Evasion, and MaxMovementSpeed. */
     private double floor(double value) {
         return Math.max(coeff().getAttributeFloor(), value);
+    }
+
+    /**
+     * Testosterone modifier (rpg-14): active only when {@code PredominantMorphicHormone} is
+     * below its neutral point (5) — {@code 5 - input}, ranging 1-4. Zero at or above neutral.
+     */
+    private int testosteroneModifier() {
+        int input = bodySystems().getHormonalSystem().getPredominantMorphicHormone();
+        return input < 5 ? 5 - input : 0;
+    }
+
+    /**
+     * Progesterone modifier (rpg-14): active only when {@code PredominantMorphicHormone} is
+     * above its neutral point (5) — {@code input - 5}, ranging 1-4. Zero at or below neutral.
+     */
+    private int progesteroneModifier() {
+        int input = bodySystems().getHormonalSystem().getPredominantMorphicHormone();
+        return input > 5 ? input - 5 : 0;
     }
 }
