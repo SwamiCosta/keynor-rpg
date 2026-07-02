@@ -18,7 +18,7 @@ class BiomechanicsTest {
 
     @Test
     void constructor_storesGeneticsAndBodyCompositionAsProvided() {
-        Genetics genetics = new Genetics(7, 3, 5, 10, 4, 6);
+        Genetics genetics = new Genetics(7, 3, 5, 10, 4, 6, 3);
         BodyComposition composition = new BodyComposition(5, 8, 7, 6, 4);
         Biomechanics biomechanics = new Biomechanics(genetics, composition);
 

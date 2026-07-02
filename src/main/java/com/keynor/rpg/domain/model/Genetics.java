@@ -13,6 +13,13 @@ package com.keynor.rpg.domain.model;
  * but that real-unit conversion only matters for {@code DisplayMassKg}/UI, never for
  * gameplay formulas directly.
  *
+ * <p>{@code skinThickness} (added rpg-13) is 1-7 with neutral 3 — the domain model accepts
+ * the full range so future non-human races can use the extremes (1, 5, 6, 7), even though
+ * the current UI locks the human character-creation slider to [2-4]. Feeds
+ * {@link PlayableCharacter#getThermalResistance()}. Immutable for now, like every other
+ * field here; flipping it trainable later only means dropping {@code final} and adding a
+ * setter, no other structural change.
+ *
  * <p>{@code endomorphy}/{@code ectomorphy} remain unused by any formula (same as before
  * rpg-11) — reserved for future pillars/mechanics.
  */
@@ -24,19 +31,21 @@ public class Genetics {
     private final int height;
     private final int limbRatio;
     private final int boneDensity;
+    private final int skinThickness;
 
     public Genetics(int endomorphy, int mesomorphy, int ectomorphy, int height,
-                     int limbRatio, int boneDensity) {
+                     int limbRatio, int boneDensity, int skinThickness) {
         this.endomorphy = endomorphy;
         this.mesomorphy = mesomorphy;
         this.ectomorphy = ectomorphy;
         this.height = height;
         this.limbRatio = limbRatio;
         this.boneDensity = boneDensity;
+        this.skinThickness = skinThickness;
     }
 
     public static Genetics defaults() {
-        return new Genetics(5, 5, 5, 7, 3, 5);
+        return new Genetics(5, 5, 5, 7, 3, 5, 3);
     }
 
     public int getEndomorphy() {
@@ -61,5 +70,9 @@ public class Genetics {
 
     public int getBoneDensity() {
         return boneDensity;
+    }
+
+    public int getSkinThickness() {
+        return skinThickness;
     }
 }

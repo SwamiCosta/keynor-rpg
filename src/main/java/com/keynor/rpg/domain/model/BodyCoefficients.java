@@ -46,6 +46,7 @@ public class BodyCoefficients {
     private double kStaminaPoolCardiac = 1;
     private double kStaminaPoolOxygen = 1;
     private double kStaminaPoolFiberType = 2;
+    private double kStaminaPoolNutrientAbsorption = 2; // added rpg-13
 
     // FatigueResistance
     private double kFatigueResistanceCardiac = 3;
@@ -55,6 +56,8 @@ public class BodyCoefficients {
     private double kFatigueResistanceMassNeutral = 25;
     private double kFatigueResistanceMassDivisor = 2;
     private double kFatigueResistanceMuscleMass = 1;
+    private double kFatigueResistanceHypothalamus = 1; // added rpg-13
+    private double kFatigueResistanceThyroid = 2; // added rpg-13
 
     // StaminaRecovery
     private double kStaminaRecoveryOxygen = 3;
@@ -110,6 +113,43 @@ public class BodyCoefficients {
     private double kDragCapacityMultiplier = 2;
     private double kDragCapacityMassFraction = 0.5;
 
+    // Cognitive/Mental (rpg-13)
+    private double kMemoryPoolCerebral = 8;
+    private double kMemoryPoolHippocampus = 2;
+    private double kReasoningSynapsis = 10;
+    private double kShortMemoryCerebral = 4;
+    private double kShortMemorySynapsis = 4;
+    private double kShortMemoryHippocampus = 2;
+    private double kMentalHealthAmygdala = 10; // shared by MentalHealthPool and Will
+
+    // Sensory / Hormonal / Stress (rpg-13)
+    private double kBalanceHippocampus = 3;
+    private double kBalanceNeuralDrive = 1;
+    private double kStressResistanceAmygdala = 5;
+    private double kStressResistanceAdrenal = 5;
+
+    // Biological defense (rpg-13)
+    private double kPoisonResistanceImmunity = 5;
+    private double kPoisonResistanceCardiac = 3;
+    private double kPoisonResistanceBloodThickness = 4;
+    private double kDiseaseResistanceImmunity = 9;
+    private double kDiseaseResistanceAmygdala = 1;
+    private double kBleedingResistanceBloodThickness = 10;
+    private double kBleedingResistanceCardiac = 5;
+
+    // Metabolic / survival (rpg-13)
+    private double kThermalResistanceSkin = 5;
+    private double kThermalResistanceBodyFat = 2;
+    private double kThermalResistanceHypothalamus = 1;
+    private double kBreathOutputPulmonary = 10;
+    private double kDehydrationResistanceHypothalamus = 5;
+    private double kDehydrationResistanceKetosis = 5;
+    private double kStarvationResistanceHypothalamus = 4;
+    private double kStarvationResistanceNutrient = 3;
+    private double kStarvationResistanceKetosis = 3;
+    private double kFoodPoisoningImpurity = 5;
+    private double kFoodPoisoningImmunity = 5;
+
     // Safety floor shared by Strength, FatigueResistance, Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
 
@@ -162,6 +202,9 @@ public class BodyCoefficients {
     public double getKStaminaPoolFiberType() { return kStaminaPoolFiberType; }
     public void setKStaminaPoolFiberType(double v) { this.kStaminaPoolFiberType = v; }
 
+    public double getKStaminaPoolNutrientAbsorption() { return kStaminaPoolNutrientAbsorption; }
+    public void setKStaminaPoolNutrientAbsorption(double v) { this.kStaminaPoolNutrientAbsorption = v; }
+
     public double getKFatigueResistanceCardiac() { return kFatigueResistanceCardiac; }
     public void setKFatigueResistanceCardiac(double v) { this.kFatigueResistanceCardiac = v; }
 
@@ -182,6 +225,12 @@ public class BodyCoefficients {
 
     public double getKFatigueResistanceMuscleMass() { return kFatigueResistanceMuscleMass; }
     public void setKFatigueResistanceMuscleMass(double v) { this.kFatigueResistanceMuscleMass = v; }
+
+    public double getKFatigueResistanceHypothalamus() { return kFatigueResistanceHypothalamus; }
+    public void setKFatigueResistanceHypothalamus(double v) { this.kFatigueResistanceHypothalamus = v; }
+
+    public double getKFatigueResistanceThyroid() { return kFatigueResistanceThyroid; }
+    public void setKFatigueResistanceThyroid(double v) { this.kFatigueResistanceThyroid = v; }
 
     public double getKStaminaRecoveryOxygen() { return kStaminaRecoveryOxygen; }
     public void setKStaminaRecoveryOxygen(double v) { this.kStaminaRecoveryOxygen = v; }
@@ -284,6 +333,93 @@ public class BodyCoefficients {
 
     public double getKDragCapacityMassFraction() { return kDragCapacityMassFraction; }
     public void setKDragCapacityMassFraction(double v) { this.kDragCapacityMassFraction = v; }
+
+    public double getKMemoryPoolCerebral() { return kMemoryPoolCerebral; }
+    public void setKMemoryPoolCerebral(double v) { this.kMemoryPoolCerebral = v; }
+
+    public double getKMemoryPoolHippocampus() { return kMemoryPoolHippocampus; }
+    public void setKMemoryPoolHippocampus(double v) { this.kMemoryPoolHippocampus = v; }
+
+    public double getKReasoningSynapsis() { return kReasoningSynapsis; }
+    public void setKReasoningSynapsis(double v) { this.kReasoningSynapsis = v; }
+
+    public double getKShortMemoryCerebral() { return kShortMemoryCerebral; }
+    public void setKShortMemoryCerebral(double v) { this.kShortMemoryCerebral = v; }
+
+    public double getKShortMemorySynapsis() { return kShortMemorySynapsis; }
+    public void setKShortMemorySynapsis(double v) { this.kShortMemorySynapsis = v; }
+
+    public double getKShortMemoryHippocampus() { return kShortMemoryHippocampus; }
+    public void setKShortMemoryHippocampus(double v) { this.kShortMemoryHippocampus = v; }
+
+    public double getKMentalHealthAmygdala() { return kMentalHealthAmygdala; }
+    public void setKMentalHealthAmygdala(double v) { this.kMentalHealthAmygdala = v; }
+
+    public double getKBalanceHippocampus() { return kBalanceHippocampus; }
+    public void setKBalanceHippocampus(double v) { this.kBalanceHippocampus = v; }
+
+    public double getKBalanceNeuralDrive() { return kBalanceNeuralDrive; }
+    public void setKBalanceNeuralDrive(double v) { this.kBalanceNeuralDrive = v; }
+
+    public double getKStressResistanceAmygdala() { return kStressResistanceAmygdala; }
+    public void setKStressResistanceAmygdala(double v) { this.kStressResistanceAmygdala = v; }
+
+    public double getKStressResistanceAdrenal() { return kStressResistanceAdrenal; }
+    public void setKStressResistanceAdrenal(double v) { this.kStressResistanceAdrenal = v; }
+
+    public double getKPoisonResistanceImmunity() { return kPoisonResistanceImmunity; }
+    public void setKPoisonResistanceImmunity(double v) { this.kPoisonResistanceImmunity = v; }
+
+    public double getKPoisonResistanceCardiac() { return kPoisonResistanceCardiac; }
+    public void setKPoisonResistanceCardiac(double v) { this.kPoisonResistanceCardiac = v; }
+
+    public double getKPoisonResistanceBloodThickness() { return kPoisonResistanceBloodThickness; }
+    public void setKPoisonResistanceBloodThickness(double v) { this.kPoisonResistanceBloodThickness = v; }
+
+    public double getKDiseaseResistanceImmunity() { return kDiseaseResistanceImmunity; }
+    public void setKDiseaseResistanceImmunity(double v) { this.kDiseaseResistanceImmunity = v; }
+
+    public double getKDiseaseResistanceAmygdala() { return kDiseaseResistanceAmygdala; }
+    public void setKDiseaseResistanceAmygdala(double v) { this.kDiseaseResistanceAmygdala = v; }
+
+    public double getKBleedingResistanceBloodThickness() { return kBleedingResistanceBloodThickness; }
+    public void setKBleedingResistanceBloodThickness(double v) { this.kBleedingResistanceBloodThickness = v; }
+
+    public double getKBleedingResistanceCardiac() { return kBleedingResistanceCardiac; }
+    public void setKBleedingResistanceCardiac(double v) { this.kBleedingResistanceCardiac = v; }
+
+    public double getKThermalResistanceSkin() { return kThermalResistanceSkin; }
+    public void setKThermalResistanceSkin(double v) { this.kThermalResistanceSkin = v; }
+
+    public double getKThermalResistanceBodyFat() { return kThermalResistanceBodyFat; }
+    public void setKThermalResistanceBodyFat(double v) { this.kThermalResistanceBodyFat = v; }
+
+    public double getKThermalResistanceHypothalamus() { return kThermalResistanceHypothalamus; }
+    public void setKThermalResistanceHypothalamus(double v) { this.kThermalResistanceHypothalamus = v; }
+
+    public double getKBreathOutputPulmonary() { return kBreathOutputPulmonary; }
+    public void setKBreathOutputPulmonary(double v) { this.kBreathOutputPulmonary = v; }
+
+    public double getKDehydrationResistanceHypothalamus() { return kDehydrationResistanceHypothalamus; }
+    public void setKDehydrationResistanceHypothalamus(double v) { this.kDehydrationResistanceHypothalamus = v; }
+
+    public double getKDehydrationResistanceKetosis() { return kDehydrationResistanceKetosis; }
+    public void setKDehydrationResistanceKetosis(double v) { this.kDehydrationResistanceKetosis = v; }
+
+    public double getKStarvationResistanceHypothalamus() { return kStarvationResistanceHypothalamus; }
+    public void setKStarvationResistanceHypothalamus(double v) { this.kStarvationResistanceHypothalamus = v; }
+
+    public double getKStarvationResistanceNutrient() { return kStarvationResistanceNutrient; }
+    public void setKStarvationResistanceNutrient(double v) { this.kStarvationResistanceNutrient = v; }
+
+    public double getKStarvationResistanceKetosis() { return kStarvationResistanceKetosis; }
+    public void setKStarvationResistanceKetosis(double v) { this.kStarvationResistanceKetosis = v; }
+
+    public double getKFoodPoisoningImpurity() { return kFoodPoisoningImpurity; }
+    public void setKFoodPoisoningImpurity(double v) { this.kFoodPoisoningImpurity = v; }
+
+    public double getKFoodPoisoningImmunity() { return kFoodPoisoningImmunity; }
+    public void setKFoodPoisoningImmunity(double v) { this.kFoodPoisoningImmunity = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

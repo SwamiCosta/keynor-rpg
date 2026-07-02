@@ -59,6 +59,44 @@ class BodyCoefficientsTest {
     }
 
     @Test
+    void defaults_rpg13WeightsMatchTheDesignDocument() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKMemoryPoolCerebral()).isEqualTo(8);
+        assertThat(coeff.getKMemoryPoolHippocampus()).isEqualTo(2);
+        assertThat(coeff.getKReasoningSynapsis()).isEqualTo(10);
+        assertThat(coeff.getKShortMemoryCerebral()).isEqualTo(4);
+        assertThat(coeff.getKShortMemorySynapsis()).isEqualTo(4);
+        assertThat(coeff.getKShortMemoryHippocampus()).isEqualTo(2);
+        assertThat(coeff.getKMentalHealthAmygdala()).isEqualTo(10);
+        assertThat(coeff.getKBalanceHippocampus()).isEqualTo(3);
+        assertThat(coeff.getKBalanceNeuralDrive()).isEqualTo(1);
+        assertThat(coeff.getKStressResistanceAmygdala()).isEqualTo(5);
+        assertThat(coeff.getKStressResistanceAdrenal()).isEqualTo(5);
+        assertThat(coeff.getKPoisonResistanceImmunity()).isEqualTo(5);
+        assertThat(coeff.getKPoisonResistanceCardiac()).isEqualTo(3);
+        assertThat(coeff.getKPoisonResistanceBloodThickness()).isEqualTo(4);
+        assertThat(coeff.getKDiseaseResistanceImmunity()).isEqualTo(9);
+        assertThat(coeff.getKDiseaseResistanceAmygdala()).isEqualTo(1);
+        assertThat(coeff.getKBleedingResistanceBloodThickness()).isEqualTo(10);
+        assertThat(coeff.getKBleedingResistanceCardiac()).isEqualTo(5);
+        assertThat(coeff.getKThermalResistanceSkin()).isEqualTo(5);
+        assertThat(coeff.getKThermalResistanceBodyFat()).isEqualTo(2);
+        assertThat(coeff.getKThermalResistanceHypothalamus()).isEqualTo(1);
+        assertThat(coeff.getKBreathOutputPulmonary()).isEqualTo(10);
+        assertThat(coeff.getKDehydrationResistanceHypothalamus()).isEqualTo(5);
+        assertThat(coeff.getKDehydrationResistanceKetosis()).isEqualTo(5);
+        assertThat(coeff.getKStarvationResistanceHypothalamus()).isEqualTo(4);
+        assertThat(coeff.getKStarvationResistanceNutrient()).isEqualTo(3);
+        assertThat(coeff.getKStarvationResistanceKetosis()).isEqualTo(3);
+        assertThat(coeff.getKFoodPoisoningImpurity()).isEqualTo(5);
+        assertThat(coeff.getKFoodPoisoningImmunity()).isEqualTo(5);
+        assertThat(coeff.getKStaminaPoolNutrientAbsorption()).isEqualTo(2);
+        assertThat(coeff.getKFatigueResistanceHypothalamus()).isEqualTo(1);
+        assertThat(coeff.getKFatigueResistanceThyroid()).isEqualTo(2);
+    }
+
+    @Test
     void defaults_attributeFloorIsFive() {
         assertThat(BodyCoefficients.defaults().getAttributeFloor()).isEqualTo(5);
     }
