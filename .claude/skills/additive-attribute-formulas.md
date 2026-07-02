@@ -34,15 +34,22 @@ Four attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (flo
 
 At `baseline = 35` (the design document's original value before the user raised it to 60), the four floored attributes' worst-case combos landed at -1, -17, -14, and -6 respectively — genuinely reachable through slider extremes. At `baseline = 60`, the same worst-case combos land at 24, 8, 11, and 19 — all positive on their own. **The floors are kept anyway**, as defense-in-depth against future coefficient tuning or scale changes, not because today's ranges require them. `Speed` never needed a floor at either baseline (its mass-penalty divisor keeps the worst case at 2 / 27 respectively) — see `PlayableCharacterTest.getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor`.
 
-## Load capacity (new in rpg-11)
+## Load capacity (added rpg-11, recalibrated rpg-12)
 
-`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `Strength` (and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section.
+`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `Strength` (and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section. All four return `int` (whole kg), unlike every other derived attribute (`double`) — this matches the design document's own `int` arithmetic and reflects that a carry-capacity ceiling doesn't need fractional-kg precision.
 
-**Load capacity does not use raw `Strength` — it uses `Strength - kLoadCapacityStrengthOffset` (offset defaults to 25).** When `baseline` was raised from 35 to 60 partway through rpg-11, every other formula's output rose by 25 along with it — but the Load Capacity formulas (`MaxCapacityKg = floor(LoadStrength² / 25) + LoadStrength`) were tuned against the original baseline-35 numbers and would have produced inflated, uncalibrated results if fed the new baseline-60 `Strength` directly. Subtracting the offset reconstructs "Strength as it was before the baseline change" for load-capacity purposes only — `Strength` itself, and every other formula that reads it (e.g. none currently do), stays at baseline 60. The result is re-floored (`floor(Strength - offset)`) so an already-floored `Strength` (5) can't produce a negative `LoadStrength` (5-25=-20 → re-floored to 5).
+```
+MaxCapacityKg  = floor(Strength^2 / kMaxCapacityDivisor) + Strength   (Strength truncated to int; kMaxCapacityDivisor = 150)
+LightLoadKg    = floor(MaxCapacityKg / kLightLoadDivisor)             (kLightLoadDivisor = 3 — exactly one third)
+HeavyLoadKg    = floor(MaxCapacityKg * kHeavyLoadMultiplier / kHeavyLoadDivisor)  (2/3 — the practical carry ceiling)
+DragCapacityKg = kDragCapacityMultiplier * MaxCapacityKg + floor(DisplayMassKg * kDragCapacityMassFraction)
+```
 
-At human defaults: `Strength = 60`, `LoadStrength = 35`, `MaxCapacityKg = floor(35²/25) + 35 = 84`.
+**`MaxCapacityKg` reads `Strength` directly — no offset.** rpg-11 originally introduced `kLoadCapacityStrengthOffset` (subtracting 25 from `Strength` before the load formula) to keep load numbers calibrated after `baseline` was raised from 35 to 60. rpg-12 replaced that entirely: the divisor itself was recalibrated (25 → 150) so the formula produces the same result working directly off the baseline-60 `Strength`, with no offset needed. **Do not reintroduce an offset alongside this divisor** — the two corrections solve the same problem and combining them would double-correct.
 
-`MaxCapacityKg` inherits `Strength`'s floor transitively through `LoadStrength`'s own re-floor: it can never go below `floor(5²/25) + 5 = 6`.
+At human defaults: `Strength = 60`, `MaxCapacityKg = floor(3600/150) + 60 = 84`, `LightLoadKg = 28`, `HeavyLoadKg = 56`, `DragCapacityKg = 2×84 + floor(71×0.5) = 203`.
+
+`MaxCapacityKg` inherits `Strength`'s floor transitively (`Strength` can never go below `attributeFloor`, 5): it can never go below `floor(5²/150) + 5 = 5`.
 
 ## Removed and renamed (breaking changes)
 

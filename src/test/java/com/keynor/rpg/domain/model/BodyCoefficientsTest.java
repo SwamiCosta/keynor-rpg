@@ -47,22 +47,15 @@ class BodyCoefficientsTest {
     }
 
     @Test
-    void defaults_loadCapacityFractionsMatchTheDesignDocument() {
+    void defaults_loadCapacityCoefficientsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKLightLoadFraction()).isEqualTo(0.3);
-        assertThat(coeff.getKHeavyLoadFraction()).isEqualTo(0.7);
-        assertThat(coeff.getKMaxCapacityDivisor()).isEqualTo(25);
+        assertThat(coeff.getKMaxCapacityDivisor()).isEqualTo(150);
+        assertThat(coeff.getKLightLoadDivisor()).isEqualTo(3);
+        assertThat(coeff.getKHeavyLoadMultiplier()).isEqualTo(2);
+        assertThat(coeff.getKHeavyLoadDivisor()).isEqualTo(3);
         assertThat(coeff.getKDragCapacityMultiplier()).isEqualTo(2);
         assertThat(coeff.getKDragCapacityMassFraction()).isEqualTo(0.5);
-    }
-
-    @Test
-    void defaults_loadCapacityStrengthOffsetUndoesTheBaselineSixtyShift() {
-        BodyCoefficients coeff = BodyCoefficients.defaults();
-
-        assertThat(coeff.getKLoadCapacityStrengthOffset()).isEqualTo(25);
-        assertThat(coeff.getBaseline() - coeff.getKLoadCapacityStrengthOffset()).isEqualTo(35);
     }
 
     @Test

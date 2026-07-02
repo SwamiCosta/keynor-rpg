@@ -459,29 +459,33 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getMaxCapacityKg_onHumanDefaults_derivesFromStrengthMinusTheBaselineOffsetSquaredPlusItself() {
+    void getMaxCapacityKg_onHumanDefaults_derivesFromStrengthSquaredOverOneFiftyPlusStrength() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        // Strength = 60; LoadStrength = 60 - 25 = 35 (undoes the baseline-60 shift)
-        double expected = Math.floor(Math.pow(35, 2) / 25.0) + 35;
-        assertThat(character.getMaxCapacityKg()).isCloseTo(expected, within(TOLERANCE));
-        assertThat(character.getMaxCapacityKg()).isCloseTo(84.0, within(TOLERANCE));
+        // Strength = 60; MaxCapacityKg = floor(60^2 / 150) + 60 = 24 + 60
+        assertThat(character.getMaxCapacityKg()).isEqualTo(84);
     }
 
     @Test
-    void getLightAndHeavyLoadKg_areFractionsOfMaxCapacityKg() {
+    void getLightLoadKg_isExactlyOneThirdOfMaxCapacityKg() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getLightLoadKg()).isCloseTo(character.getMaxCapacityKg() * 0.3, within(TOLERANCE));
-        assertThat(character.getHeavyLoadKg()).isCloseTo(character.getMaxCapacityKg() * 0.7, within(TOLERANCE));
+        assertThat(character.getLightLoadKg()).isEqualTo(28); // floor(84 / 3)
+    }
+
+    @Test
+    void getHeavyLoadKg_isExactlyTwoThirdsOfMaxCapacityKg() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getHeavyLoadKg()).isEqualTo(56); // floor(84 * 2 / 3)
     }
 
     @Test
     void getDragCapacityKg_combinesMaxCapacityKgAndDisplayMassKg() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = 2 * character.getMaxCapacityKg() + Math.floor(character.getDisplayMassKg() * 0.5);
-        assertThat(character.getDragCapacityKg()).isCloseTo(expected, within(TOLERANCE));
+        // 2 * 84 + floor(71 * 0.5) = 168 + 35
+        assertThat(character.getDragCapacityKg()).isEqualTo(203);
     }
 
     @Test
@@ -498,25 +502,14 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getMaxCapacityKg_reactsToTheStrengthOffsetCoefficient() {
-        Body body = Body.humanTemplate();
-        body.getCoefficients().setKLoadCapacityStrengthOffset(0);
-        PlayableCharacter noOffset = new PlayableCharacter("test", body);
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        // With the offset zeroed out, LoadStrength = Strength = 60 instead of 35
-        assertThat(noOffset.getMaxCapacityKg()).isGreaterThan(defaults.getMaxCapacityKg());
-    }
-
-    @Test
-    void getMaxCapacityKg_flooredWhenStrengthMinusOffsetWouldGoBelowTheFloor() {
+    void getMaxCapacityKg_flooredWhenStrengthIsFlooredByAnExtremeCoefficient() {
         Body body = Body.humanTemplate();
         body.getBiomechanics().getBodyComposition().setMuscleMass(1);
         body.getCoefficients().setKStrengthMuscleMass(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        double floor = body.getCoefficients().getAttributeFloor();
-        double expected = Math.floor(Math.pow(floor, 2) / 25.0) + floor;
-        assertThat(character.getMaxCapacityKg()).isCloseTo(expected, within(TOLERANCE));
+        int floor = (int) body.getCoefficients().getAttributeFloor();
+        int expected = (int) Math.floor(Math.pow(floor, 2) / 150.0) + floor;
+        assertThat(character.getMaxCapacityKg()).isEqualTo(expected);
     }
 }

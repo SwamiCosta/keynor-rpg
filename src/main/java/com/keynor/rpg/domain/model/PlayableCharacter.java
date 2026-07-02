@@ -253,30 +253,33 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
-    // Load capacity (rpg-11) — derived from Strength and DisplayMassKg
+    // Load capacity (rpg-11, recalibrated rpg-12) — derived from Strength and DisplayMassKg.
+    // All four figures are whole kg, matching the design document's int arithmetic.
     // -------------------------------------------------------------------------
 
     /**
-     * MaxCapacityKg = floor(LoadStrength^2 / kMaxCapacityDivisor) + LoadStrength, where
-     * LoadStrength = floor(Strength - kLoadCapacityStrengthOffset). The offset (25) undoes
-     * the baseline-60 shift so load capacity stays calibrated to the original baseline-35
-     * design the load formulas were tuned against, instead of inflating alongside the
-     * general attribute baseline. Non-linear so heroic Strength values yield
-     * disproportionately large capacity.
+     * MaxCapacityKg = floor(Strength^2 / kMaxCapacityDivisor) + Strength, computed on
+     * Strength truncated to an int. kMaxCapacityDivisor (150, rpg-12) is calibrated to work
+     * directly off the baseline-60 Strength — no separate offset needed, superseding the
+     * short-lived rpg-11 kLoadCapacityStrengthOffset correction. Non-linear so heroic
+     * Strength values yield disproportionately large capacity.
      */
-    public double getMaxCapacityKg() {
-        double loadStrength = floor(getStrength() - coeff().getKLoadCapacityStrengthOffset());
-        return Math.floor(Math.pow(loadStrength, 2) / coeff().getKMaxCapacityDivisor()) + loadStrength;
+    public int getMaxCapacityKg() {
+        int strength = (int) getStrength();
+        return (int) Math.floor(Math.pow(strength, 2) / coeff().getKMaxCapacityDivisor()) + strength;
     }
 
-    /** LightLoadKg = MaxCapacityKg x kLightLoadFraction. */
-    public double getLightLoadKg() {
-        return getMaxCapacityKg() * coeff().getKLightLoadFraction();
+    /** LightLoadKg = floor(MaxCapacityKg / kLightLoadDivisor) — exactly one third, no penalty. */
+    public int getLightLoadKg() {
+        return (int) Math.floor(getMaxCapacityKg() / coeff().getKLightLoadDivisor());
     }
 
-    /** HeavyLoadKg = MaxCapacityKg x kHeavyLoadFraction — practical carry ceiling. */
-    public double getHeavyLoadKg() {
-        return getMaxCapacityKg() * coeff().getKHeavyLoadFraction();
+    /**
+     * HeavyLoadKg = floor(MaxCapacityKg x kHeavyLoadMultiplier / kHeavyLoadDivisor) — exactly
+     * two thirds, the practical carry ceiling before movement is seriously hampered.
+     */
+    public int getHeavyLoadKg() {
+        return (int) Math.floor(getMaxCapacityKg() * coeff().getKHeavyLoadMultiplier() / coeff().getKHeavyLoadDivisor());
     }
 
     /**
@@ -284,9 +287,9 @@ public class PlayableCharacter {
      * kDragCapacityMassFraction). The only load figure that also depends on the character's
      * own real-world mass, not just Strength.
      */
-    public double getDragCapacityKg() {
-        return coeff().getKDragCapacityMultiplier() * getMaxCapacityKg()
-                + Math.floor(getDisplayMassKg() * coeff().getKDragCapacityMassFraction());
+    public int getDragCapacityKg() {
+        return (int) (coeff().getKDragCapacityMultiplier() * getMaxCapacityKg()
+                + Math.floor(getDisplayMassKg() * coeff().getKDragCapacityMassFraction()));
     }
 
     // -------------------------------------------------------------------------

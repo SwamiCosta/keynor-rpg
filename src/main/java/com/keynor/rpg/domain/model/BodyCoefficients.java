@@ -13,11 +13,10 @@ package com.keynor.rpg.domain.model;
  * fields (not inlined into {@link PlayableCharacter}) so game balance can be tuned without
  * touching formula code, same principle as the pre-rpg-11 coefficient set.
  *
- * <p>{@code kLoadCapacityStrengthOffset} (25) is a deliberate exception to the "baseline
- * feeds every formula" rule: the Load Capacity group subtracts it from {@code Strength}
- * before applying {@link PlayableCharacter#getMaxCapacityKg()}'s formula, so load numbers
- * stay calibrated to the original baseline-35 design rather than inflating when
- * {@code baseline} was later raised to 60.
+ * <p>The Load Capacity group ({@code kMaxCapacityDivisor} = 150) reads {@code Strength}
+ * directly (truncated to an {@code int}, per the design document) — recalibrated in rpg-12
+ * to work off the baseline-60 {@code Strength} with no separate offset, superseding the
+ * short-lived rpg-11 {@code kLoadCapacityStrengthOffset} correction.
  *
  * <p>Neutral points (5 for every 1-9 trait, 3 for {@code limbRatio}... — see each domain
  * class) are not coefficients: they are fixed scale midpoints, not tunable weights, so they
@@ -104,12 +103,12 @@ public class BodyCoefficients {
     private double kFrameKgDivisor = 2;
 
     // Load capacity
-    private double kLightLoadFraction = 0.3;
-    private double kHeavyLoadFraction = 0.7;
-    private double kMaxCapacityDivisor = 25;
+    private double kMaxCapacityDivisor = 150;
+    private double kLightLoadDivisor = 3;
+    private double kHeavyLoadMultiplier = 2;
+    private double kHeavyLoadDivisor = 3;
     private double kDragCapacityMultiplier = 2;
     private double kDragCapacityMassFraction = 0.5;
-    private double kLoadCapacityStrengthOffset = 25; // undoes the baseline-60 shift for load formulas only
 
     // Safety floor shared by Strength, FatigueResistance, Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
@@ -268,23 +267,23 @@ public class BodyCoefficients {
     public double getKFrameKgDivisor() { return kFrameKgDivisor; }
     public void setKFrameKgDivisor(double v) { this.kFrameKgDivisor = v; }
 
-    public double getKLightLoadFraction() { return kLightLoadFraction; }
-    public void setKLightLoadFraction(double v) { this.kLightLoadFraction = v; }
-
-    public double getKHeavyLoadFraction() { return kHeavyLoadFraction; }
-    public void setKHeavyLoadFraction(double v) { this.kHeavyLoadFraction = v; }
-
     public double getKMaxCapacityDivisor() { return kMaxCapacityDivisor; }
     public void setKMaxCapacityDivisor(double v) { this.kMaxCapacityDivisor = v; }
+
+    public double getKLightLoadDivisor() { return kLightLoadDivisor; }
+    public void setKLightLoadDivisor(double v) { this.kLightLoadDivisor = v; }
+
+    public double getKHeavyLoadMultiplier() { return kHeavyLoadMultiplier; }
+    public void setKHeavyLoadMultiplier(double v) { this.kHeavyLoadMultiplier = v; }
+
+    public double getKHeavyLoadDivisor() { return kHeavyLoadDivisor; }
+    public void setKHeavyLoadDivisor(double v) { this.kHeavyLoadDivisor = v; }
 
     public double getKDragCapacityMultiplier() { return kDragCapacityMultiplier; }
     public void setKDragCapacityMultiplier(double v) { this.kDragCapacityMultiplier = v; }
 
     public double getKDragCapacityMassFraction() { return kDragCapacityMassFraction; }
     public void setKDragCapacityMassFraction(double v) { this.kDragCapacityMassFraction = v; }
-
-    public double getKLoadCapacityStrengthOffset() { return kLoadCapacityStrengthOffset; }
-    public void setKLoadCapacityStrengthOffset(double v) { this.kLoadCapacityStrengthOffset = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }
