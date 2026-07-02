@@ -56,10 +56,10 @@ class WebConfigTest {
     @Test
     void actualRequest_fromAllowedOrigin_carriesCorsHeader() throws Exception {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
-                new GeneticsInput(5, 5, 5, 170, 1.0, 5),
-                new BodyCompositionInput(14, 30, 0.0, 5.0, 5.0),
+                new GeneticsInput(5, 5, 5, 7, 3, 5),
+                new BodyCompositionInput(3, 5, 5, 5, 5),
                 new BodySystemsInput(new BloodSystemInput(5), new CardiacSystemInput(5),
-                        new PulmonarySystemInput(5), new NervousSystemInput(5, 0.5)),
+                        new PulmonarySystemInput(5), new NervousSystemInput(5, 5)),
                 new SpatialIntelligenceInput(5, 5, 5));
 
         when(previewAttributesUseCase.calculate(any(), any(), any()))

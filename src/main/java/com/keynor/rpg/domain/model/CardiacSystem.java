@@ -1,14 +1,14 @@
 package com.keynor.rpg.domain.model;
 
 /**
- * Trainable. Together with {@link PulmonarySystem} and {@link BloodSystem}, will be the
- * basis for a future derived cardiovascular capacity formula — not yet implemented.
+ * Trainable. Additive-standard discrete scale (rpg-11): 1-9, neutral 5 (formulas use the
+ * {@code value - 5} deviation).
  */
 public class CardiacSystem {
 
-    private double cardiacOutput;
+    private int cardiacOutput;
 
-    public CardiacSystem(double cardiacOutput) {
+    public CardiacSystem(int cardiacOutput) {
         this.cardiacOutput = cardiacOutput;
     }
 
@@ -16,11 +16,11 @@ public class CardiacSystem {
         return new CardiacSystem(5);
     }
 
-    public double getCardiacOutput() {
+    public int getCardiacOutput() {
         return cardiacOutput;
     }
 
-    public void setCardiacOutput(double cardiacOutput) {
+    public void setCardiacOutput(int cardiacOutput) {
         this.cardiacOutput = cardiacOutput;
     }
 }

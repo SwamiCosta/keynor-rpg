@@ -12,14 +12,14 @@ class BiomechanicsTest {
 
         assertThat(biomechanics.getGenetics()).isNotNull();
         assertThat(biomechanics.getBodyComposition()).isNotNull();
-        assertThat(biomechanics.getGenetics().getHeight()).isEqualTo(170);
-        assertThat(biomechanics.getBodyComposition().getMuscleMass()).isEqualTo(30);
+        assertThat(biomechanics.getGenetics().getHeight()).isEqualTo(7);
+        assertThat(biomechanics.getBodyComposition().getMuscleMass()).isEqualTo(5);
     }
 
     @Test
     void constructor_storesGeneticsAndBodyCompositionAsProvided() {
-        Genetics genetics = new Genetics(7, 3, 5, 180, 1.05, 6);
-        BodyComposition composition = new BodyComposition(12, 40, 0.3, 6.0, 4.0);
+        Genetics genetics = new Genetics(7, 3, 5, 10, 4, 6);
+        BodyComposition composition = new BodyComposition(5, 8, 7, 6, 4);
         Biomechanics biomechanics = new Biomechanics(genetics, composition);
 
         assertThat(biomechanics.getGenetics()).isSameAs(genetics);

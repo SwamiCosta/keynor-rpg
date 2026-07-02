@@ -7,30 +7,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BodyCompositionTest {
 
     @Test
-    void defaults_returnsAverageHumanComposition() {
+    void defaults_returnsNeutralBodyComposition() {
         BodyComposition composition = BodyComposition.defaults();
 
-        assertThat(composition.getBodyFat()).isEqualTo(14);
-        assertThat(composition.getMuscleMass()).isEqualTo(30);
-        assertThat(composition.getDominantFiberType()).isEqualTo(0.0);
-        assertThat(composition.getMuscleDistribution()).isEqualTo(5.0);
-        assertThat(composition.getFlexibility()).isEqualTo(5.0);
+        assertThat(composition.getBodyFat()).isEqualTo(3);
+        assertThat(composition.getMuscleMass()).isEqualTo(5);
+        assertThat(composition.getDominantFiberType()).isEqualTo(5);
+        assertThat(composition.getMuscleDistribution()).isEqualTo(5);
+        assertThat(composition.getFlexibility()).isEqualTo(5);
     }
 
     @Test
     void setters_mutateStateToModelTrainingProgress() {
         BodyComposition composition = BodyComposition.defaults();
 
-        composition.setMuscleMass(35);
-        composition.setBodyFat(10);
-        composition.setDominantFiberType(0.4);
-        composition.setMuscleDistribution(7.0);
-        composition.setFlexibility(8.0);
+        composition.setMuscleMass(9);
+        composition.setBodyFat(6);
+        composition.setDominantFiberType(7);
+        composition.setMuscleDistribution(7);
+        composition.setFlexibility(8);
 
-        assertThat(composition.getMuscleMass()).isEqualTo(35);
-        assertThat(composition.getBodyFat()).isEqualTo(10);
-        assertThat(composition.getDominantFiberType()).isEqualTo(0.4);
-        assertThat(composition.getMuscleDistribution()).isEqualTo(7.0);
-        assertThat(composition.getFlexibility()).isEqualTo(8.0);
+        assertThat(composition.getMuscleMass()).isEqualTo(9);
+        assertThat(composition.getBodyFat()).isEqualTo(6);
+        assertThat(composition.getDominantFiberType()).isEqualTo(7);
+        assertThat(composition.getMuscleDistribution()).isEqualTo(7);
+        assertThat(composition.getFlexibility()).isEqualTo(8);
     }
 }

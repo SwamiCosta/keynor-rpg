@@ -41,10 +41,10 @@ class BiomechanicsPreviewControllerTest {
     @Test
     void preview_returnsAttributesComputedFromRequestBody() throws Exception {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
-                new GeneticsInput(5, 5, 5, 170, 1.0, 5),
-                new BodyCompositionInput(14, 30, 0.0, 5.0, 5.0),
+                new GeneticsInput(5, 5, 5, 7, 3, 5),
+                new BodyCompositionInput(3, 5, 5, 5, 5),
                 new BodySystemsInput(new BloodSystemInput(5), new CardiacSystemInput(5),
-                        new PulmonarySystemInput(5), new NervousSystemInput(5, 0.5)),
+                        new PulmonarySystemInput(5), new NervousSystemInput(5, 5)),
                 new SpatialIntelligenceInput(5, 5, 5));
 
         when(previewAttributesUseCase.calculate(any(), any(), any()))
@@ -58,9 +58,11 @@ class BiomechanicsPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.speed").exists())
                 .andExpect(jsonPath("$.attributes.maxMovementSpeed").exists())
                 .andExpect(jsonPath("$.attributes.staminaPool").exists())
+                .andExpect(jsonPath("$.attributes.fatigueResistance").exists())
+                .andExpect(jsonPath("$.attributes.staminaRecovery").exists())
                 .andExpect(jsonPath("$.attributes.durability").exists())
-                .andExpect(jsonPath("$.attributes.cardiovascularCapacity").exists())
-                .andExpect(jsonPath("$.attributes.fatigueRate").exists())
+                .andExpect(jsonPath("$.attributes.cardiovascularCapacity").doesNotExist())
+                .andExpect(jsonPath("$.attributes.fatigueRate").doesNotExist())
                 .andExpect(jsonPath("$.attributes.sight").exists())
                 .andExpect(jsonPath("$.attributes.hearing").exists())
                 .andExpect(jsonPath("$.attributes.smell").exists())
@@ -68,8 +70,11 @@ class BiomechanicsPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.acrobatics").exists())
                 .andExpect(jsonPath("$.attributes.meleeAccuracy").exists())
                 .andExpect(jsonPath("$.attributes.aim").exists())
-                .andExpect(jsonPath("$.calculatedValues.totalMass").exists())
-                .andExpect(jsonPath("$.calculatedValues.boneMass").exists())
-                .andExpect(jsonPath("$.calculatedValues.organWaterMass").exists());
+                .andExpect(jsonPath("$.calculatedValues.symbolicTotalMass").exists())
+                .andExpect(jsonPath("$.calculatedValues.displayMassKg").exists())
+                .andExpect(jsonPath("$.loadCapacity.lightLoadKg").exists())
+                .andExpect(jsonPath("$.loadCapacity.heavyLoadKg").exists())
+                .andExpect(jsonPath("$.loadCapacity.maxCapacityKg").exists())
+                .andExpect(jsonPath("$.loadCapacity.dragCapacityKg").exists());
     }
 }

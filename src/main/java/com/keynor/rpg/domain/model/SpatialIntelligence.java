@@ -2,8 +2,10 @@ package com.keynor.rpg.domain.model;
 
 /**
  * Trainable group of spatial-awareness inputs used to derive the character's perception,
- * mobility, and accuracy attributes in {@link PlayableCharacter}. All three axes are
- * 0-10 scales; 5 is the balanced human default.
+ * mobility, and accuracy attributes in {@link PlayableCharacter}.
+ *
+ * <p>Additive-standard discrete scale (rpg-11): all three axes are 1-9, neutral 5
+ * (formulas use the {@code value - 5} deviation).
  *
  * <ul>
  *   <li>{@code perception} — ability to detect external stimuli.
@@ -13,11 +15,11 @@ package com.keynor.rpg.domain.model;
  */
 public class SpatialIntelligence {
 
-    private double perception;
-    private double agility;
-    private double precision;
+    private int perception;
+    private int agility;
+    private int precision;
 
-    public SpatialIntelligence(double perception, double agility, double precision) {
+    public SpatialIntelligence(int perception, int agility, int precision) {
         this.perception = perception;
         this.agility = agility;
         this.precision = precision;
@@ -27,27 +29,27 @@ public class SpatialIntelligence {
         return new SpatialIntelligence(5, 5, 5);
     }
 
-    public double getPerception() {
+    public int getPerception() {
         return perception;
     }
 
-    public void setPerception(double perception) {
+    public void setPerception(int perception) {
         this.perception = perception;
     }
 
-    public double getAgility() {
+    public int getAgility() {
         return agility;
     }
 
-    public void setAgility(double agility) {
+    public void setAgility(int agility) {
         this.agility = agility;
     }
 
-    public double getPrecision() {
+    public int getPrecision() {
         return precision;
     }
 
-    public void setPrecision(double precision) {
+    public void setPrecision(int precision) {
         this.precision = precision;
     }
 }

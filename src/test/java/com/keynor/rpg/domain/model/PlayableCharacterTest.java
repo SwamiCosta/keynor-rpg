@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
+/**
+ * Covers the additive-standard formulas introduced in rpg-11 (baseline 60 + weighted
+ * deviations from each input's neutral point). Human defaults land every deviation at
+ * zero, so every baseline-anchored attribute equals exactly 60 on {@link Body#humanTemplate()}.
+ */
 class PlayableCharacterTest {
 
     private static final double TOLERANCE = 1e-9;
@@ -37,91 +42,29 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getBoneMass_onHumanDefaults_appliesHeightSquaredWithNeutralDensityDeviation() {
+    void getSymbolicTotalMass_onHumanDefaults_equalsTwentyFive() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = 2.7 * Math.pow(1.70, 2) * (1 + 0.06 * (5 - 5));
-
-        assertThat(character.getBoneMass()).isCloseTo(expected, within(TOLERANCE));
-        assertThat(character.getBoneMass()).isCloseTo(7.80, within(0.01));
+        assertThat(character.getSymbolicTotalMass()).isEqualTo(25);
     }
 
     @Test
-    void getBoneMass_doesNotCollapseToZeroAtMinimumBoneDensity() {
-        Genetics brittleBones = new Genetics(5, 5, 5, 170, 1.0, 0);
-        Biomechanics biomechanics = new Biomechanics(brittleBones, BodyComposition.defaults());
-        PlayableCharacter character = new PlayableCharacter("test",
-                Body.previewTemplate(biomechanics, BodySystems.defaults(), SpatialIntelligence.defaults()));
-
-        assertThat(character.getBoneMass()).isGreaterThan(0);
-    }
-
-    @Test
-    void getBoneMass_increasesWithBoneDensityAboveTheMidRangeDefault() {
-        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
-        Biomechanics biomechanics = new Biomechanics(denseBones, BodyComposition.defaults());
-        PlayableCharacter denser = new PlayableCharacter("test",
-                Body.previewTemplate(biomechanics, BodySystems.defaults(), SpatialIntelligence.defaults()));
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(denser.getBoneMass()).isGreaterThan(defaults.getBoneMass());
-    }
-
-    @Test
-    void getOrganWaterMass_onHumanDefaults_scalesOnlyWithHeightSquared() {
-        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
-
-        double expected = 6.3 * Math.pow(1.70, 2);
-
-        assertThat(character.getOrganWaterMass()).isCloseTo(expected, within(TOLERANCE));
-        assertThat(character.getOrganWaterMass()).isCloseTo(18.21, within(0.01));
-    }
-
-    @Test
-    void getOrganWaterMass_isUnaffectedByBoneDensity() {
-        Genetics denseBones = new Genetics(5, 5, 5, 170, 1.0, 10);
-        Biomechanics biomechanics = new Biomechanics(denseBones, BodyComposition.defaults());
-        PlayableCharacter denser = new PlayableCharacter("test",
-                Body.previewTemplate(biomechanics, BodySystems.defaults(), SpatialIntelligence.defaults()));
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(denser.getOrganWaterMass()).isCloseTo(defaults.getOrganWaterMass(), within(TOLERANCE));
-    }
-
-    @Test
-    void getTotalMass_onHumanDefaults_matchesThePreviousHardcoded70kgDefaultAlmostExactly() {
-        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
-
-        double expected = 14 + 30 + character.getBoneMass() + character.getOrganWaterMass();
-
-        assertThat(character.getTotalMass()).isCloseTo(expected, within(TOLERANCE));
-        assertThat(character.getTotalMass()).isCloseTo(70.01, within(0.01));
-    }
-
-    @Test
-    void getTotalMass_sumsBodyFatMuscleMassBoneMassAndOrganWaterMass() {
+    void getSymbolicTotalMass_increasesWithHeightMuscleMassBodyFatAndBoneDensity() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setBodyFat(10);
-        body.getBiomechanics().getBodyComposition().setMuscleMass(40);
+        body.getBiomechanics().getGenetics(); // sanity: genetics is immutable, composition/bone density mutate below
+        body.getBiomechanics().getBodyComposition().setMuscleMass(10);
+        body.getBiomechanics().getBodyComposition().setBodyFat(6);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        double expected = 10 + 40 + character.getBoneMass() + character.getOrganWaterMass();
-
-        assertThat(character.getTotalMass()).isCloseTo(expected, within(TOLERANCE));
+        // 10 (base) + 7 (height) + 10 (muscleMass) + 6 (bodyFat) + (5 - 5) (boneDensity deviation)
+        assertThat(character.getSymbolicTotalMass()).isEqualTo(33);
     }
 
-    // -------------------------------------------------------------------------
-    // Cardiovascular capacity
-    // -------------------------------------------------------------------------
-
     @Test
-    void getCardiovascularCapacity_isAverageOfBloodCardiacAndPulmonaryQuality() {
-        BodySystems bodySystems = new BodySystems(new BloodSystem(6), new CardiacSystem(9),
-                new PulmonarySystem(3), NervousSystem.defaults());
-        PlayableCharacter character = new PlayableCharacter("test",
-                Body.previewTemplate(Biomechanics.defaults(), bodySystems, SpatialIntelligence.defaults()));
+    void getDisplayMassKg_onHumanDefaults_equalsSeventyOne() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getCardiovascularCapacity()).isCloseTo(6.0, within(TOLERANCE));
+        assertThat(character.getDisplayMassKg()).isCloseTo(71.0, within(TOLERANCE));
     }
 
     // -------------------------------------------------------------------------
@@ -129,55 +72,41 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getStrength_onHumanDefaults_appliesMuscleMassPowerLawAndNeuromuscularEfficiency() {
+    void getStrength_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = Math.pow(30, 2.0 / 3.0) * (1 + 0.3 * 0.0) * 0.5 * 1.0;
-
-        assertThat(character.getStrength()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getStrength()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
-    void getStrength_appliesLeverageCoefficientCToLimbRatioAndScalesWithK1() {
-        Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5);
-        BodyComposition composition = new BodyComposition(14, 40, 0.5, 5.0, 5.0);
-        NervousSystem nervousSystem = new NervousSystem(5, 0.8);
+    void getStrength_higherMuscleMassNeuromuscularFiberTypeLimbRatioAndMuscleDistribution_allIncreaseStrength() {
+        Genetics genetics = new Genetics(5, 5, 5, 7, 5, 5);
+        BodyComposition composition = new BodyComposition(3, 9, 9, 9, 9);
+        NervousSystem nervousSystem = new NervousSystem(5, 9);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), nervousSystem);
         Body body = Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems,
                 SpatialIntelligence.defaults());
-        body.getCoefficients().setK1(1.5);
-        body.getCoefficients().setC(2);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        double leverageF = 1 + 2 * (1.2 - 1);
-        double muscleDistF = 1 + 0.02 * (5 - 5);
-        double expected = 1.5 * Math.pow(40, 2.0 / 3.0) * (1 + 0.3 * 0.5) * 0.8 * leverageF * muscleDistF;
+        double expected = 60
+                + 4 * (9 - 5)
+                + 2 * (9 - 5)
+                + 1 * (9 - 5)
+                + 2 * (5 - 3)
+                + 1 * (9 - 5);
 
         assertThat(character.getStrength()).isCloseTo(expected, within(TOLERANCE));
     }
 
     @Test
-    void getStrength_appliesMuscleDistributionDeviationAsArmBiasBonus() {
+    void getStrength_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setMuscleDistribution(8);
-        body.getCoefficients().setKMuscleDistributionStrength(0.05);
+        body.getBiomechanics().getBodyComposition().setMuscleMass(1);
+        body.getCoefficients().setKStrengthMuscleMass(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        double muscleDistributionF = 1 + 0.05 * (8 - 5);
-        double expected = Math.pow(30, 2.0 / 3.0) * (1 + 0.3 * 0.0) * 0.5 * muscleDistributionF;
-
-        assertThat(character.getStrength()).isCloseTo(expected, within(TOLERANCE));
-    }
-
-    @Test
-    void getStrength_legBiasedMuscleDistribution_isLowerThanBalanced() {
-        Body legBiasedBody = Body.humanTemplate();
-        legBiasedBody.getBiomechanics().getBodyComposition().setMuscleDistribution(2);
-        PlayableCharacter legBiased = new PlayableCharacter("test", legBiasedBody);
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(legBiased.getStrength()).isLessThan(defaults.getStrength());
+        assertThat(character.getStrength()).isEqualTo(body.getCoefficients().getAttributeFloor());
     }
 
     // -------------------------------------------------------------------------
@@ -185,18 +114,15 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getSpeed_isIndependentOfStrengthAndUsesMuscleMassFiberTypeAndNeuromuscularEfficiency() {
+    void getSpeed_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        // Human defaults: muscleMass=30, fiberType=0, neuromuscularEfficiency=0.5
-        double expected = Math.pow(30, 2.0 / 3.0) * (1 + 0.4 * 0.0) * 0.5 / character.getTotalMass();
-
-        assertThat(character.getSpeed()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getSpeed()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
     void getSpeed_isNotAffectedByLimbRatio() {
-        Genetics longLimbs = new Genetics(5, 5, 5, 170, 1.5, 5);
+        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5);
         PlayableCharacter longLimbed = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
                         BodySystems.defaults(), SpatialIntelligence.defaults()));
@@ -206,7 +132,24 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getMaxMovementSpeed_onBalancedMuscleDistribution_equalsSpeed() {
+    void getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor() {
+        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9);
+        BodyComposition composition = new BodyComposition(10, 1, 1, 5, 5);
+        NervousSystem nervousSystem = new NervousSystem(5, 1);
+        BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), nervousSystem);
+        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems,
+                SpatialIntelligence.defaults());
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        // SymbolicTotalMass = 10+15+1+10+(9-5) = 40; massPenalty = floor((40-25)/3) = 5
+        // Speed = 60 + 4*(1-5) + 1*(1-5) + 2*(1-5) - 5 = 27
+        assertThat(character.getSpeed()).isCloseTo(27.0, within(TOLERANCE));
+        assertThat(character.getSpeed()).isGreaterThan(0);
+    }
+
+    @Test
+    void getMaxMovementSpeed_onBalancedMuscleDistributionAndNeutralLimbRatio_equalsSpeed() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getMaxMovementSpeed()).isCloseTo(character.getSpeed(), within(TOLERANCE));
@@ -215,7 +158,7 @@ class PlayableCharacterTest {
     @Test
     void getMaxMovementSpeed_legBiasedMuscleDistribution_isHigherThanSpeed() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setMuscleDistribution(0);
+        body.getBiomechanics().getBodyComposition().setMuscleDistribution(1);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         assertThat(character.getMaxMovementSpeed()).isGreaterThan(character.getSpeed());
@@ -224,29 +167,15 @@ class PlayableCharacterTest {
     @Test
     void getMaxMovementSpeed_armBiasedMuscleDistribution_isLowerThanSpeed() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setMuscleDistribution(10);
+        body.getBiomechanics().getBodyComposition().setMuscleDistribution(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         assertThat(character.getMaxMovementSpeed()).isLessThan(character.getSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_appliesExplicitCoefficientToDeviation() {
-        Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setMuscleDistribution(1);
-        body.getCoefficients().setKMuscleDistributionSpeed(0.1);
-        PlayableCharacter character = new PlayableCharacter("test", body);
-
-        // LimbRatio at default 1.0 — limbF is neutral (1.0)
-        double deviation = 1 - 5;
-        double expected = character.getSpeed() * (1 - 0.1 * deviation);
-
-        assertThat(character.getMaxMovementSpeed()).isCloseTo(expected, within(TOLERANCE));
-    }
-
-    @Test
     void getMaxMovementSpeed_longerLimbRatio_increasesMaxMovementSpeed() {
-        Genetics longLimbs = new Genetics(5, 5, 5, 170, 1.3, 5);
+        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5);
         PlayableCharacter longLimbed = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
                         BodySystems.defaults(), SpatialIntelligence.defaults()));
@@ -257,7 +186,7 @@ class PlayableCharacterTest {
 
     @Test
     void getMaxMovementSpeed_shorterLimbRatio_reducesMaxMovementSpeed() {
-        Genetics shortLimbs = new Genetics(5, 5, 5, 170, 0.8, 5);
+        Genetics shortLimbs = new Genetics(5, 5, 5, 7, 1, 5);
         PlayableCharacter shortLimbed = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(shortLimbs, BodyComposition.defaults()),
                         BodySystems.defaults(), SpatialIntelligence.defaults()));
@@ -267,56 +196,98 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getMaxMovementSpeed_appliesKLimbRatioSpeedCoefficientExplicitly() {
-        Genetics genetics = new Genetics(5, 5, 5, 170, 1.2, 5);
-        Body body = Body.previewTemplate(new Biomechanics(genetics, BodyComposition.defaults()),
-                BodySystems.defaults(), SpatialIntelligence.defaults());
-        body.getCoefficients().setKLimbRatioSpeed(0.5);
+    void getMaxMovementSpeed_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setMuscleDistribution(9);
+        body.getCoefficients().setKMaxMovementSpeedMuscleDistribution(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        // MuscleDistribution is at default 5 — muscleDistF is neutral (1.0)
-        double limbF = 1 + 0.5 * (1.2 - 1.0);
-        double expected = character.getSpeed() * limbF;
-
-        assertThat(character.getMaxMovementSpeed()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getMaxMovementSpeed()).isEqualTo(body.getCoefficients().getAttributeFloor());
     }
 
     // -------------------------------------------------------------------------
-    // Stamina, fatigue and energy cost
+    // StaminaPool, FatigueResistance, StaminaRecovery
     // -------------------------------------------------------------------------
+
+    @Test
+    void getStaminaPool_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getStaminaPool()).isCloseTo(60.0, within(TOLERANCE));
+    }
 
     @Test
     void getStaminaPool_isReducedByFastTwitchFiberTypeBias() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setDominantFiberType(1.0);
+        body.getBiomechanics().getBodyComposition().setDominantFiberType(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        double expected = character.getCardiovascularCapacity() * (1 - 0.3 * 1.0);
-
+        double expected = 60 - 2 * (9 - 5);
         assertThat(character.getStaminaPool()).isCloseTo(expected, within(TOLERANCE));
-        assertThat(character.getStaminaPool()).isLessThan(character.getCardiovascularCapacity());
+        assertThat(character.getStaminaPool()).isLessThan(60.0);
     }
 
     @Test
-    void getFatigueRate_combinesKleiberMassBaseMuscleMassIntensityAndCardioRecovery() {
+    void getFatigueResistance_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = Math.pow(character.getTotalMass(), 0.75) + 30 * 2.0
-                - character.getCardiovascularCapacity();
-
-        assertThat(character.getFatigueRate(2.0)).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getFatigueResistance()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
-    void getEnergyCost_combinesBmrBaseAndActivityCostMinusEfficiency() {
+    void getFatigueResistance_worstCaseSliderCombination_isStillPositiveButFlooredIfPushedFurther() {
+        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9);
+        BodyComposition composition = new BodyComposition(10, 15, 5, 5, 5);
+        NervousSystem nervousSystem = new NervousSystem(5, 9);
+        BodySystems bodySystems = new BodySystems(new BloodSystem(1), new CardiacSystem(1),
+                new PulmonarySystem(1), nervousSystem);
+        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems,
+                SpatialIntelligence.defaults());
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        // SymbolicTotalMass = 10+15+15+10+(9-5) = 54; massPenalty = floor((54-25)/2) = 14
+        // raw = 60 + 3*(1-5) + 1*(1-5) + 1*(1-5) - 2*(9-5) - 14 - 1*(15-5) = 60-12-4-4-8-14-10 = 8
+        assertThat(character.getFatigueResistance()).isCloseTo(8.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getFatigueResistance_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setMuscleMass(15);
+        body.getCoefficients().setKFatigueResistanceMuscleMass(1000);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        assertThat(character.getFatigueResistance()).isEqualTo(body.getCoefficients().getAttributeFloor());
+    }
+
+    @Test
+    void getStaminaRecovery_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double bmrBase = Math.pow(character.getTotalMass(), 0.75);
-        double activityCost = character.getTotalMass() * 1.5;
-        double efficiency = character.getCardiovascularCapacity() * (1 - 0.3 * 0.0);
-        double expected = bmrBase + activityCost - efficiency;
+        assertThat(character.getStaminaRecovery()).isCloseTo(60.0, within(TOLERANCE));
+    }
 
-        assertThat(character.getEnergyCost(1.5)).isCloseTo(expected, within(TOLERANCE));
+    @Test
+    void getStaminaRecovery_isReducedByFastTwitchFiberTypeBias() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setDominantFiberType(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        double expected = 60 - 1 * (9 - 5);
+        assertThat(character.getStaminaRecovery()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
+    void getStaminaRecovery_higherOxygenCarryingCapacity_increasesRecovery() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getBloodSystem(); // BloodSystem is immutable — build a new one instead
+        BodySystems bodySystems = new BodySystems(new BloodSystem(9), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), NervousSystem.defaults());
+        PlayableCharacter character = new PlayableCharacter("test",
+                Body.previewTemplate(Biomechanics.defaults(), bodySystems, SpatialIntelligence.defaults()));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getStaminaRecovery()).isGreaterThan(defaults.getStaminaRecovery());
     }
 
     // -------------------------------------------------------------------------
@@ -324,32 +295,30 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getDurability_combinesBoneDensityMesomorphyMassInertiaAndFatCushion() {
+    void getDurability_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = (5 + 0.5 * 5) + Math.log(character.getTotalMass()) + Math.sqrt(14);
+        assertThat(character.getDurability()).isCloseTo(60.0, within(TOLERANCE));
+    }
 
+    @Test
+    void getDurability_usesBodyFatsOwnNeutralOfThreeNotFive() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setBodyFat(6);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        double expected = 60 + 1 * (6 - 3);
         assertThat(character.getDurability()).isCloseTo(expected, within(TOLERANCE));
     }
 
     @Test
-    void getDurability_higherFlexibilityReducesDurabilityByFlexibilityDeviationTerm() {
+    void getDurability_higherFlexibilityReducesDurability() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setFlexibility(7.0);
+        body.getBiomechanics().getBodyComposition().setFlexibility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        double flexDeviation = (7.0 - 5) * 1.0; // kFlexibilityDurability = 1.0
-        assertThat(character.getDurability()).isCloseTo(defaults.getDurability() - flexDeviation, within(TOLERANCE));
         assertThat(character.getDurability()).isLessThan(defaults.getDurability());
-    }
-
-    @Test
-    void getDurability_flexibilityAtDefault5_doesNotAffectDurability() {
-        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(character.getDurability()).isCloseTo(defaults.getDurability(), within(TOLERANCE));
     }
 
     // -------------------------------------------------------------------------
@@ -357,12 +326,10 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getSight_onHumanDefaults_combinesPerceptionAndNeuralDriveAsAverage() {
+    void getSight_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = (5 + 5) / 2.0; // kSense=1, perception=5, neuralDrive=5
-
-        assertThat(character.getSight()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getSight()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
@@ -377,16 +344,6 @@ class PlayableCharacterTest {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getSmell()).isCloseTo(character.getSight(), within(TOLERANCE));
-    }
-
-    @Test
-    void getSight_scalesWithKSenseCoefficient() {
-        Body body = Body.humanTemplate();
-        body.getCoefficients().setKSense(2.0);
-        PlayableCharacter character = new PlayableCharacter("test", body);
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(character.getSight()).isCloseTo(2.0 * defaults.getSight(), within(TOLERANCE));
     }
 
     @Test
@@ -414,18 +371,14 @@ class PlayableCharacterTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void getEvasion_onHumanDefaults_includesAgilitySpeedNeuralAndFlexModifiers() {
+    void getEvasion_onHumanDefaults_equalsSpeed() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = 1.0 * 5 * character.getSpeed()
-                * (1 + 0.1 * 5)
-                * (1 + 0.1 * 5);
-
-        assertThat(character.getEvasion()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getEvasion()).isCloseTo(character.getSpeed(), within(TOLERANCE));
     }
 
     @Test
-    void getEvasion_higherAgilityIncreasesEvasion() {
+    void getEvasion_higherAgilityNeuralDriveOrFlexibility_increasesEvasion() {
         Body body = Body.humanTemplate();
         body.getSpatialIntelligence().setAgility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
@@ -435,50 +388,42 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getEvasion_higherFlexibility_increasesEvasionViakEvasionFlexModifier() {
+    void getEvasion_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setFlexibility(9.0);
+        body.getSpatialIntelligence().setAgility(1);
+        body.getCoefficients().setKEvasionAgility(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getEvasion()).isGreaterThan(defaults.getEvasion());
+        assertThat(character.getEvasion()).isEqualTo(body.getCoefficients().getAttributeFloor());
     }
 
     // -------------------------------------------------------------------------
-    // Acrobatics
+    // Acrobatics / MeleeAccuracy / Aim
     // -------------------------------------------------------------------------
 
     @Test
-    void getAcrobatics_onHumanDefaults_isAverageOfAgilityAndFlexibility() {
+    void getAcrobatics_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = (5 + 5.0) / 2.0; // kAcrobatics=1, agility=5, flexibility=5
-
-        assertThat(character.getAcrobatics()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getAcrobatics()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
     void getAcrobatics_higherAgilityOrFlexibility_increasesAcrobatics() {
         Body body = Body.humanTemplate();
         body.getSpatialIntelligence().setAgility(9);
-        body.getBiomechanics().getBodyComposition().setFlexibility(9.0);
+        body.getBiomechanics().getBodyComposition().setFlexibility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getAcrobatics()).isGreaterThan(defaults.getAcrobatics());
     }
 
-    // -------------------------------------------------------------------------
-    // Melee Accuracy
-    // -------------------------------------------------------------------------
-
     @Test
-    void getMeleeAccuracy_onHumanDefaults_isAverageOfPrecisionAndAgility() {
+    void getMeleeAccuracy_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = (5 + 5) / 2.0; // kMelee=1, precision=5, agility=5
-
-        assertThat(character.getMeleeAccuracy()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getMeleeAccuracy()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
@@ -491,32 +436,17 @@ class PlayableCharacterTest {
         assertThat(character.getMeleeAccuracy()).isGreaterThan(defaults.getMeleeAccuracy());
     }
 
-    // -------------------------------------------------------------------------
-    // Aim
-    // -------------------------------------------------------------------------
-
     @Test
-    void getAim_onHumanDefaults_isAverageOfPrecisionAndPerception() {
+    void getAim_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        double expected = (5 + 5) / 2.0; // kAim=1, precision=5, perception=5
-
-        assertThat(character.getAim()).isCloseTo(expected, within(TOLERANCE));
+        assertThat(character.getAim()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
-    void getAim_higherPerception_increasesAim() {
+    void getAim_higherPerceptionOrPrecision_increasesAim() {
         Body body = Body.humanTemplate();
         body.getSpatialIntelligence().setPerception(9);
-        PlayableCharacter character = new PlayableCharacter("test", body);
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-
-        assertThat(character.getAim()).isGreaterThan(defaults.getAim());
-    }
-
-    @Test
-    void getAim_higherPrecision_increasesAim() {
-        Body body = Body.humanTemplate();
         body.getSpatialIntelligence().setPrecision(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -524,4 +454,62 @@ class PlayableCharacterTest {
         assertThat(character.getAim()).isGreaterThan(defaults.getAim());
     }
 
+    // -------------------------------------------------------------------------
+    // Load capacity
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getMaxCapacityKg_onHumanDefaults_derivesFromStrengthSquaredOverOneFiftyPlusStrength() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        // Strength = 60; MaxCapacityKg = floor(60^2 / 150) + 60 = 24 + 60
+        assertThat(character.getMaxCapacityKg()).isEqualTo(84);
+    }
+
+    @Test
+    void getLightLoadKg_isExactlyOneThirdOfMaxCapacityKg() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getLightLoadKg()).isEqualTo(28); // floor(84 / 3)
+    }
+
+    @Test
+    void getHeavyLoadKg_isExactlyTwoThirdsOfMaxCapacityKg() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getHeavyLoadKg()).isEqualTo(56); // floor(84 * 2 / 3)
+    }
+
+    @Test
+    void getDragCapacityKg_combinesMaxCapacityKgAndDisplayMassKg() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        // 2 * 84 + floor(71 * 0.5) = 168 + 35
+        assertThat(character.getDragCapacityKg()).isEqualTo(203);
+    }
+
+    @Test
+    void getMaxCapacityKg_higherStrength_increasesEveryLoadFigure() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setMuscleMass(15);
+        PlayableCharacter stronger = new PlayableCharacter("test", body);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(stronger.getMaxCapacityKg()).isGreaterThan(defaults.getMaxCapacityKg());
+        assertThat(stronger.getLightLoadKg()).isGreaterThan(defaults.getLightLoadKg());
+        assertThat(stronger.getHeavyLoadKg()).isGreaterThan(defaults.getHeavyLoadKg());
+        assertThat(stronger.getDragCapacityKg()).isGreaterThan(defaults.getDragCapacityKg());
+    }
+
+    @Test
+    void getMaxCapacityKg_flooredWhenStrengthIsFlooredByAnExtremeCoefficient() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setMuscleMass(1);
+        body.getCoefficients().setKStrengthMuscleMass(1000);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        int floor = (int) body.getCoefficients().getAttributeFloor();
+        int expected = (int) Math.floor(Math.pow(floor, 2) / 150.0) + floor;
+        assertThat(character.getMaxCapacityKg()).isEqualTo(expected);
+    }
 }

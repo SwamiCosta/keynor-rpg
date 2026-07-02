@@ -42,6 +42,10 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 
 **Not applicable to this agent:** Skills 01, 02, 05, and 07 — Skill 01 (Document Editing) and Skill 05 (Architect Review) are Gaemes' recurring duties, not Void's; Skill 02 (Database Migration) is Jung's territory; Skill 07 (Documentation Sync) follows from an architect review Void never performs.
 
+### Project skills (`keynor-rpg/.claude/skills/`)
+
+- `.claude/skills/additive-attribute-formulas.md` — the baseline-60 additive design (`attribute = baseline + Σ weight × (input - neutral)`), the SymbolicTotalMass/DisplayMassKg split, and which attributes carry a safety floor. Open it before touching any `PlayableCharacter` formula or `BodyCoefficients` field.
+
 ---
 
 ## Responsibilities
