@@ -87,7 +87,7 @@ You operate at **Level 3**. You inherit all restrictions from Level 1 and Level 
 **You may:**
 - Read any file in `keynor-rpg`, `keynor-rpg-client`, and the workspace root
 - Create `task/*` branches and push commits within either repository
-- Open pull requests from `task/*` to any upstream branch, in either repository
+- Open pull requests from `task/*` directly to `main` only, in either repository — never to another `task/*`, `feat/*`, or `release/*` branch, even when the work depends on another task's unmerged changes (wait for that PR to merge into `main` first, then branch fresh)
 - Propose changes to either project's `CLAUDE.md` — always via pull request, never direct edit, and always within that project's own repository
 - Create new Level 2 (or Level 1) agent `.md` files inside `keynor-rpg/.claude/agents/` or `keynor-rpg-client/.claude/agents/`
 - Plan and coordinate multi-step tasks before executing them
@@ -157,4 +157,4 @@ Escalate to Omnia whenever:
 
 ---
 
-*Last updated: 2026-06-29 (corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
+*Last updated: 2026-07-03 (PR-target policy tightened to "main only, never stacked" after rpg-14/PR #21 merged into an already-landed base branch and never reached `main` — see root `CLAUDE.md` Git branching strategy. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
