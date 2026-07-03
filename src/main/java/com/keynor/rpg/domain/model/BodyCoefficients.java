@@ -13,10 +13,10 @@ package com.keynor.rpg.domain.model;
  * fields (not inlined into {@link PlayableCharacter}) so game balance can be tuned without
  * touching formula code, same principle as the pre-rpg-11 coefficient set.
  *
- * <p>The Load Capacity group ({@code kMaxCapacityDivisor} = 150) reads {@code Strength}
- * directly (truncated to an {@code int}, per the design document) — recalibrated in rpg-12
- * to work off the baseline-60 {@code Strength} with no separate offset, superseding the
- * short-lived rpg-11 {@code kLoadCapacityStrengthOffset} correction.
+ * <p>The Load Capacity group ({@code kMaxCapacityDivisor} = 150) now reads {@code LiftStrength}
+ * (Delta V4, was {@code Strength}) directly (truncated to an {@code int}, per the design
+ * document) — recalibrated in rpg-12 to work off the baseline-60 attribute with no separate
+ * offset, superseding the short-lived rpg-11 {@code kLoadCapacityStrengthOffset} correction.
  *
  * <p>Neutral points (5 for every 1-9 trait, 3 for {@code limbRatio}... — see each domain
  * class) are not coefficients: they are fixed scale midpoints, not tunable weights, so they
@@ -27,23 +27,37 @@ public class BodyCoefficients {
 
     private double baseline = 60; // shared additive baseline for every attribute formula
 
-    // Strength
-    private double kStrengthMuscleMass = 4;
-    private double kStrengthNeuromuscular = 2;
-    private double kStrengthFiberType = 1;
-    private double kStrengthLimbRatio = 2;
-    private double kStrengthMuscleDistribution = 1;
-    private double kStrengthTendons = 1; // added rpg-14
+    // Mean Strength (Delta V4) — hidden engine, never exposed via any DTO. Replaces the old
+    // global Strength's three core terms (LimbRatio/MuscleDistribution/Tendons moved to the
+    // four specialized strengths below).
+    private double kMeanStrengthMuscleMass = 4;
+    private double kMeanStrengthNeuromuscular = 2;
+    private double kMeanStrengthFiberType = 1;
+
+    // 4 specialized strengths (Delta V4) — each anchored on the hidden Mean Strength, not the
+    // baseline directly. Height neutral is 7, matching Genetics.height's own neutral.
+    private double kPushStrengthLimbRatio = 2;
+    private double kPushStrengthMuscleDistribution = 1;
+    private double kPushStrengthTendons = 1;
+    private double kPushStrengthHeight = 0.5;
+    private double kLegDriveLimbRatio = 2;
+    private double kLegDriveMuscleDistribution = 1; // applied as (5 - MuscleDistribution)
+    private double kLegDriveTendons = 1;
+    private double kLegDriveHeight = 0.5;
+    private double kGripStrengthMuscleDistribution = 1;
+    private double kGripStrengthTendons = 2;
+    private double kLiftStrengthLimbRatio = 2; // subtracted
+    private double kLiftStrengthTendons = 1;
 
     // FatGainRate / MuscleGainRate (rpg-14) — zero-baseline rate attributes, not baseline 60
     private double kFatGainRateEndomorphy = 1.0;
     private double kFatGainRateEctomorphy = 1.0;
-    private double kFatGainRateNutrientAbsorption = 1.0;
+    private double kFatGainRateDigestiveAbsorption = 1.0; // renamed from kFatGainRateNutrientAbsorption, Delta V4
     private double kFatGainRateKetosis = 1.0;
     private double kFatGainRateCellularHealth = 0.5;
     private double kMuscleGainRateMesomorphy = 1.0;
     private double kMuscleGainRateEctomorphy = 1.0;
-    private double kMuscleGainRateNutrientAbsorption = 1.0;
+    private double kMuscleGainRateDigestiveAbsorption = 1.0; // renamed from kMuscleGainRateNutrientAbsorption, Delta V4
     private double kMuscleGainRateTmod = 1.0;
 
     // Intimidation / Diplomacy / Enfactuation / Command (rpg-14) — social attributes
@@ -69,7 +83,7 @@ public class BodyCoefficients {
     private double kStaminaPoolCardiac = 1;
     private double kStaminaPoolOxygen = 1;
     private double kStaminaPoolFiberType = 2;
-    private double kStaminaPoolNutrientAbsorption = 2; // added rpg-13
+    private double kStaminaPoolDigestiveAbsorption = 2; // renamed from kStaminaPoolNutrientAbsorption, Delta V4
 
     // FatigueResistance
     private double kFatigueResistanceCardiac = 3;
@@ -95,17 +109,18 @@ public class BodyCoefficients {
     private double kDurabilityFlexibility = 1;
     private double kDurabilitySkin = 1; // added rpg-14
 
-    // Sight / Hearing / Smell (rpg-14: diverged from one shared formula to one per sense)
+    // Sight / Hearing / Smell (rpg-14: diverged from one shared formula to one per sense;
+    // Delta V4: Hippocampus term swapped for Thalamus on all three, same weights)
     private double kSightEyesSensitivity = 6;
-    private double kSightHippocampus = 1;
+    private double kSightThalamus = 1; // renamed from kSightHippocampus, Delta V4
     private double kSightNeuralDrive = 1;
     private double kSightPmod = 2;
     private double kHearingEarsSensitivity = 6;
-    private double kHearingHippocampus = 1;
+    private double kHearingThalamus = 1; // renamed from kHearingHippocampus, Delta V4
     private double kHearingNeuralDrive = 1;
     private double kHearingPmod = 2;
     private double kSmellNoseSensitivity = 6;
-    private double kSmellHippocampus = 1;
+    private double kSmellThalamus = 1; // renamed from kSmellHippocampus, Delta V4
     private double kSmellNeuralDrive = 1;
     private double kSmellPmod = 2;
 
@@ -117,9 +132,9 @@ public class BodyCoefficients {
     private double kMeleeAccuracyPrecision = 3;
     private double kMeleeAccuracyAgility = 1;
 
-    // Aim
-    private double kAimPrecision = 3;
-    private double kAimPerception = 1;
+    // Aim (Delta V4: Precision reweighted, Hippocampus swapped for Thalamus and reweighted)
+    private double kAimPrecision = 5; // was 3
+    private double kAimThalamus = 3; // renamed from kAimPerception (read Hippocampus), was 1
 
     // Evasion (extends Speed)
     private double kEvasionAgility = 2;
@@ -129,6 +144,7 @@ public class BodyCoefficients {
     // MaxMovementSpeed (extends Speed)
     private double kMaxMovementSpeedLimbRatio = 2;
     private double kMaxMovementSpeedMuscleDistribution = 1;
+    private double kMaxMovementSpeedHeight = 0.5; // added Delta V4
 
     // Mass model
     private double kSymbolicMassBase = 10;
@@ -139,7 +155,7 @@ public class BodyCoefficients {
     private double kFrameKgHeightMultiplier = 3;
     private double kFrameKgDivisor = 2;
 
-    // Load capacity
+    // Load capacity — now reads LiftStrength (Delta V4, was Strength)
     private double kMaxCapacityDivisor = 150;
     private double kLightLoadDivisor = 3;
     private double kHeavyLoadMultiplier = 2;
@@ -147,25 +163,25 @@ public class BodyCoefficients {
     private double kDragCapacityMultiplier = 2;
     private double kDragCapacityMassFraction = 0.5;
 
-    // Cognitive/Mental (rpg-13)
-    private double kMemoryPoolCerebral = 8;
-    private double kMemoryPoolHippocampus = 2;
+    // Cognitive/Mental (rpg-13, Memory/ShortMemory reweighted Delta V4)
+    private double kMemoryPoolCerebral = 6; // was 8
+    private double kMemoryPoolHippocampus = 4; // was 2
     private double kReasoningSynapsis = 10;
-    private double kShortMemoryCerebral = 4;
-    private double kShortMemorySynapsis = 4;
-    private double kShortMemoryHippocampus = 2;
+    private double kShortMemoryCerebral = 3; // was 4
+    private double kShortMemorySynapsis = 3; // was 4
+    private double kShortMemoryHippocampus = 4; // was 2
     private double kMentalHealthAmygdala = 5; // shared by MentalHealthPool and Will; reweighted 10->5 in rpg-14
     private double kMentalHealthTmod = 5; // added rpg-14
     private double kMentalHealthPmod = 5; // added rpg-14
 
-    // Sensory / Hormonal / Stress (rpg-13, recalibrated rpg-14)
-    private double kBalanceHippocampus = 1; // reweighted 3->1 in rpg-14
+    // Sensory / Hormonal / Stress (rpg-13, recalibrated rpg-14, Balance rebuilt Delta V4)
+    private double kBalanceThalamus = 4; // added Delta V4 (replaces kBalanceHippocampus)
     private double kBalanceNeuralDrive = 1;
-    private double kBalanceTendons = 2; // added rpg-14
+    private double kBalanceLegDrive = 0.2; // added Delta V4 — applied as (LegDrive - 60)
     private double kStressResistanceAmygdala = 5;
     private double kStressResistanceAdrenal = 5;
 
-    // Biological defense (rpg-13, cellular health term added rpg-14)
+    // Biological defense (rpg-13, cellular health term added rpg-14, digestive term Delta V4)
     private double kPoisonResistanceImmunity = 5;
     private double kPoisonResistanceCardiac = 3;
     private double kPoisonResistanceBloodThickness = 4;
@@ -176,6 +192,13 @@ public class BodyCoefficients {
     private double kBleedingResistanceBloodThickness = 10;
     private double kBleedingResistanceCardiac = 5;
 
+    // Anger / Fear Resistance, Pain Threshold (Delta V4 — new attributes)
+    private double kAngerResistanceAmygdala = 10;
+    private double kFearResistanceAmygdala = 10;
+    private double kPainThresholdBodyFat = 3;
+    private double kPainThresholdSkin = 3;
+    private double kPainThresholdAmygdala = 4;
+
     // Metabolic / survival (rpg-13)
     private double kThermalResistanceSkin = 5;
     private double kThermalResistanceBodyFat = 2;
@@ -184,13 +207,15 @@ public class BodyCoefficients {
     private double kDehydrationResistanceHypothalamus = 5;
     private double kDehydrationResistanceKetosis = 5;
     private double kStarvationResistanceHypothalamus = 4;
-    private double kStarvationResistanceNutrient = 3;
+    private double kStarvationResistanceDigestiveAbsorption = 3; // renamed from kStarvationResistanceNutrient, Delta V4
     private double kStarvationResistanceKetosis = 3;
     private double kFoodPoisoningImpurity = 5;
     private double kFoodPoisoningImmunity = 5;
     private double kFoodPoisoningCellularHealth = 2; // added rpg-14
+    private double kFoodPoisoningDigestiveAbsorption = 1; // added Delta V4 — subtracted (light penalty)
 
-    // Safety floor shared by Strength, FatigueResistance, Evasion, MaxMovementSpeed
+    // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
+    // Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
 
     public static BodyCoefficients defaults() {
@@ -200,23 +225,50 @@ public class BodyCoefficients {
     public double getBaseline() { return baseline; }
     public void setBaseline(double baseline) { this.baseline = baseline; }
 
-    public double getKStrengthMuscleMass() { return kStrengthMuscleMass; }
-    public void setKStrengthMuscleMass(double v) { this.kStrengthMuscleMass = v; }
+    public double getKMeanStrengthMuscleMass() { return kMeanStrengthMuscleMass; }
+    public void setKMeanStrengthMuscleMass(double v) { this.kMeanStrengthMuscleMass = v; }
 
-    public double getKStrengthNeuromuscular() { return kStrengthNeuromuscular; }
-    public void setKStrengthNeuromuscular(double v) { this.kStrengthNeuromuscular = v; }
+    public double getKMeanStrengthNeuromuscular() { return kMeanStrengthNeuromuscular; }
+    public void setKMeanStrengthNeuromuscular(double v) { this.kMeanStrengthNeuromuscular = v; }
 
-    public double getKStrengthFiberType() { return kStrengthFiberType; }
-    public void setKStrengthFiberType(double v) { this.kStrengthFiberType = v; }
+    public double getKMeanStrengthFiberType() { return kMeanStrengthFiberType; }
+    public void setKMeanStrengthFiberType(double v) { this.kMeanStrengthFiberType = v; }
 
-    public double getKStrengthLimbRatio() { return kStrengthLimbRatio; }
-    public void setKStrengthLimbRatio(double v) { this.kStrengthLimbRatio = v; }
+    public double getKPushStrengthLimbRatio() { return kPushStrengthLimbRatio; }
+    public void setKPushStrengthLimbRatio(double v) { this.kPushStrengthLimbRatio = v; }
 
-    public double getKStrengthMuscleDistribution() { return kStrengthMuscleDistribution; }
-    public void setKStrengthMuscleDistribution(double v) { this.kStrengthMuscleDistribution = v; }
+    public double getKPushStrengthMuscleDistribution() { return kPushStrengthMuscleDistribution; }
+    public void setKPushStrengthMuscleDistribution(double v) { this.kPushStrengthMuscleDistribution = v; }
 
-    public double getKStrengthTendons() { return kStrengthTendons; }
-    public void setKStrengthTendons(double v) { this.kStrengthTendons = v; }
+    public double getKPushStrengthTendons() { return kPushStrengthTendons; }
+    public void setKPushStrengthTendons(double v) { this.kPushStrengthTendons = v; }
+
+    public double getKPushStrengthHeight() { return kPushStrengthHeight; }
+    public void setKPushStrengthHeight(double v) { this.kPushStrengthHeight = v; }
+
+    public double getKLegDriveLimbRatio() { return kLegDriveLimbRatio; }
+    public void setKLegDriveLimbRatio(double v) { this.kLegDriveLimbRatio = v; }
+
+    public double getKLegDriveMuscleDistribution() { return kLegDriveMuscleDistribution; }
+    public void setKLegDriveMuscleDistribution(double v) { this.kLegDriveMuscleDistribution = v; }
+
+    public double getKLegDriveTendons() { return kLegDriveTendons; }
+    public void setKLegDriveTendons(double v) { this.kLegDriveTendons = v; }
+
+    public double getKLegDriveHeight() { return kLegDriveHeight; }
+    public void setKLegDriveHeight(double v) { this.kLegDriveHeight = v; }
+
+    public double getKGripStrengthMuscleDistribution() { return kGripStrengthMuscleDistribution; }
+    public void setKGripStrengthMuscleDistribution(double v) { this.kGripStrengthMuscleDistribution = v; }
+
+    public double getKGripStrengthTendons() { return kGripStrengthTendons; }
+    public void setKGripStrengthTendons(double v) { this.kGripStrengthTendons = v; }
+
+    public double getKLiftStrengthLimbRatio() { return kLiftStrengthLimbRatio; }
+    public void setKLiftStrengthLimbRatio(double v) { this.kLiftStrengthLimbRatio = v; }
+
+    public double getKLiftStrengthTendons() { return kLiftStrengthTendons; }
+    public void setKLiftStrengthTendons(double v) { this.kLiftStrengthTendons = v; }
 
     public double getKFatGainRateEndomorphy() { return kFatGainRateEndomorphy; }
     public void setKFatGainRateEndomorphy(double v) { this.kFatGainRateEndomorphy = v; }
@@ -224,8 +276,8 @@ public class BodyCoefficients {
     public double getKFatGainRateEctomorphy() { return kFatGainRateEctomorphy; }
     public void setKFatGainRateEctomorphy(double v) { this.kFatGainRateEctomorphy = v; }
 
-    public double getKFatGainRateNutrientAbsorption() { return kFatGainRateNutrientAbsorption; }
-    public void setKFatGainRateNutrientAbsorption(double v) { this.kFatGainRateNutrientAbsorption = v; }
+    public double getKFatGainRateDigestiveAbsorption() { return kFatGainRateDigestiveAbsorption; }
+    public void setKFatGainRateDigestiveAbsorption(double v) { this.kFatGainRateDigestiveAbsorption = v; }
 
     public double getKFatGainRateKetosis() { return kFatGainRateKetosis; }
     public void setKFatGainRateKetosis(double v) { this.kFatGainRateKetosis = v; }
@@ -239,8 +291,8 @@ public class BodyCoefficients {
     public double getKMuscleGainRateEctomorphy() { return kMuscleGainRateEctomorphy; }
     public void setKMuscleGainRateEctomorphy(double v) { this.kMuscleGainRateEctomorphy = v; }
 
-    public double getKMuscleGainRateNutrientAbsorption() { return kMuscleGainRateNutrientAbsorption; }
-    public void setKMuscleGainRateNutrientAbsorption(double v) { this.kMuscleGainRateNutrientAbsorption = v; }
+    public double getKMuscleGainRateDigestiveAbsorption() { return kMuscleGainRateDigestiveAbsorption; }
+    public void setKMuscleGainRateDigestiveAbsorption(double v) { this.kMuscleGainRateDigestiveAbsorption = v; }
 
     public double getKMuscleGainRateTmod() { return kMuscleGainRateTmod; }
     public void setKMuscleGainRateTmod(double v) { this.kMuscleGainRateTmod = v; }
@@ -299,8 +351,8 @@ public class BodyCoefficients {
     public double getKStaminaPoolFiberType() { return kStaminaPoolFiberType; }
     public void setKStaminaPoolFiberType(double v) { this.kStaminaPoolFiberType = v; }
 
-    public double getKStaminaPoolNutrientAbsorption() { return kStaminaPoolNutrientAbsorption; }
-    public void setKStaminaPoolNutrientAbsorption(double v) { this.kStaminaPoolNutrientAbsorption = v; }
+    public double getKStaminaPoolDigestiveAbsorption() { return kStaminaPoolDigestiveAbsorption; }
+    public void setKStaminaPoolDigestiveAbsorption(double v) { this.kStaminaPoolDigestiveAbsorption = v; }
 
     public double getKFatigueResistanceCardiac() { return kFatigueResistanceCardiac; }
     public void setKFatigueResistanceCardiac(double v) { this.kFatigueResistanceCardiac = v; }
@@ -359,8 +411,8 @@ public class BodyCoefficients {
     public double getKSightEyesSensitivity() { return kSightEyesSensitivity; }
     public void setKSightEyesSensitivity(double v) { this.kSightEyesSensitivity = v; }
 
-    public double getKSightHippocampus() { return kSightHippocampus; }
-    public void setKSightHippocampus(double v) { this.kSightHippocampus = v; }
+    public double getKSightThalamus() { return kSightThalamus; }
+    public void setKSightThalamus(double v) { this.kSightThalamus = v; }
 
     public double getKSightNeuralDrive() { return kSightNeuralDrive; }
     public void setKSightNeuralDrive(double v) { this.kSightNeuralDrive = v; }
@@ -371,8 +423,8 @@ public class BodyCoefficients {
     public double getKHearingEarsSensitivity() { return kHearingEarsSensitivity; }
     public void setKHearingEarsSensitivity(double v) { this.kHearingEarsSensitivity = v; }
 
-    public double getKHearingHippocampus() { return kHearingHippocampus; }
-    public void setKHearingHippocampus(double v) { this.kHearingHippocampus = v; }
+    public double getKHearingThalamus() { return kHearingThalamus; }
+    public void setKHearingThalamus(double v) { this.kHearingThalamus = v; }
 
     public double getKHearingNeuralDrive() { return kHearingNeuralDrive; }
     public void setKHearingNeuralDrive(double v) { this.kHearingNeuralDrive = v; }
@@ -383,8 +435,8 @@ public class BodyCoefficients {
     public double getKSmellNoseSensitivity() { return kSmellNoseSensitivity; }
     public void setKSmellNoseSensitivity(double v) { this.kSmellNoseSensitivity = v; }
 
-    public double getKSmellHippocampus() { return kSmellHippocampus; }
-    public void setKSmellHippocampus(double v) { this.kSmellHippocampus = v; }
+    public double getKSmellThalamus() { return kSmellThalamus; }
+    public void setKSmellThalamus(double v) { this.kSmellThalamus = v; }
 
     public double getKSmellNeuralDrive() { return kSmellNeuralDrive; }
     public void setKSmellNeuralDrive(double v) { this.kSmellNeuralDrive = v; }
@@ -407,8 +459,8 @@ public class BodyCoefficients {
     public double getKAimPrecision() { return kAimPrecision; }
     public void setKAimPrecision(double v) { this.kAimPrecision = v; }
 
-    public double getKAimPerception() { return kAimPerception; }
-    public void setKAimPerception(double v) { this.kAimPerception = v; }
+    public double getKAimThalamus() { return kAimThalamus; }
+    public void setKAimThalamus(double v) { this.kAimThalamus = v; }
 
     public double getKEvasionAgility() { return kEvasionAgility; }
     public void setKEvasionAgility(double v) { this.kEvasionAgility = v; }
@@ -424,6 +476,9 @@ public class BodyCoefficients {
 
     public double getKMaxMovementSpeedMuscleDistribution() { return kMaxMovementSpeedMuscleDistribution; }
     public void setKMaxMovementSpeedMuscleDistribution(double v) { this.kMaxMovementSpeedMuscleDistribution = v; }
+
+    public double getKMaxMovementSpeedHeight() { return kMaxMovementSpeedHeight; }
+    public void setKMaxMovementSpeedHeight(double v) { this.kMaxMovementSpeedHeight = v; }
 
     public double getKSymbolicMassBase() { return kSymbolicMassBase; }
     public void setKSymbolicMassBase(double v) { this.kSymbolicMassBase = v; }
@@ -491,14 +546,14 @@ public class BodyCoefficients {
     public double getKMentalHealthPmod() { return kMentalHealthPmod; }
     public void setKMentalHealthPmod(double v) { this.kMentalHealthPmod = v; }
 
-    public double getKBalanceHippocampus() { return kBalanceHippocampus; }
-    public void setKBalanceHippocampus(double v) { this.kBalanceHippocampus = v; }
+    public double getKBalanceThalamus() { return kBalanceThalamus; }
+    public void setKBalanceThalamus(double v) { this.kBalanceThalamus = v; }
 
     public double getKBalanceNeuralDrive() { return kBalanceNeuralDrive; }
     public void setKBalanceNeuralDrive(double v) { this.kBalanceNeuralDrive = v; }
 
-    public double getKBalanceTendons() { return kBalanceTendons; }
-    public void setKBalanceTendons(double v) { this.kBalanceTendons = v; }
+    public double getKBalanceLegDrive() { return kBalanceLegDrive; }
+    public void setKBalanceLegDrive(double v) { this.kBalanceLegDrive = v; }
 
     public double getKStressResistanceAmygdala() { return kStressResistanceAmygdala; }
     public void setKStressResistanceAmygdala(double v) { this.kStressResistanceAmygdala = v; }
@@ -533,6 +588,21 @@ public class BodyCoefficients {
     public double getKBleedingResistanceCardiac() { return kBleedingResistanceCardiac; }
     public void setKBleedingResistanceCardiac(double v) { this.kBleedingResistanceCardiac = v; }
 
+    public double getKAngerResistanceAmygdala() { return kAngerResistanceAmygdala; }
+    public void setKAngerResistanceAmygdala(double v) { this.kAngerResistanceAmygdala = v; }
+
+    public double getKFearResistanceAmygdala() { return kFearResistanceAmygdala; }
+    public void setKFearResistanceAmygdala(double v) { this.kFearResistanceAmygdala = v; }
+
+    public double getKPainThresholdBodyFat() { return kPainThresholdBodyFat; }
+    public void setKPainThresholdBodyFat(double v) { this.kPainThresholdBodyFat = v; }
+
+    public double getKPainThresholdSkin() { return kPainThresholdSkin; }
+    public void setKPainThresholdSkin(double v) { this.kPainThresholdSkin = v; }
+
+    public double getKPainThresholdAmygdala() { return kPainThresholdAmygdala; }
+    public void setKPainThresholdAmygdala(double v) { this.kPainThresholdAmygdala = v; }
+
     public double getKThermalResistanceSkin() { return kThermalResistanceSkin; }
     public void setKThermalResistanceSkin(double v) { this.kThermalResistanceSkin = v; }
 
@@ -554,8 +624,8 @@ public class BodyCoefficients {
     public double getKStarvationResistanceHypothalamus() { return kStarvationResistanceHypothalamus; }
     public void setKStarvationResistanceHypothalamus(double v) { this.kStarvationResistanceHypothalamus = v; }
 
-    public double getKStarvationResistanceNutrient() { return kStarvationResistanceNutrient; }
-    public void setKStarvationResistanceNutrient(double v) { this.kStarvationResistanceNutrient = v; }
+    public double getKStarvationResistanceDigestiveAbsorption() { return kStarvationResistanceDigestiveAbsorption; }
+    public void setKStarvationResistanceDigestiveAbsorption(double v) { this.kStarvationResistanceDigestiveAbsorption = v; }
 
     public double getKStarvationResistanceKetosis() { return kStarvationResistanceKetosis; }
     public void setKStarvationResistanceKetosis(double v) { this.kStarvationResistanceKetosis = v; }
@@ -568,6 +638,9 @@ public class BodyCoefficients {
 
     public double getKFoodPoisoningCellularHealth() { return kFoodPoisoningCellularHealth; }
     public void setKFoodPoisoningCellularHealth(double v) { this.kFoodPoisoningCellularHealth = v; }
+
+    public double getKFoodPoisoningDigestiveAbsorption() { return kFoodPoisoningDigestiveAbsorption; }
+    public void setKFoodPoisoningDigestiveAbsorption(double v) { this.kFoodPoisoningDigestiveAbsorption = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

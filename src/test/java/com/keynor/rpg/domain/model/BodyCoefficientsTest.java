@@ -12,14 +12,30 @@ class BodyCoefficientsTest {
     }
 
     @Test
-    void defaults_strengthWeightsMatchTheDesignDocument() {
+    void defaults_meanStrengthWeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKStrengthMuscleMass()).isEqualTo(4);
-        assertThat(coeff.getKStrengthNeuromuscular()).isEqualTo(2);
-        assertThat(coeff.getKStrengthFiberType()).isEqualTo(1);
-        assertThat(coeff.getKStrengthLimbRatio()).isEqualTo(2);
-        assertThat(coeff.getKStrengthMuscleDistribution()).isEqualTo(1);
+        assertThat(coeff.getKMeanStrengthMuscleMass()).isEqualTo(4);
+        assertThat(coeff.getKMeanStrengthNeuromuscular()).isEqualTo(2);
+        assertThat(coeff.getKMeanStrengthFiberType()).isEqualTo(1);
+    }
+
+    @Test
+    void defaults_specializedStrengthWeightsMatchTheDesignDocument() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKPushStrengthLimbRatio()).isEqualTo(2);
+        assertThat(coeff.getKPushStrengthMuscleDistribution()).isEqualTo(1);
+        assertThat(coeff.getKPushStrengthTendons()).isEqualTo(1);
+        assertThat(coeff.getKPushStrengthHeight()).isEqualTo(0.5);
+        assertThat(coeff.getKLegDriveLimbRatio()).isEqualTo(2);
+        assertThat(coeff.getKLegDriveMuscleDistribution()).isEqualTo(1);
+        assertThat(coeff.getKLegDriveTendons()).isEqualTo(1);
+        assertThat(coeff.getKLegDriveHeight()).isEqualTo(0.5);
+        assertThat(coeff.getKGripStrengthMuscleDistribution()).isEqualTo(1);
+        assertThat(coeff.getKGripStrengthTendons()).isEqualTo(2);
+        assertThat(coeff.getKLiftStrengthLimbRatio()).isEqualTo(2);
+        assertThat(coeff.getKLiftStrengthTendons()).isEqualTo(1);
     }
 
     @Test
@@ -31,6 +47,7 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKSpeedFiberType()).isEqualTo(2);
         assertThat(coeff.getKSpeedMassNeutral()).isEqualTo(25);
         assertThat(coeff.getKSpeedMassDivisor()).isEqualTo(3);
+        assertThat(coeff.getKMaxMovementSpeedHeight()).isEqualTo(0.5);
     }
 
     @Test
@@ -62,15 +79,8 @@ class BodyCoefficientsTest {
     void defaults_rpg13WeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKMemoryPoolCerebral()).isEqualTo(8);
-        assertThat(coeff.getKMemoryPoolHippocampus()).isEqualTo(2);
         assertThat(coeff.getKReasoningSynapsis()).isEqualTo(10);
-        assertThat(coeff.getKShortMemoryCerebral()).isEqualTo(4);
-        assertThat(coeff.getKShortMemorySynapsis()).isEqualTo(4);
-        assertThat(coeff.getKShortMemoryHippocampus()).isEqualTo(2);
         assertThat(coeff.getKMentalHealthAmygdala()).isEqualTo(5);
-        assertThat(coeff.getKBalanceHippocampus()).isEqualTo(1);
-        assertThat(coeff.getKBalanceNeuralDrive()).isEqualTo(1);
         assertThat(coeff.getKStressResistanceAmygdala()).isEqualTo(5);
         assertThat(coeff.getKStressResistanceAdrenal()).isEqualTo(5);
         assertThat(coeff.getKPoisonResistanceImmunity()).isEqualTo(5);
@@ -87,11 +97,9 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKDehydrationResistanceHypothalamus()).isEqualTo(5);
         assertThat(coeff.getKDehydrationResistanceKetosis()).isEqualTo(5);
         assertThat(coeff.getKStarvationResistanceHypothalamus()).isEqualTo(4);
-        assertThat(coeff.getKStarvationResistanceNutrient()).isEqualTo(3);
         assertThat(coeff.getKStarvationResistanceKetosis()).isEqualTo(3);
         assertThat(coeff.getKFoodPoisoningImpurity()).isEqualTo(5);
         assertThat(coeff.getKFoodPoisoningImmunity()).isEqualTo(5);
-        assertThat(coeff.getKStaminaPoolNutrientAbsorption()).isEqualTo(2);
         assertThat(coeff.getKFatigueResistanceHypothalamus()).isEqualTo(1);
         assertThat(coeff.getKFatigueResistanceThyroid()).isEqualTo(2);
     }
@@ -100,11 +108,8 @@ class BodyCoefficientsTest {
     void defaults_rpg14WeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKStrengthTendons()).isEqualTo(1);
         assertThat(coeff.getKDurabilitySkin()).isEqualTo(1);
-        assertThat(coeff.getKBalanceTendons()).isEqualTo(2);
         assertThat(coeff.getKSightEyesSensitivity()).isEqualTo(6);
-        assertThat(coeff.getKSightHippocampus()).isEqualTo(1);
         assertThat(coeff.getKSightNeuralDrive()).isEqualTo(1);
         assertThat(coeff.getKSightPmod()).isEqualTo(2);
         assertThat(coeff.getKHearingEarsSensitivity()).isEqualTo(6);
@@ -125,6 +130,46 @@ class BodyCoefficientsTest {
     }
 
     @Test
+    void defaults_deltaV4WeightsMatchTheDesignDocument() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        // Sight/Hearing/Smell: Hippocampus swapped for Thalamus, same weights
+        assertThat(coeff.getKSightThalamus()).isEqualTo(1);
+        assertThat(coeff.getKHearingThalamus()).isEqualTo(1);
+        assertThat(coeff.getKSmellThalamus()).isEqualTo(1);
+
+        // Memory reweighted
+        assertThat(coeff.getKMemoryPoolCerebral()).isEqualTo(6);
+        assertThat(coeff.getKMemoryPoolHippocampus()).isEqualTo(4);
+        assertThat(coeff.getKShortMemoryCerebral()).isEqualTo(3);
+        assertThat(coeff.getKShortMemorySynapsis()).isEqualTo(3);
+        assertThat(coeff.getKShortMemoryHippocampus()).isEqualTo(4);
+
+        // Balance rebuilt: Thalamus + NeuralDrive (kept) + LegDrive term, Tendons/Hippocampus gone
+        assertThat(coeff.getKBalanceThalamus()).isEqualTo(4);
+        assertThat(coeff.getKBalanceNeuralDrive()).isEqualTo(1);
+        assertThat(coeff.getKBalanceLegDrive()).isEqualTo(0.2);
+
+        // Aim: Precision reweighted, Hippocampus swapped for Thalamus and reweighted
+        assertThat(coeff.getKAimPrecision()).isEqualTo(5);
+        assertThat(coeff.getKAimThalamus()).isEqualTo(3);
+
+        // New resistance/threshold attributes
+        assertThat(coeff.getKAngerResistanceAmygdala()).isEqualTo(10);
+        assertThat(coeff.getKFearResistanceAmygdala()).isEqualTo(10);
+        assertThat(coeff.getKPainThresholdBodyFat()).isEqualTo(3);
+        assertThat(coeff.getKPainThresholdSkin()).isEqualTo(3);
+        assertThat(coeff.getKPainThresholdAmygdala()).isEqualTo(4);
+
+        // DigestiveAbsorption renames (value unchanged from the old NutrientAbsorption fields)
+        assertThat(coeff.getKStaminaPoolDigestiveAbsorption()).isEqualTo(2);
+        assertThat(coeff.getKStarvationResistanceDigestiveAbsorption()).isEqualTo(3);
+        assertThat(coeff.getKFatGainRateDigestiveAbsorption()).isEqualTo(1.0);
+        assertThat(coeff.getKMuscleGainRateDigestiveAbsorption()).isEqualTo(1.0);
+        assertThat(coeff.getKFoodPoisoningDigestiveAbsorption()).isEqualTo(1);
+    }
+
+    @Test
     void defaults_attributeFloorIsFive() {
         assertThat(BodyCoefficients.defaults().getAttributeFloor()).isEqualTo(5);
     }
@@ -134,12 +179,12 @@ class BodyCoefficientsTest {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
         coeff.setBaseline(70);
-        coeff.setKStrengthMuscleMass(5);
+        coeff.setKPushStrengthLimbRatio(5);
         coeff.setAttributeFloor(10);
 
         assertThat(coeff.getBaseline()).isEqualTo(70);
-        assertThat(coeff.getKStrengthMuscleMass()).isEqualTo(5);
+        assertThat(coeff.getKPushStrengthLimbRatio()).isEqualTo(5);
         assertThat(coeff.getAttributeFloor()).isEqualTo(10);
-        assertThat(coeff.getKStrengthNeuromuscular()).isEqualTo(2);
+        assertThat(coeff.getKPushStrengthMuscleDistribution()).isEqualTo(1);
     }
 }

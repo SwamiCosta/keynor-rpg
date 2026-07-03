@@ -19,6 +19,13 @@ package com.keynor.rpg.domain.model;
  * {@link PlayableCharacter#getWill()} / {@link PlayableCharacter#getStressResistance()} /
  * {@link PlayableCharacter#getDiseaseResistance()}. {@code hypothalamus} feeds several
  * metabolic/survival attributes. {@code immunity} feeds the biological-defense attributes.
+ *
+ * <p>{@code thalamus} (added Delta V4): split off {@code hippocampus} to isolate external
+ * sensory/perception filtering from memory/cognition — {@code hippocampus} now feeds only the
+ * memory attributes ({@link PlayableCharacter#getMemoryPool()},
+ * {@link PlayableCharacter#getShortMemory()}), while {@code thalamus} feeds the senses
+ * ({@link PlayableCharacter#getSight()}, etc.), {@link PlayableCharacter#getAim()}, and
+ * {@link PlayableCharacter#getBalance()}.
  */
 public class NeuralSystem {
 
@@ -27,6 +34,7 @@ public class NeuralSystem {
     private int cerebralCapacity;
     private int synapsisQuality;
     private int hippocampus;
+    private int thalamus;
     private int hypothalamus;
     private int amygdalaAndCingulum;
     private int immunity;
@@ -34,13 +42,14 @@ public class NeuralSystem {
     private int precision;
 
     public NeuralSystem(int neuralDrive, int neuromuscularEfficiency, int cerebralCapacity, int synapsisQuality,
-                         int hippocampus, int hypothalamus, int amygdalaAndCingulum, int immunity, int agility,
-                         int precision) {
+                         int hippocampus, int thalamus, int hypothalamus, int amygdalaAndCingulum, int immunity,
+                         int agility, int precision) {
         this.neuralDrive = neuralDrive;
         this.neuromuscularEfficiency = neuromuscularEfficiency;
         this.cerebralCapacity = cerebralCapacity;
         this.synapsisQuality = synapsisQuality;
         this.hippocampus = hippocampus;
+        this.thalamus = thalamus;
         this.hypothalamus = hypothalamus;
         this.amygdalaAndCingulum = amygdalaAndCingulum;
         this.immunity = immunity;
@@ -49,7 +58,7 @@ public class NeuralSystem {
     }
 
     public static NeuralSystem defaults() {
-        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5);
+        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5);
     }
 
     public int getNeuralDrive() {
@@ -90,6 +99,14 @@ public class NeuralSystem {
 
     public void setHippocampus(int hippocampus) {
         this.hippocampus = hippocampus;
+    }
+
+    public int getThalamus() {
+        return thalamus;
+    }
+
+    public void setThalamus(int thalamus) {
+        this.thalamus = thalamus;
     }
 
     public int getHypothalamus() {

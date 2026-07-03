@@ -10,7 +10,7 @@ class DigestiveSystemTest {
     void defaults_returnsMidRangeForAllThreeFields() {
         DigestiveSystem digestiveSystem = DigestiveSystem.defaults();
 
-        assertThat(digestiveSystem.getNutrientAbsorption()).isEqualTo(5);
+        assertThat(digestiveSystem.getDigestiveAbsorption()).isEqualTo(5);
         assertThat(digestiveSystem.getImpurityCleaning()).isEqualTo(5);
         assertThat(digestiveSystem.getKetosisQuality()).isEqualTo(5);
     }
@@ -19,11 +19,11 @@ class DigestiveSystemTest {
     void setters_mutateStateToModelTrainingProgress() {
         DigestiveSystem digestiveSystem = DigestiveSystem.defaults();
 
-        digestiveSystem.setNutrientAbsorption(8);
+        digestiveSystem.setDigestiveAbsorption(8);
         digestiveSystem.setImpurityCleaning(2);
         digestiveSystem.setKetosisQuality(9);
 
-        assertThat(digestiveSystem.getNutrientAbsorption()).isEqualTo(8);
+        assertThat(digestiveSystem.getDigestiveAbsorption()).isEqualTo(8);
         assertThat(digestiveSystem.getImpurityCleaning()).isEqualTo(2);
         assertThat(digestiveSystem.getKetosisQuality()).isEqualTo(9);
     }

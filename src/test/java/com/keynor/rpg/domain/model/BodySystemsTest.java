@@ -21,7 +21,7 @@ class BodySystemsTest {
         assertThat(bodySystems.getPulmonarySystem().getPulmonaryCapacity()).isEqualTo(5);
         assertThat(bodySystems.getNeuralSystem().getNeuralDrive()).isEqualTo(5);
         assertThat(bodySystems.getHormonalSystem().getThyroid()).isEqualTo(5);
-        assertThat(bodySystems.getDigestiveSystem().getNutrientAbsorption()).isEqualTo(5);
+        assertThat(bodySystems.getDigestiveSystem().getDigestiveAbsorption()).isEqualTo(5);
     }
 
     @Test
@@ -29,7 +29,7 @@ class BodySystemsTest {
         BloodSystem blood = new BloodSystem(7, 4);
         CardiacSystem cardiac = new CardiacSystem(8);
         PulmonarySystem pulmonary = new PulmonarySystem(6);
-        NeuralSystem neural = new NeuralSystem(9, 8, 1, 2, 3, 4, 5, 6, 7, 8);
+        NeuralSystem neural = new NeuralSystem(9, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9);
         HormonalSystem hormonal = new HormonalSystem(6, 7, 9);
         DigestiveSystem digestive = new DigestiveSystem(3, 4, 5);
         BodySystems bodySystems = new BodySystems(blood, cardiac, pulmonary, neural, hormonal, digestive);

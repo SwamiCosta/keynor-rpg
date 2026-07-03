@@ -2,20 +2,27 @@ package com.keynor.rpg.application.dto;
 
 import com.keynor.rpg.domain.model.PlayableCharacter;
 
-public record AttributesResponse(double strength, double speed, double maxMovementSpeed, double staminaPool,
-                                  double fatigueResistance, double staminaRecovery, double durability,
-                                  double sight, double hearing, double smell, double evasion, double acrobatics,
-                                  double meleeAccuracy, double aim, double memoryPool, double reasoning,
-                                  double shortMemory, double mentalHealthPool, double will, double balance,
-                                  double stressResistance, double poisonResistance, double diseaseResistance,
-                                  double bleedingResistance, double thermalResistance, double breathOutput,
-                                  double dehydrationResistance, double starvationResistance,
+public record AttributesResponse(double pushStrength, double legDrive, double gripStrength, double liftStrength,
+                                  double swingPower, double grapplingSelfLifting, double speed,
+                                  double maxMovementSpeed, double staminaPool, double fatigueResistance,
+                                  double staminaRecovery, double durability, double sight, double hearing,
+                                  double smell, double evasion, double acrobatics, double meleeAccuracy, double aim,
+                                  double memoryPool, double reasoning, double shortMemory, double mentalHealthPool,
+                                  double will, double balance, double stressResistance, double angerResistance,
+                                  double fearResistance, double painThreshold, double poisonResistance,
+                                  double diseaseResistance, double bleedingResistance, double thermalResistance,
+                                  double breathOutput, double dehydrationResistance, double starvationResistance,
                                   double foodPoisoningAlcoholResistance, double fatGainRate, double muscleGainRate,
                                   double intimidation, double diplomacy, double enfactuation, double command) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
-                character.getStrength(),
+                character.getPushStrength(),
+                character.getLegDrive(),
+                character.getGripStrength(),
+                character.getLiftStrength(),
+                character.getSwingPower(),
+                character.getGrapplingSelfLifting(),
                 character.getSpeed(),
                 character.getMaxMovementSpeed(),
                 character.getStaminaPool(),
@@ -36,6 +43,9 @@ public record AttributesResponse(double strength, double speed, double maxMoveme
                 character.getWill(),
                 character.getBalance(),
                 character.getStressResistance(),
+                character.getAngerResistance(),
+                character.getFearResistance(),
+                character.getPainThreshold(),
                 character.getPoisonResistance(),
                 character.getDiseaseResistance(),
                 character.getBleedingResistance(),

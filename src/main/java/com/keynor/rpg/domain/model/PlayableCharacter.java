@@ -1,5 +1,7 @@
 package com.keynor.rpg.domain.model;
 
+import java.util.List;
+
 /**
  * Aggregate root for a playable character. Holds the {@link Body} pillar (wound tree +
  * data groups) and exposes all derived physical attribute formulas. Formulas combine inputs
@@ -7,17 +9,33 @@ package com.keynor.rpg.domain.model;
  * (cardiovascular, neural, hormonal, and digestive systems) — none of these groups owns the
  * formulas themselves. {@link NeuralSystem} absorbed the former {@code SpatialIntelligence}
  * group in rpg-13 (perception/agility/precision now live there as
- * hippocampus/agility/precision).
+ * hippocampus/agility/precision), and split {@code hippocampus} into
+ * {@code hippocampus}/{@code thalamus} in Delta V4 (memory vs. external perception).
  *
- * <p><b>Additive standard (rpg-11, extended rpg-13):</b> every derived attribute is
- * {@code baseline + sum(weight x (input - neutral))} — the previous multiplicative model
- * (square-cube law, power-to-weight ratios, logarithms) is fully replaced. {@code baseline}
- * is 60 (see {@link BodyCoefficients#getBaseline()}). Most inputs are 1-9 with neutral 5;
- * {@code limbRatio} is 1-5 with neutral 3; {@code bodyFat}'s own neutral is 3 (not 5) inside
- * {@link #getDurability()}; {@code bloodThickness} is 1-5 neutral 3; {@code skinThickness} is
- * 1-7 neutral 3. {@code height}/{@code muscleMass}/{@code bodyFat} additionally feed
- * {@link #getSymbolicTotalMass()}/{@link #getDisplayMassKg()} directly (not as deviations).
- * See {@code .claude/skills/additive-attribute-formulas.md} for the full design rationale.
+ * <p><b>Additive standard (rpg-11, extended rpg-13/rpg-14/Delta V4):</b> every derived
+ * attribute is {@code baseline + sum(weight x (input - neutral))} — the previous
+ * multiplicative model (square-cube law, power-to-weight ratios, logarithms) is fully
+ * replaced. {@code baseline} is 60 (see {@link BodyCoefficients#getBaseline()}). Most inputs
+ * are 1-9 with neutral 5; {@code limbRatio} is 1-5 with neutral 3; {@code height} is 1-15 with
+ * neutral 7; {@code bodyFat}'s own neutral is 3 (not 5); {@code bloodThickness} is 1-5 neutral
+ * 3; {@code skinThickness} is 1-7 neutral 3. {@code height}/{@code muscleMass}/{@code bodyFat}
+ * additionally feed {@link #getSymbolicTotalMass()}/{@link #getDisplayMassKg()} directly (not
+ * as deviations). See {@code .claude/skills/additive-attribute-formulas.md} for the full
+ * design rationale.
+ *
+ * <p><b>Delta V4 (2026-07-03):</b> the old global {@code Strength} and its Load Capacity group
+ * were deprecated outright and replaced by a hidden {@code meanStrength()} engine plus four
+ * specialized, player-facing strengths ({@link #getPushStrength()}, {@link #getLegDrive()},
+ * {@link #getGripStrength()}, {@link #getLiftStrength()}) and two averaged combat attributes
+ * ({@link #getSwingPower()}, {@link #getGrapplingSelfLifting()}). Load Capacity now derives
+ * from {@link #getLiftStrength()} instead of the old Strength. Every additive-standard getter
+ * now has a companion {@code getXxxBreakdown()} method returning an {@link AttributeBreakdown}
+ * — the term-by-term resolved values the frontend renders in its attribute tooltips, so the
+ * API is the single source of truth for both the number and its resolved calculation (no
+ * duplicate formula logic on the client). {@code Swing Power}/{@code Grappling Self Lifting}
+ * (averages of two already-resolved attributes) and the Load Capacity group (non-linear
+ * transforms of {@code LiftStrength}) are not additive-standard formulas and do not get a
+ * breakdown.
  *
  * <p>All formula coefficients are tunable via {@link Body#getCoefficients()} without
  * modifying any formula code. Default coefficients are not balanced game data — tune
@@ -55,7 +73,7 @@ public class PlayableCharacter {
     /**
      * DisplayMassKg = MuscleKg + FatKg + FrameKg + BoneModKg. UI-facing real-world mass —
      * never used by gameplay formulas directly except as an input to
-     * {@link #getDragCapacityKg()}, which mixes it with {@link #getStrength()}.
+     * {@link #getDragCapacityKg()}, which mixes it with {@link #getLiftStrength()}.
      */
     public double getDisplayMassKg() {
         double muscleKg = composition().getMuscleMass() * coeff().getKMuscleKgMultiplier()
@@ -69,74 +87,174 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
-    // Biomechanics-derived attributes
+    // Mean Strength (Delta V4) — hidden base engine, never exposed via any DTO or public getter.
+    // -------------------------------------------------------------------------
+
+    private AttributeBreakdown meanStrengthBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKMeanStrengthMuscleMass() * (composition().getMuscleMass() - 5),
+                coeff().getKMeanStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
+                coeff().getKMeanStrengthFiberType() * (composition().getDominantFiberType() - 5)
+        ));
+    }
+
+    private double meanStrength() {
+        return meanStrengthBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
+    // 4 specialized strengths (Delta V4) — each anchored on the hidden meanStrength(), not the
+    // baseline directly. All floored, continuing the old Strength's floor convention.
     // -------------------------------------------------------------------------
 
     /**
-     * Strength = baseline + kStrengthMuscleMass x (MuscleMass-5) + kStrengthNeuromuscular x
-     * (NeuromuscularEfficiency-5) + kStrengthFiberType x (FiberType-5) + kStrengthLimbRatio x
-     * (LimbRatio-3) + kStrengthMuscleDistribution x (MuscleDistribution-5) + kStrengthTendons x
-     * (TendonsAndLigaments-5). Floored at {@link BodyCoefficients#getAttributeFloor()} —
-     * MuscleMass's 1-15 range is asymmetric around its neutral (5), so extreme low-mass builds
-     * can otherwise go negative.
+     * PushStrength ("Upper Strike") = meanStrength() + kPushStrengthLimbRatio x (LimbRatio-3) +
+     * kPushStrengthMuscleDistribution x (MuscleDistribution-5) + kPushStrengthTendons x
+     * (TendonsAndLigaments-5) + kPushStrengthHeight x (Height-7). Floored.
      */
-    public double getStrength() {
-        double raw = coeff().getBaseline()
-                + coeff().getKStrengthMuscleMass() * (composition().getMuscleMass() - 5)
-                + coeff().getKStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
-                + coeff().getKStrengthFiberType() * (composition().getDominantFiberType() - 5)
-                + coeff().getKStrengthLimbRatio() * (genetics().getLimbRatio() - 3)
-                + coeff().getKStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5)
-                + coeff().getKStrengthTendons() * (composition().getTendonsAndLigaments() - 5);
-        return floor(raw);
+    public AttributeBreakdown getPushStrengthBreakdown() {
+        return new AttributeBreakdown(meanStrength(), List.of(
+                coeff().getKPushStrengthLimbRatio() * (genetics().getLimbRatio() - 3),
+                coeff().getKPushStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5),
+                coeff().getKPushStrengthTendons() * (composition().getTendonsAndLigaments() - 5),
+                coeff().getKPushStrengthHeight() * (genetics().getHeight() - 7)
+        ));
     }
+
+    public double getPushStrength() {
+        return floor(getPushStrengthBreakdown().total());
+    }
+
+    /**
+     * LegDrive = meanStrength() + kLegDriveLimbRatio x (LimbRatio-3) +
+     * kLegDriveMuscleDistribution x (5-MuscleDistribution) + kLegDriveTendons x
+     * (TendonsAndLigaments-5) + kLegDriveHeight x (Height-7). MuscleDistribution term inverted
+     * relative to {@link #getPushStrength()} — leg-bias helps, arm-bias hurts. Floored.
+     */
+    public AttributeBreakdown getLegDriveBreakdown() {
+        return new AttributeBreakdown(meanStrength(), List.of(
+                coeff().getKLegDriveLimbRatio() * (genetics().getLimbRatio() - 3),
+                coeff().getKLegDriveMuscleDistribution() * (5 - composition().getMuscleDistribution()),
+                coeff().getKLegDriveTendons() * (composition().getTendonsAndLigaments() - 5),
+                coeff().getKLegDriveHeight() * (genetics().getHeight() - 7)
+        ));
+    }
+
+    public double getLegDrive() {
+        return floor(getLegDriveBreakdown().total());
+    }
+
+    /**
+     * GripStrength = meanStrength() + kGripStrengthMuscleDistribution x
+     * (MuscleDistribution-5) + kGripStrengthTendons x (TendonsAndLigaments-5). Floored.
+     */
+    public AttributeBreakdown getGripStrengthBreakdown() {
+        return new AttributeBreakdown(meanStrength(), List.of(
+                coeff().getKGripStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5),
+                coeff().getKGripStrengthTendons() * (composition().getTendonsAndLigaments() - 5)
+        ));
+    }
+
+    public double getGripStrength() {
+        return floor(getGripStrengthBreakdown().total());
+    }
+
+    /**
+     * LiftStrength ("Pull Strength") = meanStrength() - kLiftStrengthLimbRatio x (LimbRatio-3) +
+     * kLiftStrengthTendons x (TendonsAndLigaments-5). Floored. Feeds the entire Load Capacity
+     * group below (replaces the old global Strength).
+     */
+    public AttributeBreakdown getLiftStrengthBreakdown() {
+        return new AttributeBreakdown(meanStrength(), List.of(
+                -coeff().getKLiftStrengthLimbRatio() * (genetics().getLimbRatio() - 3),
+                coeff().getKLiftStrengthTendons() * (composition().getTendonsAndLigaments() - 5)
+        ));
+    }
+
+    public double getLiftStrength() {
+        return floor(getLiftStrengthBreakdown().total());
+    }
+
+    /**
+     * SwingPower = floor((PushStrength + GripStrength) / 2). Average of two already-resolved
+     * attributes, not an additive-standard formula — no breakdown.
+     */
+    public double getSwingPower() {
+        return floor(Math.floor((getPushStrength() + getGripStrength()) / 2));
+    }
+
+    /**
+     * GrapplingSelfLifting = floor((GripStrength + LiftStrength) / 2). Same shape as
+     * {@link #getSwingPower()} — no breakdown.
+     */
+    public double getGrapplingSelfLifting() {
+        return floor(Math.floor((getGripStrength() + getLiftStrength()) / 2));
+    }
+
+    // -------------------------------------------------------------------------
+    // Biomechanics-derived attributes
+    // -------------------------------------------------------------------------
 
     /**
      * Speed = baseline + kSpeedNeuromuscular x (NeuromuscularEfficiency-5) + kSpeedMuscleMass x
      * (MuscleMass-5) + kSpeedFiberType x (FiberType-5) - floor((SymbolicTotalMass -
      * kSpeedMassNeutral) / kSpeedMassDivisor). The divisor-3 mass penalty (rpg-11 revision)
      * keeps the worst-case result positive (minimum ~27 at baseline 60) without needing a
-     * floor, unlike {@link #getStrength()}.
+     * floor.
      */
-    public double getSpeed() {
+    public AttributeBreakdown getSpeedBreakdown() {
         double massPenalty = Math.floor(
                 (getSymbolicTotalMass() - coeff().getKSpeedMassNeutral()) / coeff().getKSpeedMassDivisor());
-        return coeff().getBaseline()
-                + coeff().getKSpeedNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
-                + coeff().getKSpeedMuscleMass() * (composition().getMuscleMass() - 5)
-                + coeff().getKSpeedFiberType() * (composition().getDominantFiberType() - 5)
-                - massPenalty;
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSpeedNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
+                coeff().getKSpeedMuscleMass() * (composition().getMuscleMass() - 5),
+                coeff().getKSpeedFiberType() * (composition().getDominantFiberType() - 5),
+                -massPenalty
+        ));
+    }
+
+    public double getSpeed() {
+        return getSpeedBreakdown().total();
     }
 
     /**
      * MaxMovementSpeed = Speed + kMaxMovementSpeedLimbRatio x (LimbRatio-3) -
-     * kMaxMovementSpeedMuscleDistribution x (MuscleDistribution-5). Displacement/travel speed,
-     * extended from Speed with a stride-length term (longer limbs help, shorter limbs hurt)
-     * and a muscle-distribution term (leg-bias helps, arm-bias hurts). Floored.
+     * kMaxMovementSpeedMuscleDistribution x (MuscleDistribution-5) + kMaxMovementSpeedHeight x
+     * (Height-7) (height term added Delta V4). Displacement/travel speed, anchored on Speed.
+     * Floored.
      */
+    public AttributeBreakdown getMaxMovementSpeedBreakdown() {
+        return new AttributeBreakdown(getSpeed(), List.of(
+                coeff().getKMaxMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3),
+                -coeff().getKMaxMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5),
+                coeff().getKMaxMovementSpeedHeight() * (genetics().getHeight() - 7)
+        ));
+    }
+
     public double getMaxMovementSpeed() {
-        double raw = getSpeed()
-                + coeff().getKMaxMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3)
-                - coeff().getKMaxMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5);
-        return floor(raw);
+        return floor(getMaxMovementSpeedBreakdown().total());
     }
 
     /**
      * StaminaPool = baseline + kStaminaPoolPulmonary x (PulmonaryCapacity-5) +
      * kStaminaPoolCardiac x (CardiacOutput-5) + kStaminaPoolOxygen x
      * (OxygenCarryingCapacity-5) - kStaminaPoolFiberType x (FiberType-5) +
-     * kStaminaPoolNutrientAbsorption x (NutrientAbsorption-5). Pulmonary capacity is the
-     * leading term; fast-twitch fiber bias lowers the pool; efficient nutrient absorption
-     * (added rpg-13) raises it.
+     * kStaminaPoolDigestiveAbsorption x (DigestiveAbsorption-5) (renamed from
+     * NutrientAbsorption, Delta V4).
      */
+    public AttributeBreakdown getStaminaPoolBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKStaminaPoolPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
+                coeff().getKStaminaPoolCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
+                coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
+                -coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5),
+                coeff().getKStaminaPoolDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)
+        ));
+    }
+
     public double getStaminaPool() {
-        return coeff().getBaseline()
-                + coeff().getKStaminaPoolPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
-                + coeff().getKStaminaPoolCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
-                + coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)
-                - coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5)
-                + coeff().getKStaminaPoolNutrientAbsorption()
-                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5);
+        return getStaminaPoolBreakdown().total();
     }
 
     /**
@@ -146,57 +264,66 @@ public class PlayableCharacter {
      * (NeuromuscularEfficiency-5) - floor((SymbolicTotalMass - kFatigueResistanceMassNeutral) /
      * kFatigueResistanceMassDivisor) - kFatigueResistanceMuscleMass x (MuscleMass-5) +
      * kFatigueResistanceHypothalamus x (Hypothalamus-5) + kFatigueResistanceThyroid x
-     * (Thyroid-5). Cardiac output leads; high neuromuscular efficiency, heavy mass, and high
-     * muscle mass all cause wear that lowers resistance; homeostatic (Hypothalamus) and
-     * metabolic-rate (Thyroid) control raise it (added rpg-13). Floored — replaces the old
-     * (removed) {@code FatigueRate}, with inverted semantics: higher is now better.
+     * (Thyroid-5). Floored.
      */
-    public double getFatigueResistance() {
+    public AttributeBreakdown getFatigueResistanceBreakdown() {
         double massPenalty = Math.floor((getSymbolicTotalMass() - coeff().getKFatigueResistanceMassNeutral())
                 / coeff().getKFatigueResistanceMassDivisor());
-        double raw = coeff().getBaseline()
-                + coeff().getKFatigueResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
-                + coeff().getKFatigueResistancePulmonary()
-                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
-                + coeff().getKFatigueResistanceOxygen()
-                        * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)
-                - coeff().getKFatigueResistanceNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
-                - massPenalty
-                - coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5)
-                + coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
-                + coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalSystem().getThyroid() - 5);
-        return floor(raw);
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKFatigueResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
+                coeff().getKFatigueResistancePulmonary()
+                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
+                coeff().getKFatigueResistanceOxygen()
+                        * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
+                -coeff().getKFatigueResistanceNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
+                -massPenalty,
+                -coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5),
+                coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
+                coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalSystem().getThyroid() - 5)
+        ));
+    }
+
+    public double getFatigueResistance() {
+        return floor(getFatigueResistanceBreakdown().total());
     }
 
     /**
      * StaminaRecovery = baseline + kStaminaRecoveryOxygen x (OxygenCarryingCapacity-5) +
      * kStaminaRecoveryPulmonary x (PulmonaryCapacity-5) + kStaminaRecoveryCardiac x
-     * (CardiacOutput-5) - kStaminaRecoveryFiberType x (FiberType-5). New attribute (rpg-11):
-     * blood oxygenation leads recovery speed; slow-twitch fiber bias gives a bonus.
+     * (CardiacOutput-5) - kStaminaRecoveryFiberType x (FiberType-5).
      */
+    public AttributeBreakdown getStaminaRecoveryBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKStaminaRecoveryOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
+                coeff().getKStaminaRecoveryPulmonary()
+                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
+                coeff().getKStaminaRecoveryCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
+                -coeff().getKStaminaRecoveryFiberType() * (composition().getDominantFiberType() - 5)
+        ));
+    }
+
     public double getStaminaRecovery() {
-        return coeff().getBaseline()
-                + coeff().getKStaminaRecoveryOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)
-                + coeff().getKStaminaRecoveryPulmonary()
-                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
-                + coeff().getKStaminaRecoveryCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
-                - coeff().getKStaminaRecoveryFiberType() * (composition().getDominantFiberType() - 5);
+        return getStaminaRecoveryBreakdown().total();
     }
 
     /**
      * Durability = baseline + kDurabilityBoneDensity x (BoneDensity-5) + kDurabilityMesomorphy
      * x (Mesomorphy-5) + kDurabilityBodyFat x (BodyFat-3) - kDurabilityFlexibility x
      * (Flexibility-5) + kDurabilitySkin x (SkinThickness-3). Note BodyFat's own neutral is 3,
-     * not 5, same as SkinThickness's. Dense bones, a mesomorphic build, extra fat cushioning,
-     * and thick skin all raise durability; high flexibility lowers it.
+     * not 5, same as SkinThickness's.
      */
+    public AttributeBreakdown getDurabilityBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKDurabilityBoneDensity() * (composition().getBoneDensity() - 5),
+                coeff().getKDurabilityMesomorphy() * (genetics().getMesomorphy() - 5),
+                coeff().getKDurabilityBodyFat() * (composition().getBodyFat() - 3),
+                -coeff().getKDurabilityFlexibility() * (composition().getFlexibility() - 5),
+                coeff().getKDurabilitySkin() * (bodyStructure().getSkinThickness() - 3)
+        ));
+    }
+
     public double getDurability() {
-        return coeff().getBaseline()
-                + coeff().getKDurabilityBoneDensity() * (composition().getBoneDensity() - 5)
-                + coeff().getKDurabilityMesomorphy() * (genetics().getMesomorphy() - 5)
-                + coeff().getKDurabilityBodyFat() * (composition().getBodyFat() - 3)
-                - coeff().getKDurabilityFlexibility() * (composition().getFlexibility() - 5)
-                + coeff().getKDurabilitySkin() * (bodyStructure().getSkinThickness() - 3);
+        return getDurabilityBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -204,41 +331,56 @@ public class PlayableCharacter {
     // -------------------------------------------------------------------------
 
     /**
-     * Sight = baseline + kSightEyesSensitivity x (EyesSensitivity-5) + kSightHippocampus x
-     * (Hippocampus-5) + kSightNeuralDrive x (NeuralDrive-5) + kSightPmod x Pmod. Diverged from
-     * {@link #getHearing()}/{@link #getSmell()} in rpg-14 — each sense now reads its own
-     * {@link SensorialOrgans} input instead of sharing one shared formula.
+     * Sight = baseline + kSightEyesSensitivity x (EyesSensitivity-5) + kSightThalamus x
+     * (Thalamus-5) + kSightNeuralDrive x (NeuralDrive-5) + kSightPmod x Pmod. Reads
+     * {@code Thalamus} instead of {@code Hippocampus} since Delta V4 (perception input, not
+     * memory).
      */
+    public AttributeBreakdown getSightBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSightEyesSensitivity() * (sensorialOrgans().getEyesSensitivity() - 5),
+                coeff().getKSightThalamus() * (neuralSystem().getThalamus() - 5),
+                coeff().getKSightNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKSightPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getSight() {
-        return coeff().getBaseline()
-                + coeff().getKSightEyesSensitivity() * (sensorialOrgans().getEyesSensitivity() - 5)
-                + coeff().getKSightHippocampus() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKSightNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
-                + coeff().getKSightPmod() * progesteroneModifier();
+        return getSightBreakdown().total();
     }
 
     /**
-     * Hearing = baseline + kHearingEarsSensitivity x (EarsSensitivity-5) + kHearingHippocampus
-     * x (Hippocampus-5) + kHearingNeuralDrive x (NeuralDrive-5) + kHearingPmod x Pmod.
+     * Hearing = baseline + kHearingEarsSensitivity x (EarsSensitivity-5) + kHearingThalamus x
+     * (Thalamus-5) + kHearingNeuralDrive x (NeuralDrive-5) + kHearingPmod x Pmod.
      */
+    public AttributeBreakdown getHearingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKHearingEarsSensitivity() * (sensorialOrgans().getEarsSensitivity() - 5),
+                coeff().getKHearingThalamus() * (neuralSystem().getThalamus() - 5),
+                coeff().getKHearingNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKHearingPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getHearing() {
-        return coeff().getBaseline()
-                + coeff().getKHearingEarsSensitivity() * (sensorialOrgans().getEarsSensitivity() - 5)
-                + coeff().getKHearingHippocampus() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKHearingNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
-                + coeff().getKHearingPmod() * progesteroneModifier();
+        return getHearingBreakdown().total();
     }
 
     /**
-     * Smell = baseline + kSmellNoseSensitivity x (NoseSensitivity-5) + kSmellHippocampus x
-     * (Hippocampus-5) + kSmellNeuralDrive x (NeuralDrive-5) + kSmellPmod x Pmod.
+     * Smell = baseline + kSmellNoseSensitivity x (NoseSensitivity-5) + kSmellThalamus x
+     * (Thalamus-5) + kSmellNeuralDrive x (NeuralDrive-5) + kSmellPmod x Pmod.
      */
+    public AttributeBreakdown getSmellBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSmellNoseSensitivity() * (sensorialOrgans().getNoseSensitivity() - 5),
+                coeff().getKSmellThalamus() * (neuralSystem().getThalamus() - 5),
+                coeff().getKSmellNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKSmellPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getSmell() {
-        return coeff().getBaseline()
-                + coeff().getKSmellNoseSensitivity() * (sensorialOrgans().getNoseSensitivity() - 5)
-                + coeff().getKSmellHippocampus() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKSmellNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
-                + coeff().getKSmellPmod() * progesteroneModifier();
+        return getSmellBreakdown().total();
     }
 
     /**
@@ -246,157 +388,282 @@ public class PlayableCharacter {
      * kEvasionFlexibility x (Flexibility-5). Anchored directly on final movement speed.
      * Floored.
      */
+    public AttributeBreakdown getEvasionBreakdown() {
+        return new AttributeBreakdown(getSpeed(), List.of(
+                coeff().getKEvasionAgility() * (neuralSystem().getAgility() - 5),
+                coeff().getKEvasionNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKEvasionFlexibility() * (composition().getFlexibility() - 5)
+        ));
+    }
+
     public double getEvasion() {
-        double raw = getSpeed()
-                + coeff().getKEvasionAgility() * (neuralSystem().getAgility() - 5)
-                + coeff().getKEvasionNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
-                + coeff().getKEvasionFlexibility() * (composition().getFlexibility() - 5);
-        return floor(raw);
+        return floor(getEvasionBreakdown().total());
     }
 
     /**
      * Acrobatics = baseline + kAcrobaticsAgility x (Agility-5) + kAcrobaticsFlexibility x
      * (Flexibility-5).
      */
+    public AttributeBreakdown getAcrobaticsBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKAcrobaticsAgility() * (neuralSystem().getAgility() - 5),
+                coeff().getKAcrobaticsFlexibility() * (composition().getFlexibility() - 5)
+        ));
+    }
+
     public double getAcrobatics() {
-        return coeff().getBaseline()
-                + coeff().getKAcrobaticsAgility() * (neuralSystem().getAgility() - 5)
-                + coeff().getKAcrobaticsFlexibility() * (composition().getFlexibility() - 5);
+        return getAcrobaticsBreakdown().total();
     }
 
     /**
      * MeleeAccuracy = baseline + kMeleeAccuracyPrecision x (Precision-5) +
      * kMeleeAccuracyAgility x (Agility-5).
      */
+    public AttributeBreakdown getMeleeAccuracyBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5),
+                coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5)
+        ));
+    }
+
     public double getMeleeAccuracy() {
-        return coeff().getBaseline()
-                + coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5)
-                + coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5);
+        return getMeleeAccuracyBreakdown().total();
     }
 
     /**
-     * Aim = baseline + kAimPrecision x (Precision-5) + kAimPerception x (Perception-5).
+     * Aim = baseline + kAimPrecision x (Precision-5) + kAimThalamus x (Thalamus-5). Reweighted
+     * and switched from {@code Hippocampus} to {@code Thalamus} in Delta V4; the EyesSensitivity
+     * term proposed in an earlier draft was dropped per explicit user instruction.
      */
+    public AttributeBreakdown getAimBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKAimPrecision() * (neuralSystem().getPrecision() - 5),
+                coeff().getKAimThalamus() * (neuralSystem().getThalamus() - 5)
+        ));
+    }
+
     public double getAim() {
-        return coeff().getBaseline()
-                + coeff().getKAimPrecision() * (neuralSystem().getPrecision() - 5)
-                + coeff().getKAimPerception() * (neuralSystem().getHippocampus() - 5);
+        return getAimBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
-    // Cognitive / Mental (rpg-13) — NeuralSystem-derived
+    // Cognitive / Mental (rpg-13, Memory/ShortMemory reweighted Delta V4) — NeuralSystem-derived
     // -------------------------------------------------------------------------
 
     /** MemoryPool = baseline + kMemoryPoolCerebral x (CerebralCapacity-5) + kMemoryPoolHippocampus x (Hippocampus-5). */
+    public AttributeBreakdown getMemoryPoolBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKMemoryPoolCerebral() * (neuralSystem().getCerebralCapacity() - 5),
+                coeff().getKMemoryPoolHippocampus() * (neuralSystem().getHippocampus() - 5)
+        ));
+    }
+
     public double getMemoryPool() {
-        return coeff().getBaseline()
-                + coeff().getKMemoryPoolCerebral() * (neuralSystem().getCerebralCapacity() - 5)
-                + coeff().getKMemoryPoolHippocampus() * (neuralSystem().getHippocampus() - 5);
+        return getMemoryPoolBreakdown().total();
     }
 
     /** Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5). */
+    public AttributeBreakdown getReasoningBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5)
+        ));
+    }
+
     public double getReasoning() {
-        return coeff().getBaseline()
-                + coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5);
+        return getReasoningBreakdown().total();
     }
 
     /**
      * ShortMemory = baseline + kShortMemoryCerebral x (CerebralCapacity-5) +
      * kShortMemorySynapsis x (SynapsisQuality-5) + kShortMemoryHippocampus x (Hippocampus-5).
+     * Still reads {@code Hippocampus} (memory), not {@code Thalamus} — unlike Sight/Hearing/Smell/
+     * Balance/Aim, which moved to Thalamus in Delta V4.
      */
+    public AttributeBreakdown getShortMemoryBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5),
+                coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5),
+                coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5)
+        ));
+    }
+
     public double getShortMemory() {
-        return coeff().getBaseline()
-                + coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5)
-                + coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5)
-                + coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5);
+        return getShortMemoryBreakdown().total();
     }
 
     /**
      * MentalHealthPool = baseline - kMentalHealthAmygdala x (AmygdalaAndCingulum-5) -
-     * kMentalHealthTmod x Tmod + kMentalHealthPmod x Pmod. {@code kMentalHealthAmygdala} was
-     * reweighted 10->5 in rpg-14 alongside the two new hormone-modifier terms. Reserve for
-     * future Mind-pillar mechanics — deliberately simplified until that pillar exists.
+     * kMentalHealthTmod x Tmod + kMentalHealthPmod x Pmod. Reserve for future Mind-pillar
+     * mechanics — deliberately simplified until that pillar exists.
      */
+    public AttributeBreakdown getMentalHealthPoolBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
+                -coeff().getKMentalHealthTmod() * testosteroneModifier(),
+                coeff().getKMentalHealthPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getMentalHealthPool() {
-        return coeff().getBaseline()
-                - coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
-                - coeff().getKMentalHealthTmod() * testosteroneModifier()
-                + coeff().getKMentalHealthPmod() * progesteroneModifier();
+        return getMentalHealthPoolBreakdown().total();
     }
 
     /**
      * Will — same formula as {@link #getMentalHealthPool()} for now; expected to diverge once
      * the Mind pillar is implemented.
      */
+    public AttributeBreakdown getWillBreakdown() {
+        return getMentalHealthPoolBreakdown();
+    }
+
     public double getWill() {
         return getMentalHealthPool();
     }
 
     // -------------------------------------------------------------------------
-    // Sensory / Hormonal / Stress (rpg-13)
+    // Sensory / Hormonal / Stress (rpg-13, Balance rebuilt Delta V4)
     // -------------------------------------------------------------------------
 
     /**
-     * Balance = baseline + kBalanceHippocampus x (Hippocampus-5) + kBalanceNeuralDrive x
-     * (NeuralDrive-5) + kBalanceTendons x (TendonsAndLigaments-5). {@code kBalanceHippocampus}
-     * was reweighted 3->1 in rpg-14 when the new tendons term was introduced.
+     * Balance = baseline + kBalanceThalamus x (Thalamus-5) + kBalanceNeuralDrive x
+     * (NeuralDrive-5) + kBalanceLegDrive x (LegDrive-60). Rebuilt in Delta V4: the old
+     * {@code Hippocampus} and {@code TendonsAndLigaments} terms are gone (tendons already
+     * factor into {@link #getLegDrive()}, which Balance now reads as a term);
+     * {@code NeuralDrive} was kept per explicit user instruction rather than being replaced by
+     * Agility. This is the first formula in the codebase to use another derived attribute as an
+     * additive *term* (deviation from its own baseline, 60) rather than as a base like
+     * {@link #getEvasion()}/{@link #getMaxMovementSpeed()} do with Speed.
      */
+    public AttributeBreakdown getBalanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKBalanceThalamus() * (neuralSystem().getThalamus() - 5),
+                coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKBalanceLegDrive() * (getLegDrive() - 60)
+        ));
+    }
+
     public double getBalance() {
-        return coeff().getBaseline()
-                + coeff().getKBalanceHippocampus() * (neuralSystem().getHippocampus() - 5)
-                + coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
-                + coeff().getKBalanceTendons() * (composition().getTendonsAndLigaments() - 5);
+        return getBalanceBreakdown().total();
     }
 
     /**
      * StressResistance = baseline - kStressResistanceAmygdala x (AmygdalaAndCingulum-5) -
      * kStressResistanceAdrenal x (AdrenalGlands-5).
      */
+    public AttributeBreakdown getStressResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
+                -coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalSystem().getAdrenalGlands() - 5)
+        ));
+    }
+
     public double getStressResistance() {
-        return coeff().getBaseline()
-                - coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
-                - coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalSystem().getAdrenalGlands() - 5);
+        return getStressResistanceBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
-    // Biological defense (rpg-13)
+    // Resistance / pain threshold (Delta V4 — new attributes)
+    // -------------------------------------------------------------------------
+
+    /** AngerResistance = baseline - kAngerResistanceAmygdala x (AmygdalaAndCingulum-5). */
+    public AttributeBreakdown getAngerResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKAngerResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+        ));
+    }
+
+    public double getAngerResistance() {
+        return getAngerResistanceBreakdown().total();
+    }
+
+    /**
+     * FearResistance = baseline - kFearResistanceAmygdala x (AmygdalaAndCingulum-5). Same
+     * formula shape as {@link #getAngerResistance()} — kept as two separate methods/coefficients
+     * per the design document, in case they diverge later.
+     */
+    public AttributeBreakdown getFearResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKFearResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+        ));
+    }
+
+    public double getFearResistance() {
+        return getFearResistanceBreakdown().total();
+    }
+
+    /**
+     * PainThreshold = baseline + kPainThresholdBodyFat x (BodyFat-3) + kPainThresholdSkin x
+     * (SkinThickness-3) - kPainThresholdAmygdala x (AmygdalaAndCingulum-5). The design document
+     * wrote the BodyFat term as a deviation from 5; confirmed with the user that BodyFat's
+     * neutral is 3 everywhere else in this codebase (e.g. {@link #getDurability()}), so this
+     * formula uses -3 for consistency.
+     */
+    public AttributeBreakdown getPainThresholdBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKPainThresholdBodyFat() * (composition().getBodyFat() - 3),
+                coeff().getKPainThresholdSkin() * (bodyStructure().getSkinThickness() - 3),
+                -coeff().getKPainThresholdAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+        ));
+    }
+
+    public double getPainThreshold() {
+        return getPainThresholdBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
+    // Biological defense (rpg-13, cellular health term added rpg-14)
     // -------------------------------------------------------------------------
 
     /**
      * PoisonResistance = baseline + kPoisonResistanceImmunity x (Immunity-5) -
      * kPoisonResistanceCardiac x (CardiacOutput-5) - kPoisonResistanceBloodThickness x
-     * (BloodThickness-3) + kPoisonResistanceCellularHealth x (CellularHealth-5) (added rpg-14).
+     * (BloodThickness-3) + kPoisonResistanceCellularHealth x (CellularHealth-5).
      */
+    public AttributeBreakdown getPoisonResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5),
+                -coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
+                -coeff().getKPoisonResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3),
+                coeff().getKPoisonResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5)
+        ));
+    }
+
     public double getPoisonResistance() {
-        return coeff().getBaseline()
-                + coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5)
-                - coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
-                - coeff().getKPoisonResistanceBloodThickness()
-                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)
-                + coeff().getKPoisonResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5);
+        return getPoisonResistanceBreakdown().total();
     }
 
     /**
      * DiseaseResistance = baseline + kDiseaseResistanceImmunity x (Immunity-5) +
      * kDiseaseResistanceAmygdala x (AmygdalaAndCingulum-5) + kDiseaseResistanceCellularHealth x
-     * (CellularHealth-5) (added rpg-14).
+     * (CellularHealth-5).
      */
+    public AttributeBreakdown getDiseaseResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5),
+                coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
+                coeff().getKDiseaseResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5)
+        ));
+    }
+
     public double getDiseaseResistance() {
-        return coeff().getBaseline()
-                + coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5)
-                + coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
-                + coeff().getKDiseaseResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5);
+        return getDiseaseResistanceBreakdown().total();
     }
 
     /**
      * BleedingResistance = baseline + kBleedingResistanceBloodThickness x (BloodThickness-3) -
      * kBleedingResistanceCardiac x (CardiacOutput-5).
      */
+    public AttributeBreakdown getBleedingResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKBleedingResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3),
+                -coeff().getKBleedingResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
+        ));
+    }
+
     public double getBleedingResistance() {
-        return coeff().getBaseline()
-                + coeff().getKBleedingResistanceBloodThickness()
-                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)
-                - coeff().getKBleedingResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5);
+        return getBleedingResistanceBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -409,71 +676,100 @@ public class PlayableCharacter {
      * (Hypothalamus-5). Natural human ceiling is 83 (SkinThickness UI-locked to 4) — the true
      * ceiling (98, SkinThickness=7) is reserved for future non-human races.
      */
+    public AttributeBreakdown getThermalResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKThermalResistanceSkin() * (bodyStructure().getSkinThickness() - 3),
+                coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3),
+                coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
+        ));
+    }
+
     public double getThermalResistance() {
-        return coeff().getBaseline()
-                + coeff().getKThermalResistanceSkin() * (bodyStructure().getSkinThickness() - 3)
-                + coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3)
-                + coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5);
+        return getThermalResistanceBreakdown().total();
     }
 
     /** BreathOutput = baseline + kBreathOutputPulmonary x (PulmonaryCapacity-5). */
+    public AttributeBreakdown getBreathOutputBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKBreathOutputPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
+        ));
+    }
+
     public double getBreathOutput() {
-        return coeff().getBaseline()
-                + coeff().getKBreathOutputPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5);
+        return getBreathOutputBreakdown().total();
     }
 
     /**
      * DehydrationResistance = baseline + kDehydrationResistanceHypothalamus x (Hypothalamus-5)
      * + kDehydrationResistanceKetosis x (KetosisQuality-5).
      */
+    public AttributeBreakdown getDehydrationResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
+                coeff().getKDehydrationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
+        ));
+    }
+
     public double getDehydrationResistance() {
-        return coeff().getBaseline()
-                + coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
-                + coeff().getKDehydrationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5);
+        return getDehydrationResistanceBreakdown().total();
     }
 
     /**
      * StarvationResistance = baseline + kStarvationResistanceHypothalamus x (Hypothalamus-5) +
-     * kStarvationResistanceNutrient x (NutrientAbsorption-5) + kStarvationResistanceKetosis x
-     * (KetosisQuality-5).
+     * kStarvationResistanceDigestiveAbsorption x (DigestiveAbsorption-5) (renamed from
+     * NutrientAbsorption, Delta V4) + kStarvationResistanceKetosis x (KetosisQuality-5).
      */
+    public AttributeBreakdown getStarvationResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKStarvationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
+                coeff().getKStarvationResistanceDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
+                coeff().getKStarvationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
+        ));
+    }
+
     public double getStarvationResistance() {
-        return coeff().getBaseline()
-                + coeff().getKStarvationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
-                + coeff().getKStarvationResistanceNutrient()
-                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
-                + coeff().getKStarvationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5);
+        return getStarvationResistanceBreakdown().total();
     }
 
     /**
      * FoodPoisoningAlcoholResistance = baseline + kFoodPoisoningImpurity x (ImpurityCleaning-5)
      * + kFoodPoisoningImmunity x (Immunity-5) + kFoodPoisoningCellularHealth x
-     * (CellularHealth-5) (added rpg-14).
+     * (CellularHealth-5) - kFoodPoisoningDigestiveAbsorption x (DigestiveAbsorption-5) (new
+     * term, Delta V4 — easier nutrient absorption carries a light extra exposure to
+     * food-borne/alcohol effects).
      */
+    public AttributeBreakdown getFoodPoisoningAlcoholResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5),
+                coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5),
+                coeff().getKFoodPoisoningCellularHealth() * (bodyStructure().getCellularHealth() - 5),
+                -coeff().getKFoodPoisoningDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)
+        ));
+    }
+
     public double getFoodPoisoningAlcoholResistance() {
-        return coeff().getBaseline()
-                + coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5)
-                + coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5)
-                + coeff().getKFoodPoisoningCellularHealth() * (bodyStructure().getCellularHealth() - 5);
+        return getFoodPoisoningAlcoholResistanceBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
-    // Load capacity (rpg-11, recalibrated rpg-12) — derived from Strength and DisplayMassKg.
-    // All four figures are whole kg, matching the design document's int arithmetic.
+    // Load capacity (rpg-11, recalibrated rpg-12, now driven by LiftStrength — Delta V4).
+    // All four figures are whole kg, matching the design document's int arithmetic. Non-linear
+    // transforms of an already-resolved attribute — no breakdown.
     // -------------------------------------------------------------------------
 
     /**
-     * MaxCapacityKg = floor(Strength^2 / kMaxCapacityDivisor) + Strength, computed on
-     * Strength truncated to an int. kMaxCapacityDivisor (150, rpg-12) is calibrated to work
-     * directly off the baseline-60 Strength — no separate offset needed, superseding the
-     * short-lived rpg-11 kLoadCapacityStrengthOffset correction. Non-linear so heroic
-     * Strength values yield disproportionately large capacity.
+     * MaxCapacityKg = floor(LiftStrength^2 / kMaxCapacityDivisor) + LiftStrength, computed on
+     * LiftStrength truncated to an int (Delta V4 — was the old global Strength).
+     * kMaxCapacityDivisor (150, rpg-12) is calibrated to work directly off a baseline-60
+     * attribute — no separate offset needed.
      */
     public int getMaxCapacityKg() {
-        int strength = (int) getStrength();
-        return (int) Math.floor(Math.pow(strength, 2) / coeff().getKMaxCapacityDivisor()) + strength;
+        int liftStrength = (int) getLiftStrength();
+        return (int) Math.floor(Math.pow(liftStrength, 2) / coeff().getKMaxCapacityDivisor()) + liftStrength;
     }
 
     /** LightLoadKg = floor(MaxCapacityKg / kLightLoadDivisor) — exactly one third, no penalty. */
@@ -492,7 +788,7 @@ public class PlayableCharacter {
     /**
      * DragCapacityKg = kDragCapacityMultiplier x MaxCapacityKg + floor(DisplayMassKg x
      * kDragCapacityMassFraction). The only load figure that also depends on the character's
-     * own real-world mass, not just Strength.
+     * own real-world mass, not just LiftStrength.
      */
     public int getDragCapacityKg() {
         return (int) (coeff().getKDragCapacityMultiplier() * getMaxCapacityKg()
@@ -502,38 +798,52 @@ public class PlayableCharacter {
     // -------------------------------------------------------------------------
     // Body-growth rates (rpg-14) — zero-baseline, unlike every other derived attribute above.
     // These express a rate of change (can be negative), not an absolute stat value, so they
-    // deliberately do NOT add BodyCoefficients.getBaseline(). A third documented exception to
-    // the additive standard, alongside Speed's mass penalty and Evasion/MaxMovementSpeed's
-    // Speed-anchoring — see .claude/skills/additive-attribute-formulas.md.
+    // deliberately do NOT add BodyCoefficients.getBaseline(). A documented exception to the
+    // additive standard, alongside Speed's mass penalty and Evasion/MaxMovementSpeed/Balance's
+    // anchoring on another derived attribute — see .claude/skills/additive-attribute-formulas.md.
     // -------------------------------------------------------------------------
 
     /**
      * FatGainRate = kFatGainRateEndomorphy x (Endomorphy-5) - kFatGainRateEctomorphy x
-     * (Ectomorphy-5) + kFatGainRateNutrientAbsorption x (NutrientAbsorption-5) -
-     * kFatGainRateKetosis x (KetosisQuality-5) - kFatGainRateCellularHealth x
-     * (CellularHealth-5). Zero-baseline: positive means gaining fat faster, negative means
-     * losing it faster, zero means stable at every input's neutral value.
+     * (Ectomorphy-5) + kFatGainRateDigestiveAbsorption x (DigestiveAbsorption-5) (renamed from
+     * NutrientAbsorption, Delta V4) - kFatGainRateKetosis x (KetosisQuality-5) -
+     * kFatGainRateCellularHealth x (CellularHealth-5). Zero-baseline: positive means gaining
+     * fat faster, negative means losing it faster, zero means stable at every input's neutral
+     * value.
      */
+    public AttributeBreakdown getFatGainRateBreakdown() {
+        return new AttributeBreakdown(0, List.of(
+                coeff().getKFatGainRateEndomorphy() * (genetics().getEndomorphy() - 5),
+                -coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5),
+                coeff().getKFatGainRateDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
+                -coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5),
+                -coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5)
+        ));
+    }
+
     public double getFatGainRate() {
-        return coeff().getKFatGainRateEndomorphy() * (genetics().getEndomorphy() - 5)
-                - coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5)
-                + coeff().getKFatGainRateNutrientAbsorption()
-                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
-                - coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
-                - coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5);
+        return getFatGainRateBreakdown().total();
     }
 
     /**
      * MuscleGainRate = kMuscleGainRateMesomorphy x (Mesomorphy-5) - kMuscleGainRateEctomorphy x
-     * (Ectomorphy-5) + kMuscleGainRateNutrientAbsorption x (NutrientAbsorption-5) +
-     * kMuscleGainRateTmod x Tmod. Zero-baseline, same semantics as {@link #getFatGainRate()}.
+     * (Ectomorphy-5) + kMuscleGainRateDigestiveAbsorption x (DigestiveAbsorption-5) (renamed
+     * from NutrientAbsorption, Delta V4) + kMuscleGainRateTmod x Tmod. Zero-baseline, same
+     * semantics as {@link #getFatGainRate()}.
      */
+    public AttributeBreakdown getMuscleGainRateBreakdown() {
+        return new AttributeBreakdown(0, List.of(
+                coeff().getKMuscleGainRateMesomorphy() * (genetics().getMesomorphy() - 5),
+                -coeff().getKMuscleGainRateEctomorphy() * (genetics().getEctomorphy() - 5),
+                coeff().getKMuscleGainRateDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
+                coeff().getKMuscleGainRateTmod() * testosteroneModifier()
+        ));
+    }
+
     public double getMuscleGainRate() {
-        return coeff().getKMuscleGainRateMesomorphy() * (genetics().getMesomorphy() - 5)
-                - coeff().getKMuscleGainRateEctomorphy() * (genetics().getEctomorphy() - 5)
-                + coeff().getKMuscleGainRateNutrientAbsorption()
-                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
-                + coeff().getKMuscleGainRateTmod() * testosteroneModifier();
+        return getMuscleGainRateBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -545,21 +855,31 @@ public class PlayableCharacter {
      * kIntimidationTmod x Tmod + kIntimidationMass x (SymbolicTotalMass-kIntimidationMassNeutral).
      * Unattractive, testosterone-driven, physically imposing characters intimidate more.
      */
+    public AttributeBreakdown getIntimidationBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKIntimidationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
+                coeff().getKIntimidationTmod() * testosteroneModifier(),
+                coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral())
+        ));
+    }
+
     public double getIntimidation() {
-        return coeff().getBaseline()
-                - coeff().getKIntimidationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
-                + coeff().getKIntimidationTmod() * testosteroneModifier()
-                + coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral());
+        return getIntimidationBreakdown().total();
     }
 
     /**
      * Diplomacy = baseline + kDiplomacyShapeAesthetics x (ShapeAesthetics-5) + kDiplomacyPmod x
      * Pmod.
      */
+    public AttributeBreakdown getDiplomacyBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKDiplomacyShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
+                coeff().getKDiplomacyPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getDiplomacy() {
-        return coeff().getBaseline()
-                + coeff().getKDiplomacyShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
-                + coeff().getKDiplomacyPmod() * progesteroneModifier();
+        return getDiplomacyBreakdown().total();
     }
 
     /**
@@ -568,10 +888,15 @@ public class PlayableCharacter {
      * read the same morphology/hormone inputs today; expected to diverge once the Mind pillar
      * adds cognitive/social inputs that only one of the two should use.
      */
+    public AttributeBreakdown getEnfactuationBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
+                coeff().getKEnfactuationPmod() * progesteroneModifier()
+        ));
+    }
+
     public double getEnfactuation() {
-        return coeff().getBaseline()
-                + coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)
-                + coeff().getKEnfactuationPmod() * progesteroneModifier();
+        return getEnfactuationBreakdown().total();
     }
 
     /**
@@ -579,9 +904,14 @@ public class PlayableCharacter {
      * extremes (very repulsive or very attractive) raise Command equally — commanding presence
      * comes from being memorable, not from being liked.
      */
+    public AttributeBreakdown getCommandBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKCommandShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)
+        ));
+    }
+
     public double getCommand() {
-        return coeff().getBaseline()
-                + coeff().getKCommandShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5);
+        return getCommandBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -613,7 +943,10 @@ public class PlayableCharacter {
     private BodyStructure bodyStructure() { return body.getPhysicalTraits().getBodyStructure(); }
     private BodyCoefficients coeff() { return body.getCoefficients(); }
 
-    /** Applies the shared safety floor used by Strength, FatigueResistance, Evasion, and MaxMovementSpeed. */
+    /**
+     * Applies the shared safety floor used by the Strength-family (Push/Leg/Grip/Lift Strength,
+     * SwingPower, GrapplingSelfLifting), FatigueResistance, Evasion, and MaxMovementSpeed.
+     */
     private double floor(double value) {
         return Math.max(coeff().getAttributeFloor(), value);
     }
