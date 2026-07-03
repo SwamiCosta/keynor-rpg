@@ -5,20 +5,23 @@ package com.keynor.rpg.domain.model;
  * {@link PulmonarySystem}/{@link HormonalSystem} inside {@link BodySystems}. All three fields
  * are 1-9, neutral 5.
  *
- * <p>{@code nutrientAbsorption} feeds {@link PlayableCharacter#getStaminaPool()} and
- * {@link PlayableCharacter#getStarvationResistance()}. {@code impurityCleaning} feeds
+ * <p>{@code digestiveAbsorption} (renamed from {@code nutrientAbsorption} in Delta V4) feeds
+ * {@link PlayableCharacter#getStaminaPool()}, {@link PlayableCharacter#getStarvationResistance()},
+ * {@link PlayableCharacter#getFatGainRate()}, {@link PlayableCharacter#getMuscleGainRate()}, and
+ * (new, Delta V4) a light negative term on
+ * {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}. {@code impurityCleaning} feeds
  * {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}. {@code ketosisQuality} feeds
  * {@link PlayableCharacter#getDehydrationResistance()} and
  * {@link PlayableCharacter#getStarvationResistance()}.
  */
 public class DigestiveSystem {
 
-    private int nutrientAbsorption;
+    private int digestiveAbsorption;
     private int impurityCleaning;
     private int ketosisQuality;
 
-    public DigestiveSystem(int nutrientAbsorption, int impurityCleaning, int ketosisQuality) {
-        this.nutrientAbsorption = nutrientAbsorption;
+    public DigestiveSystem(int digestiveAbsorption, int impurityCleaning, int ketosisQuality) {
+        this.digestiveAbsorption = digestiveAbsorption;
         this.impurityCleaning = impurityCleaning;
         this.ketosisQuality = ketosisQuality;
     }
@@ -27,12 +30,12 @@ public class DigestiveSystem {
         return new DigestiveSystem(5, 5, 5);
     }
 
-    public int getNutrientAbsorption() {
-        return nutrientAbsorption;
+    public int getDigestiveAbsorption() {
+        return digestiveAbsorption;
     }
 
-    public void setNutrientAbsorption(int nutrientAbsorption) {
-        this.nutrientAbsorption = nutrientAbsorption;
+    public void setDigestiveAbsorption(int digestiveAbsorption) {
+        this.digestiveAbsorption = digestiveAbsorption;
     }
 
     public int getImpurityCleaning() {

@@ -22,7 +22,10 @@ class PreviewAttributesServiceTest {
                 PhysicalTraits.defaults());
 
         PlayableCharacter expected = new PlayableCharacter("expected", Body.humanTemplate());
-        assertThat(result.getStrength()).isEqualTo(expected.getStrength());
+        assertThat(result.getPushStrength()).isEqualTo(expected.getPushStrength());
+        assertThat(result.getLegDrive()).isEqualTo(expected.getLegDrive());
+        assertThat(result.getGripStrength()).isEqualTo(expected.getGripStrength());
+        assertThat(result.getLiftStrength()).isEqualTo(expected.getLiftStrength());
         assertThat(result.getSpeed()).isEqualTo(expected.getSpeed());
         assertThat(result.getStaminaPool()).isEqualTo(expected.getStaminaPool());
         assertThat(result.getDurability()).isEqualTo(expected.getDurability());
@@ -35,10 +38,12 @@ class PreviewAttributesServiceTest {
         assertThat(result.getThermalResistance()).isEqualTo(expected.getThermalResistance());
         assertThat(result.getIntimidation()).isEqualTo(expected.getIntimidation());
         assertThat(result.getFatGainRate()).isEqualTo(expected.getFatGainRate());
+        assertThat(result.getAngerResistance()).isEqualTo(expected.getAngerResistance());
+        assertThat(result.getPainThreshold()).isEqualTo(expected.getPainThreshold());
     }
 
     @Test
-    void calculate_reactsToInputChanges_higherMuscleMassIncreasesStrength() {
+    void calculate_reactsToInputChanges_higherMuscleMassIncreasesPushStrength() {
         PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults());
 
@@ -46,7 +51,7 @@ class PreviewAttributesServiceTest {
         PlayableCharacter result = service.calculate(new Biomechanics(Genetics.defaults(), heavierMuscle),
                 BodySystems.defaults(), PhysicalTraits.defaults());
 
-        assertThat(result.getStrength()).isGreaterThan(baseline.getStrength());
+        assertThat(result.getPushStrength()).isGreaterThan(baseline.getPushStrength());
     }
 
     @Test
@@ -54,7 +59,7 @@ class PreviewAttributesServiceTest {
         PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults());
 
-        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5);
+        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5);
         BodySystems bodySystems = new BodySystems(BodySystems.defaults().getBloodSystem(),
                 BodySystems.defaults().getCardiacSystem(), BodySystems.defaults().getPulmonarySystem(), agileNeural,
                 BodySystems.defaults().getHormonalSystem(), BodySystems.defaults().getDigestiveSystem());

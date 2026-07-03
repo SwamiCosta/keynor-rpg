@@ -1,4 +1,4 @@
-# Additive Attribute Standard (rpg-11, extended rpg-13, extended rpg-14)
+# Additive Attribute Standard (rpg-11, extended rpg-13, extended rpg-14, extended Delta V4)
 
 **Scope:** `PlayableCharacter`'s derived-attribute formulas and `BodyCoefficients`, in this project only. Maintained by Gaemes; referenced from `gaemes.md`'s Mandatory reading (Skill 06 pattern — see workspace `SKILLS.md`).
 
@@ -18,11 +18,13 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 - **Neutral points are scale midpoints, not coefficients.** Most 1-9 inputs are neutral at 5; `limbRatio` (1-5) is neutral at 3; `bodyFat` (1-10) is neutral at 3, not 5, only inside `getDurability()` — everywhere else `bodyFat` is used as a direct (non-deviation) mass input. Neutral points are literals inside `PlayableCharacter`'s formulas, not `BodyCoefficients` fields, since they describe the scale itself rather than a tunable weight.
 - **Weights are `BodyCoefficients` fields**, named `k<Formula><Term>` (e.g. `kStrengthMuscleMass`). Every weight in the design document is exposed this way so game balance can be tuned without touching formula code — this was already the pre-rpg-11 convention and rpg-11 preserves it even though the underlying formula shape changed completely.
 
-### The three exceptions
+### The exceptions
 
-- **`Speed`** does not add a `(input - neutral)` term for mass — it *subtracts* a mass **penalty**: `floor((SymbolicTotalMass - kSpeedMassNeutral) / kSpeedMassDivisor)`. This is what keeps Speed's worst case positive (see Safety floors below) instead of needing a hard floor like Strength does.
+- **`Speed`** does not add a `(input - neutral)` term for mass — it *subtracts* a mass **penalty**: `floor((SymbolicTotalMass - kSpeedMassNeutral) / kSpeedMassDivisor)`. This is what keeps Speed's worst case positive (see Safety floors below) instead of needing a hard floor like the Strength-family does.
 - **`Evasion`** and **`MaxMovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
 - **`FatGainRate`** and **`MuscleGainRate`** (rpg-14) do not add `baseline` at all — they are zero-baseline **rate** attributes (positive = gaining faster, negative = losing/gaining slower, zero = stable at every input's neutral value), not absolute stat values. See the rpg-14 section below.
+- **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MaxMovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
+- **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MaxMovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
 
 ## Two mass numbers, not one
 
@@ -31,26 +33,26 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 
 ## Safety floors
 
-Four attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): **Strength**, **FatigueResistance**, **Evasion**, **MaxMovementSpeed**. These were identified by computing the actual worst-case slider combination for all 13 derived attributes (see `PlayableCharacterTest`'s floor tests) — the other 9 attributes have a natural worst-case comfortably above the floor and do not need one.
+Eight attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): the four specialized strengths (**PushStrength**, **LegDrive**, **GripStrength**, **LiftStrength** — Delta V4, replacing the old floored **Strength**), **SwingPower**/**GrapplingSelfLifting** (Delta V4, floored on their own averaged result), **FatigueResistance**, **Evasion**, **MaxMovementSpeed**. These were identified by computing the actual worst-case slider combination (see `PlayableCharacterTest`'s floor tests) — every other derived attribute has a natural worst-case comfortably above the floor and does not need one.
 
 At `baseline = 35` (the design document's original value before the user raised it to 60), the four floored attributes' worst-case combos landed at -1, -17, -14, and -6 respectively — genuinely reachable through slider extremes. At `baseline = 60`, the same worst-case combos land at 24, 8, 11, and 19 — all positive on their own. **The floors are kept anyway**, as defense-in-depth against future coefficient tuning or scale changes, not because today's ranges require them. `Speed` never needed a floor at either baseline (its mass-penalty divisor keeps the worst case at 2 / 27 respectively) — see `PlayableCharacterTest.getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor`.
 
-## Load capacity (added rpg-11, recalibrated rpg-12)
+## Load capacity (added rpg-11, recalibrated rpg-12, re-anchored on LiftStrength Delta V4)
 
-`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `Strength` (and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section. All four return `int` (whole kg), unlike every other derived attribute (`double`) — this matches the design document's own `int` arithmetic and reflects that a carry-capacity ceiling doesn't need fractional-kg precision.
+`MaxCapacityKg`, `LightLoadKg`, `HeavyLoadKg`, `DragCapacityKg` are all derived from `LiftStrength` (renamed from `Strength`, Delta V4 — see below) and `DisplayMassKg` for `DragCapacityKg` specifically) — see `PlayableCharacter`'s Load capacity section. All four return `int` (whole kg), unlike every other derived attribute (`double`) — this matches the design document's own `int` arithmetic and reflects that a carry-capacity ceiling doesn't need fractional-kg precision.
 
 ```
-MaxCapacityKg  = floor(Strength^2 / kMaxCapacityDivisor) + Strength   (Strength truncated to int; kMaxCapacityDivisor = 150)
+MaxCapacityKg  = floor(LiftStrength^2 / kMaxCapacityDivisor) + LiftStrength   (LiftStrength truncated to int; kMaxCapacityDivisor = 150)
 LightLoadKg    = floor(MaxCapacityKg / kLightLoadDivisor)             (kLightLoadDivisor = 3 — exactly one third)
 HeavyLoadKg    = floor(MaxCapacityKg * kHeavyLoadMultiplier / kHeavyLoadDivisor)  (2/3 — the practical carry ceiling)
 DragCapacityKg = kDragCapacityMultiplier * MaxCapacityKg + floor(DisplayMassKg * kDragCapacityMassFraction)
 ```
 
-**`MaxCapacityKg` reads `Strength` directly — no offset.** rpg-11 originally introduced `kLoadCapacityStrengthOffset` (subtracting 25 from `Strength` before the load formula) to keep load numbers calibrated after `baseline` was raised from 35 to 60. rpg-12 replaced that entirely: the divisor itself was recalibrated (25 → 150) so the formula produces the same result working directly off the baseline-60 `Strength`, with no offset needed. **Do not reintroduce an offset alongside this divisor** — the two corrections solve the same problem and combining them would double-correct.
+**`MaxCapacityKg` reads `LiftStrength` directly — no offset.** rpg-11 originally introduced `kLoadCapacityStrengthOffset` (subtracting 25 from `Strength` before the load formula) to keep load numbers calibrated after `baseline` was raised from 35 to 60. rpg-12 replaced that entirely: the divisor itself was recalibrated (25 → 150) so the formula produces the same result working directly off a baseline-60 attribute, with no offset needed. Delta V4 swapped the input from the old global `Strength` to the new `LiftStrength` — same divisor, same shape, since `LiftStrength` equals 60 at human defaults just like the old `Strength` did. **Do not reintroduce an offset alongside this divisor** — the two corrections solve the same problem and combining them would double-correct.
 
-At human defaults: `Strength = 60`, `MaxCapacityKg = floor(3600/150) + 60 = 84`, `LightLoadKg = 28`, `HeavyLoadKg = 56`, `DragCapacityKg = 2×84 + floor(71×0.5) = 203`.
+At human defaults: `LiftStrength = 60`, `MaxCapacityKg = floor(3600/150) + 60 = 84`, `LightLoadKg = 28`, `HeavyLoadKg = 56`, `DragCapacityKg = 2×84 + floor(71×0.5) = 203` — unchanged numerically from the pre-Delta-V4 values.
 
-`MaxCapacityKg` inherits `Strength`'s floor transitively (`Strength` can never go below `attributeFloor`, 5): it can never go below `floor(5²/150) + 5 = 5`.
+`MaxCapacityKg` inherits `LiftStrength`'s floor transitively (`LiftStrength` can never go below `attributeFloor`, 5): it can never go below `floor(5²/150) + 5 = 5`.
 
 ## Removed and renamed (breaking changes)
 
@@ -114,6 +116,67 @@ At input 5, both are 0 — this is why the frontend requires the player to move 
 
 - **Body-growth rates** (zero-baseline, see the exceptions above): `FatGainRate = (Endomorphy-5) - (Ectomorphy-5) + (NutrientAbsorption-5) - (KetosisQuality-5) - 0.5×(CellularHealth-5)`; `MuscleGainRate = (Mesomorphy-5) - (Ectomorphy-5) + (NutrientAbsorption-5) + Tmod`. These are the first formulas to read `Genetics.endomorphy`/`ectomorphy` (previously unused by any formula) and `Genetics.mesomorphy` outside `Durability`.
 - **Social attributes** (baseline 60, driven by `BodyStructure.shapeAesthetics` and the hormone modifiers): `Intimidation = 60 - 5×(ShapeAesthetics-5) + 5×Tmod + 2×(SymbolicTotalMass-25)`, `Diplomacy = 60 + 7×(ShapeAesthetics-5) + 3×Pmod`, `Enfactuation = 60 + 7×(ShapeAesthetics-5) + 3×Pmod` (**currently identical to `Diplomacy`** — the design doc gave both the same formula; kept as specified and documented as a known duplication expected to diverge once the Mind pillar exists, not a copy-paste bug to silently fix), `Command = 60 + 10×|ShapeAesthetics-5|` (V-shaped — both repulsive and attractive extremes raise Command equally). `Intimidation` is unbounded in practice (uses raw `SymbolicTotalMass`, not a small deviation) — it is not expected to stay within [20,100] the way most other attributes do; this is intentional (an imposingly massive character should have no intimidation ceiling).
+
+## Strength deprecation, Thalamus split, 3 new attributes, attribute breakdowns (Delta V4, 2026-07-03)
+
+The old global `Strength` (and its Load Capacity group) is **deleted outright**, per explicit user/design-document instruction — not deprecated-but-kept, not aliased. `NeuralSystem.hippocampus` was split: `hippocampus` now feeds **only** memory (`MemoryPool`, `ShortMemory`); a new `thalamus` field (1-9, neutral 5) takes over every formula that used to read `hippocampus` for perception/sensory purposes (`Sight`, `Hearing`, `Smell`, `Balance`, `Aim`). `DigestiveSystem.nutrientAbsorption` was renamed to `digestiveAbsorption` (pure rename, no weight changes to its existing terms).
+
+### Mean Strength — hidden base engine
+
+```
+meanStrength() = 60 + kMeanStrengthMuscleMass×(MuscleMass-5) + kMeanStrengthNeuromuscular×(NeuromuscularEfficiency-5) + kMeanStrengthFiberType×(FiberType-5)
+```
+
+Private, never exposed via any getter or DTO — the design document explicitly forbids rendering it in the UI, and nothing outside `PlayableCharacter` needs it. It plays the role of `baseline` for the four specialized strengths below (their own dynamic anchor, the same way `Speed` anchors `Evasion`/`MaxMovementSpeed`).
+
+### 4 specialized strengths + 2 derived combat attributes
+
+```
+PushStrength ("Upper Strike") = meanStrength() + 2×(LimbRatio-3) + 1×(MuscleDistribution-5) + 1×(TendonsAndLigaments-5) + 0.5×(Height-7)
+LegDrive                      = meanStrength() + 2×(LimbRatio-3) + 1×(5-MuscleDistribution) + 1×(TendonsAndLigaments-5) + 0.5×(Height-7)
+GripStrength                  = meanStrength() + 1×(MuscleDistribution-5) + 2×(TendonsAndLigaments-5)
+LiftStrength ("Pull Strength") = meanStrength() - 2×(LimbRatio-3) + 1×(TendonsAndLigaments-5)
+
+SwingPower           = floor((PushStrength + GripStrength) / 2)
+GrapplingSelfLifting = floor((GripStrength + LiftStrength) / 2)
+```
+
+All six floored (continuing the old `Strength`'s floor convention). `LegDrive`'s `MuscleDistribution` term is inverted relative to `PushStrength` (leg-bias helps `LegDrive`, hurts `PushStrength`, and vice versa for arm-bias) — same asymmetric-but-related pattern as the pre-existing `Strength`/`MaxMovementSpeed` `MuscleDistribution` terms. `SwingPower`/`GrapplingSelfLifting` are plain averages of two already-resolved attributes, not additive-standard formulas in their own right — they get no `AttributeBreakdown` (see below).
+
+### 3 new resistance/threshold attributes
+
+```
+AngerResistance = 60 - 10×(AmygdalaAndCingulum-5)
+FearResistance  = 60 - 10×(AmygdalaAndCingulum-5)   (identical formula, kept as two methods/coefficients per the design doc, in case they diverge later)
+PainThreshold   = 60 + 3×(BodyFat-3) + 3×(SkinThickness-3) - 4×(AmygdalaAndCingulum-5)
+```
+
+`PainThreshold`'s `BodyFat` term: the design document literally wrote `3×(BodyFat-5)`, but confirmed with the user that `BodyFat`'s neutral is 3 everywhere else in this codebase (`Durability`, `ThermalResistance`) — implemented as `-3` for consistency, not the doc's literal `-5`.
+
+### Balance and Aim rebuilt
+
+```
+Balance = 60 + 4×(Thalamus-5) + 1×(NeuralDrive-5) + 0.2×(LegDrive-60)
+Aim     = 60 + 5×(Precision-5) + 3×(Thalamus-5)
+```
+
+`Balance`: `Hippocampus` and `TendonsAndLigaments` are gone (tendons already factor into `LegDrive`, which Balance now reads as a term); `NeuralDrive` was explicitly kept (an earlier draft proposed swapping it for `Agility` — the user rejected that and asked for `NeuralDrive` kept, plus the new `LegDrive` term, instead). `Aim`: `Precision`'s weight rose 3→5; the old `Hippocampus` term (weight 1) became a `Thalamus` term (weight 3); an `EyesSensitivity` term proposed in an earlier draft was explicitly dropped by the user, so `Aim` has no sensory-organ input.
+
+### Sight/Hearing/Smell and Memory reweighted
+
+`Sight`/`Hearing`/`Smell` keep their exact rpg-14 shape and weights — only the `Hippocampus` term became a `Thalamus` term (same weight, 1). `MemoryPool`/`ShortMemory` (still `Hippocampus`-driven, untouched by the Thalamus split) were reweighted: `MemoryPool` = `60 + 6×(CerebralCapacity-5) + 4×(Hippocampus-5)` (was 8/2); `ShortMemory` = `60 + 3×(CerebralCapacity-5) + 3×(SynapsisQuality-5) + 4×(Hippocampus-5)` (was 4/4/2).
+
+### Digestive Absorption rename + new penalty term
+
+`nutrientAbsorption` → `digestiveAbsorption` everywhere (domain field, DTOs, every formula that already read it — `StaminaPool`, `StarvationResistance`, `FatGainRate`, `MuscleGainRate` — pure rename, same weights). New term on `FoodPoisoningAlcoholResistance`: `- 1×(DigestiveAbsorption-5)` — easier nutrient absorption carries a light extra exposure to food-borne/alcohol effects (weight confirmed with the user as "light", -1).
+
+### Attribute breakdowns — API-side, not client-side
+
+Every additive-standard getter (all of them except `SwingPower`/`GrapplingSelfLifting` and the Load Capacity group, which aren't additive-standard formulas) has a companion `getXxxBreakdown()` returning a new `AttributeBreakdown(double baseline, List<Double> terms)` record — the exact resolved values (multiplications/divisions already collapsed) that sum to the getter's own return value. `AttributesResponse.from(character)` stays a flat, unchanged-shape DTO; a new sibling `AttributeBreakdownsResponse` (keyed the same as `AttributesResponse`'s fields) rides alongside it in both `CharacterResponse`/`BodyResponse` and `BiomechanicsPreviewResponse`.
+
+This exists to back the frontend's new tooltip format ("60 + 4 + 0 + 0 + 0 = 64") **without duplicating any formula logic in TypeScript** — the frontend has never independently computed attributes (it only displays what `/biomechanics/preview` returns), and reimplementing ~40 formulas client-side would create a second, driftable source of truth every future formula change would have to keep in sync by hand. The backend computing and serving the breakdown keeps `PlayableCharacter` the single source of truth for both the number and its resolved explanation.
+
+For the four specialized strengths, the breakdown's `baseline` is the **dynamic `meanStrength()` value**, not the literal `60` — matching the design document's own framing of Mean Strength as "the base engine" for these four (at neutral inputs `meanStrength()` happens to equal 60, matching the doc's own worked example, but it moves with `MuscleMass`/`NeuromuscularEfficiency`/`FiberType` just like any other baseline in this design). `FatGainRate`/`MuscleGainRate` breakdowns use `baseline = 0`, matching their zero-baseline nature.
 
 ## Extending this pattern
 

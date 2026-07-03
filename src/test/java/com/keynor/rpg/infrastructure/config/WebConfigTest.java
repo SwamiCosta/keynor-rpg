@@ -63,7 +63,7 @@ class WebConfigTest {
                 new GeneticsInput(5, 5, 5, 7, 3),
                 new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
                 new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5),
-                        new PulmonarySystemInput(5), new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5),
+                        new PulmonarySystemInput(5), new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5),
                         new HormonalSystemInput(5, 5, 5), new DigestiveSystemInput(5, 5, 5)),
                 new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5)));
 
