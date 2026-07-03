@@ -3,6 +3,7 @@ package com.keynor.rpg.application.usecase;
 import com.keynor.rpg.domain.model.Biomechanics;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.BodySystems;
+import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 
@@ -14,8 +15,9 @@ import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 public class PreviewAttributesService implements PreviewAttributesUseCase {
 
     @Override
-    public PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems) {
-        Body body = Body.previewTemplate(biomechanics, bodySystems);
+    public PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems,
+                                        PhysicalTraits physicalTraits) {
+        Body body = Body.previewTemplate(biomechanics, bodySystems, physicalTraits);
         return new PlayableCharacter("preview", body);
     }
 }

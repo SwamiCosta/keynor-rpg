@@ -24,6 +24,7 @@ public class BiomechanicsPreviewController {
         Biomechanics biomechanics = new Biomechanics(
                 request.genetics().toDomain(), request.bodyComposition().toDomain());
         return BiomechanicsPreviewResponse.from(
-                previewAttributesUseCase.calculate(biomechanics, request.bodySystems().toDomain()));
+                previewAttributesUseCase.calculate(biomechanics, request.bodySystems().toDomain(),
+                        request.physicalTraits().toDomain()));
     }
 }

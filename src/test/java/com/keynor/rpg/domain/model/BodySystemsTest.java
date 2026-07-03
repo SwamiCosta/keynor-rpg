@@ -30,7 +30,7 @@ class BodySystemsTest {
         CardiacSystem cardiac = new CardiacSystem(8);
         PulmonarySystem pulmonary = new PulmonarySystem(6);
         NeuralSystem neural = new NeuralSystem(9, 8, 1, 2, 3, 4, 5, 6, 7, 8);
-        HormonalSystem hormonal = new HormonalSystem(6, 7);
+        HormonalSystem hormonal = new HormonalSystem(6, 7, 9);
         DigestiveSystem digestive = new DigestiveSystem(3, 4, 5);
         BodySystems bodySystems = new BodySystems(blood, cardiac, pulmonary, neural, hormonal, digestive);
 
