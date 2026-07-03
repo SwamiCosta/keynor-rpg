@@ -153,6 +153,9 @@ class BodyTest {
         assertThat(body.getBodySystems().getNeuralSystem()).isNotNull();
         assertThat(body.getBodySystems().getHormonalSystem()).isNotNull();
         assertThat(body.getBodySystems().getDigestiveSystem()).isNotNull();
+        assertThat(body.getPhysicalTraits()).isNotNull();
+        assertThat(body.getPhysicalTraits().getSensorialOrgans()).isNotNull();
+        assertThat(body.getPhysicalTraits().getBodyStructure()).isNotNull();
         assertThat(body.getCoefficients()).isNotNull();
         assertThat(body.getGeneticPoints().remainingPoints()).isEqualTo(20);
         assertThat(body.getTrainingPoints().remainingPoints()).isEqualTo(20);
