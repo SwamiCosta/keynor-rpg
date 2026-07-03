@@ -1,6 +1,5 @@
 package com.keynor.rpg.application.dto;
 
 public record BiomechanicsPreviewRequest(GeneticsInput genetics, BodyCompositionInput bodyComposition,
-                                          BodySystemsInput bodySystems,
-                                          SpatialIntelligenceInput spatialIntelligence) {
+                                          BodySystemsInput bodySystems) {
 }

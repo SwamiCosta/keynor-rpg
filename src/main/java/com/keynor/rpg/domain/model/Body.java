@@ -16,7 +16,6 @@ public class Body {
     private final BodyComponent lowerBody;
     private final Biomechanics biomechanics;
     private final BodySystems bodySystems;
-    private final SpatialIntelligence spatialIntelligence;
     private final BodyCoefficients coefficients;
     private final AttributePointBudget geneticPoints;
     private final AttributePointBudget trainingPoints;
@@ -24,8 +23,7 @@ public class Body {
     private Body(BodyComponent skull, BodyComponent neck, BodyComponent rightFlank, BodyComponent leftFlank,
                   BodyComponent torso, BodyComponent rightHip, BodyComponent leftHip, BodyComponent genitals,
                   BodyComponent buttocks, BodyComponent lowerBody, Biomechanics biomechanics,
-                  BodySystems bodySystems, SpatialIntelligence spatialIntelligence,
-                  BodyCoefficients coefficients, AttributePointBudget geneticPoints,
+                  BodySystems bodySystems, BodyCoefficients coefficients, AttributePointBudget geneticPoints,
                   AttributePointBudget trainingPoints) {
         this.skull = skull;
         this.neck = neck;
@@ -39,7 +37,6 @@ public class Body {
         this.lowerBody = lowerBody;
         this.biomechanics = biomechanics;
         this.bodySystems = bodySystems;
-        this.spatialIntelligence = spatialIntelligence;
         this.coefficients = coefficients;
         this.geneticPoints = geneticPoints;
         this.trainingPoints = trainingPoints;
@@ -50,20 +47,18 @@ public class Body {
      * anatomical wound tree.
      */
     public static Body humanTemplate() {
-        return fromDataGroups(Biomechanics.defaults(), BodySystems.defaults(), SpatialIntelligence.defaults());
+        return fromDataGroups(Biomechanics.defaults(), BodySystems.defaults());
     }
 
     /**
      * Builds a body with the provided data groups (for stateless previews and tests) using
      * the standard anatomical wound tree and default coefficients and point budgets.
      */
-    public static Body previewTemplate(Biomechanics biomechanics, BodySystems bodySystems,
-                                        SpatialIntelligence spatialIntelligence) {
-        return fromDataGroups(biomechanics, bodySystems, spatialIntelligence);
+    public static Body previewTemplate(Biomechanics biomechanics, BodySystems bodySystems) {
+        return fromDataGroups(biomechanics, bodySystems);
     }
 
-    private static Body fromDataGroups(Biomechanics biomechanics, BodySystems bodySystems,
-                                        SpatialIntelligence spatialIntelligence) {
+    private static Body fromDataGroups(Biomechanics biomechanics, BodySystems bodySystems) {
         BodyComponent skull = buildSkull();
         BodyComponent neck = buildNeck();
         BodyComponent rightFlank = buildFlank("Right");
@@ -76,7 +71,7 @@ public class Body {
         BodyComponent lowerBody = buildLowerBody();
 
         return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks,
-                lowerBody, biomechanics, bodySystems, spatialIntelligence,
+                lowerBody, biomechanics, bodySystems,
                 BodyCoefficients.defaults(), new AttributePointBudget(20), new AttributePointBudget(20));
     }
 
@@ -163,7 +158,6 @@ public class Body {
     public BodyComponent getLowerBody() { return lowerBody; }
     public Biomechanics getBiomechanics() { return biomechanics; }
     public BodySystems getBodySystems() { return bodySystems; }
-    public SpatialIntelligence getSpatialIntelligence() { return spatialIntelligence; }
     public BodyCoefficients getCoefficients() { return coefficients; }
     public AttributePointBudget getGeneticPoints() { return geneticPoints; }
     public AttributePointBudget getTrainingPoints() { return trainingPoints; }

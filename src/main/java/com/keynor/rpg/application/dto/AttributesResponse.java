@@ -5,7 +5,12 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
 public record AttributesResponse(double strength, double speed, double maxMovementSpeed, double staminaPool,
                                   double fatigueResistance, double staminaRecovery, double durability,
                                   double sight, double hearing, double smell, double evasion, double acrobatics,
-                                  double meleeAccuracy, double aim) {
+                                  double meleeAccuracy, double aim, double memoryPool, double reasoning,
+                                  double shortMemory, double mentalHealthPool, double will, double balance,
+                                  double stressResistance, double poisonResistance, double diseaseResistance,
+                                  double bleedingResistance, double thermalResistance, double breathOutput,
+                                  double dehydrationResistance, double starvationResistance,
+                                  double foodPoisoningAlcoholResistance) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -22,6 +27,21 @@ public record AttributesResponse(double strength, double speed, double maxMoveme
                 character.getEvasion(),
                 character.getAcrobatics(),
                 character.getMeleeAccuracy(),
-                character.getAim());
+                character.getAim(),
+                character.getMemoryPool(),
+                character.getReasoning(),
+                character.getShortMemory(),
+                character.getMentalHealthPool(),
+                character.getWill(),
+                character.getBalance(),
+                character.getStressResistance(),
+                character.getPoisonResistance(),
+                character.getDiseaseResistance(),
+                character.getBleedingResistance(),
+                character.getThermalResistance(),
+                character.getBreathOutput(),
+                character.getDehydrationResistance(),
+                character.getStarvationResistance(),
+                character.getFoodPoisoningAlcoholResistance());
     }
 }

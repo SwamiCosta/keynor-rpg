@@ -2,20 +2,22 @@ package com.keynor.rpg.domain.model;
 
 /**
  * Aggregate root for a playable character. Holds the {@link Body} pillar (wound tree +
- * data groups) and exposes all derived physical attribute formulas. Formulas combine
- * inputs from {@link Biomechanics} (genetics + body composition), {@link BodySystems}
- * (cardiovascular and neural systems), and {@link SpatialIntelligence} (spatial awareness
- * group) — none of these groups owns the formulas themselves.
+ * data groups) and exposes all derived physical attribute formulas. Formulas combine inputs
+ * from {@link Biomechanics} (genetics + body composition) and {@link BodySystems}
+ * (cardiovascular, neural, hormonal, and digestive systems) — none of these groups owns the
+ * formulas themselves. {@link NeuralSystem} absorbed the former {@code SpatialIntelligence}
+ * group in rpg-13 (perception/agility/precision now live there as
+ * hippocampus/agility/precision).
  *
- * <p><b>Additive standard (rpg-11):</b> every derived attribute is
+ * <p><b>Additive standard (rpg-11, extended rpg-13):</b> every derived attribute is
  * {@code baseline + sum(weight x (input - neutral))} — the previous multiplicative model
  * (square-cube law, power-to-weight ratios, logarithms) is fully replaced. {@code baseline}
  * is 60 (see {@link BodyCoefficients#getBaseline()}). Most inputs are 1-9 with neutral 5;
  * {@code limbRatio} is 1-5 with neutral 3; {@code bodyFat}'s own neutral is 3 (not 5) inside
- * {@link #getDurability()}. {@code height}/{@code muscleMass}/{@code bodyFat} additionally
- * feed {@link #getSymbolicTotalMass()}/{@link #getDisplayMassKg()} directly (not as
- * deviations). See {@code .claude/skills/additive-attribute-formulas.md} for the full design
- * rationale.
+ * {@link #getDurability()}; {@code bloodThickness} is 1-5 neutral 3; {@code skinThickness} is
+ * 1-7 neutral 3. {@code height}/{@code muscleMass}/{@code bodyFat} additionally feed
+ * {@link #getSymbolicTotalMass()}/{@link #getDisplayMassKg()} directly (not as deviations).
+ * See {@code .claude/skills/additive-attribute-formulas.md} for the full design rationale.
  *
  * <p>All formula coefficients are tunable via {@link Body#getCoefficients()} without
  * modifying any formula code. Default coefficients are not balanced game data — tune
@@ -80,7 +82,7 @@ public class PlayableCharacter {
     public double getStrength() {
         double raw = coeff().getBaseline()
                 + coeff().getKStrengthMuscleMass() * (composition().getMuscleMass() - 5)
-                + coeff().getKStrengthNeuromuscular() * (nervousSystem().getNeuromuscularEfficiency() - 5)
+                + coeff().getKStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
                 + coeff().getKStrengthFiberType() * (composition().getDominantFiberType() - 5)
                 + coeff().getKStrengthLimbRatio() * (genetics().getLimbRatio() - 3)
                 + coeff().getKStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5);
@@ -98,7 +100,7 @@ public class PlayableCharacter {
         double massPenalty = Math.floor(
                 (getSymbolicTotalMass() - coeff().getKSpeedMassNeutral()) / coeff().getKSpeedMassDivisor());
         return coeff().getBaseline()
-                + coeff().getKSpeedNeuromuscular() * (nervousSystem().getNeuromuscularEfficiency() - 5)
+                + coeff().getKSpeedNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
                 + coeff().getKSpeedMuscleMass() * (composition().getMuscleMass() - 5)
                 + coeff().getKSpeedFiberType() * (composition().getDominantFiberType() - 5)
                 - massPenalty;
@@ -120,15 +122,19 @@ public class PlayableCharacter {
     /**
      * StaminaPool = baseline + kStaminaPoolPulmonary x (PulmonaryCapacity-5) +
      * kStaminaPoolCardiac x (CardiacOutput-5) + kStaminaPoolOxygen x
-     * (OxygenCarryingCapacity-5) - kStaminaPoolFiberType x (FiberType-5). Pulmonary capacity
-     * is the leading term; fast-twitch fiber bias lowers the pool.
+     * (OxygenCarryingCapacity-5) - kStaminaPoolFiberType x (FiberType-5) +
+     * kStaminaPoolNutrientAbsorption x (NutrientAbsorption-5). Pulmonary capacity is the
+     * leading term; fast-twitch fiber bias lowers the pool; efficient nutrient absorption
+     * (added rpg-13) raises it.
      */
     public double getStaminaPool() {
         return coeff().getBaseline()
                 + coeff().getKStaminaPoolPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
                 + coeff().getKStaminaPoolCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
                 + coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)
-                - coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5);
+                - coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5)
+                + coeff().getKStaminaPoolNutrientAbsorption()
+                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5);
     }
 
     /**
@@ -136,10 +142,12 @@ public class PlayableCharacter {
      * kFatigueResistancePulmonary x (PulmonaryCapacity-5) + kFatigueResistanceOxygen x
      * (OxygenCarryingCapacity-5) - kFatigueResistanceNeuromuscular x
      * (NeuromuscularEfficiency-5) - floor((SymbolicTotalMass - kFatigueResistanceMassNeutral) /
-     * kFatigueResistanceMassDivisor) - kFatigueResistanceMuscleMass x (MuscleMass-5). Cardiac
-     * output leads; high neuromuscular efficiency, heavy mass, and high muscle mass all cause
-     * wear that lowers resistance. Floored — replaces the old (removed) {@code FatigueRate},
-     * with inverted semantics: higher is now better.
+     * kFatigueResistanceMassDivisor) - kFatigueResistanceMuscleMass x (MuscleMass-5) +
+     * kFatigueResistanceHypothalamus x (Hypothalamus-5) + kFatigueResistanceThyroid x
+     * (Thyroid-5). Cardiac output leads; high neuromuscular efficiency, heavy mass, and high
+     * muscle mass all cause wear that lowers resistance; homeostatic (Hypothalamus) and
+     * metabolic-rate (Thyroid) control raise it (added rpg-13). Floored — replaces the old
+     * (removed) {@code FatigueRate}, with inverted semantics: higher is now better.
      */
     public double getFatigueResistance() {
         double massPenalty = Math.floor((getSymbolicTotalMass() - coeff().getKFatigueResistanceMassNeutral())
@@ -150,9 +158,11 @@ public class PlayableCharacter {
                         * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
                 + coeff().getKFatigueResistanceOxygen()
                         * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)
-                - coeff().getKFatigueResistanceNeuromuscular() * (nervousSystem().getNeuromuscularEfficiency() - 5)
+                - coeff().getKFatigueResistanceNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)
                 - massPenalty
-                - coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5);
+                - coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5)
+                + coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
+                + coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalSystem().getThyroid() - 5);
         return floor(raw);
     }
 
@@ -186,7 +196,7 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
-    // SpatialIntelligence-derived attributes
+    // NeuralSystem-derived attributes (spatial/accuracy — formerly SpatialIntelligence)
     // -------------------------------------------------------------------------
 
     /**
@@ -196,8 +206,8 @@ public class PlayableCharacter {
      */
     public double getSight() {
         return coeff().getBaseline()
-                + coeff().getKSensePerception() * (spatialIntelligence().getPerception() - 5)
-                + coeff().getKSenseNeuralDrive() * (nervousSystem().getNeuralDrive() - 5);
+                + coeff().getKSensePerception() * (neuralSystem().getHippocampus() - 5)
+                + coeff().getKSenseNeuralDrive() * (neuralSystem().getNeuralDrive() - 5);
     }
 
     /** Hearing — same base formula as {@link #getSight()}. */
@@ -217,8 +227,8 @@ public class PlayableCharacter {
      */
     public double getEvasion() {
         double raw = getSpeed()
-                + coeff().getKEvasionAgility() * (spatialIntelligence().getAgility() - 5)
-                + coeff().getKEvasionNeuralDrive() * (nervousSystem().getNeuralDrive() - 5)
+                + coeff().getKEvasionAgility() * (neuralSystem().getAgility() - 5)
+                + coeff().getKEvasionNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)
                 + coeff().getKEvasionFlexibility() * (composition().getFlexibility() - 5);
         return floor(raw);
     }
@@ -229,7 +239,7 @@ public class PlayableCharacter {
      */
     public double getAcrobatics() {
         return coeff().getBaseline()
-                + coeff().getKAcrobaticsAgility() * (spatialIntelligence().getAgility() - 5)
+                + coeff().getKAcrobaticsAgility() * (neuralSystem().getAgility() - 5)
                 + coeff().getKAcrobaticsFlexibility() * (composition().getFlexibility() - 5);
     }
 
@@ -239,8 +249,8 @@ public class PlayableCharacter {
      */
     public double getMeleeAccuracy() {
         return coeff().getBaseline()
-                + coeff().getKMeleeAccuracyPrecision() * (spatialIntelligence().getPrecision() - 5)
-                + coeff().getKMeleeAccuracyAgility() * (spatialIntelligence().getAgility() - 5);
+                + coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5)
+                + coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5);
     }
 
     /**
@@ -248,8 +258,170 @@ public class PlayableCharacter {
      */
     public double getAim() {
         return coeff().getBaseline()
-                + coeff().getKAimPrecision() * (spatialIntelligence().getPrecision() - 5)
-                + coeff().getKAimPerception() * (spatialIntelligence().getPerception() - 5);
+                + coeff().getKAimPrecision() * (neuralSystem().getPrecision() - 5)
+                + coeff().getKAimPerception() * (neuralSystem().getHippocampus() - 5);
+    }
+
+    // -------------------------------------------------------------------------
+    // Cognitive / Mental (rpg-13) — NeuralSystem-derived
+    // -------------------------------------------------------------------------
+
+    /** MemoryPool = baseline + kMemoryPoolCerebral x (CerebralCapacity-5) + kMemoryPoolHippocampus x (Hippocampus-5). */
+    public double getMemoryPool() {
+        return coeff().getBaseline()
+                + coeff().getKMemoryPoolCerebral() * (neuralSystem().getCerebralCapacity() - 5)
+                + coeff().getKMemoryPoolHippocampus() * (neuralSystem().getHippocampus() - 5);
+    }
+
+    /** Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5). */
+    public double getReasoning() {
+        return coeff().getBaseline()
+                + coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5);
+    }
+
+    /**
+     * ShortMemory = baseline + kShortMemoryCerebral x (CerebralCapacity-5) +
+     * kShortMemorySynapsis x (SynapsisQuality-5) + kShortMemoryHippocampus x (Hippocampus-5).
+     */
+    public double getShortMemory() {
+        return coeff().getBaseline()
+                + coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5)
+                + coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5)
+                + coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5);
+    }
+
+    /**
+     * MentalHealthPool = baseline - kMentalHealthAmygdala x (AmygdalaAndCingulum-5). Reserve
+     * for future Mind-pillar mechanics — deliberately simplified until that pillar exists.
+     */
+    public double getMentalHealthPool() {
+        return coeff().getBaseline()
+                - coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5);
+    }
+
+    /**
+     * Will — same formula as {@link #getMentalHealthPool()} for now; expected to diverge once
+     * the Mind pillar is implemented.
+     */
+    public double getWill() {
+        return getMentalHealthPool();
+    }
+
+    // -------------------------------------------------------------------------
+    // Sensory / Hormonal / Stress (rpg-13)
+    // -------------------------------------------------------------------------
+
+    /** Balance = baseline + kBalanceHippocampus x (Hippocampus-5) + kBalanceNeuralDrive x (NeuralDrive-5). */
+    public double getBalance() {
+        return coeff().getBaseline()
+                + coeff().getKBalanceHippocampus() * (neuralSystem().getHippocampus() - 5)
+                + coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5);
+    }
+
+    /**
+     * StressResistance = baseline - kStressResistanceAmygdala x (AmygdalaAndCingulum-5) -
+     * kStressResistanceAdrenal x (AdrenalGlands-5).
+     */
+    public double getStressResistance() {
+        return coeff().getBaseline()
+                - coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)
+                - coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalSystem().getAdrenalGlands() - 5);
+    }
+
+    // -------------------------------------------------------------------------
+    // Biological defense (rpg-13)
+    // -------------------------------------------------------------------------
+
+    /**
+     * PoisonResistance = baseline + kPoisonResistanceImmunity x (Immunity-5) -
+     * kPoisonResistanceCardiac x (CardiacOutput-5) - kPoisonResistanceBloodThickness x
+     * (BloodThickness-3).
+     */
+    public double getPoisonResistance() {
+        return coeff().getBaseline()
+                + coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5)
+                - coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
+                - coeff().getKPoisonResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3);
+    }
+
+    /**
+     * DiseaseResistance = baseline + kDiseaseResistanceImmunity x (Immunity-5) +
+     * kDiseaseResistanceAmygdala x (AmygdalaAndCingulum-5).
+     */
+    public double getDiseaseResistance() {
+        return coeff().getBaseline()
+                + coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5)
+                + coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5);
+    }
+
+    /**
+     * BleedingResistance = baseline + kBleedingResistanceBloodThickness x (BloodThickness-3) -
+     * kBleedingResistanceCardiac x (CardiacOutput-5).
+     */
+    public double getBleedingResistance() {
+        return coeff().getBaseline()
+                + coeff().getKBleedingResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)
+                - coeff().getKBleedingResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5);
+    }
+
+    // -------------------------------------------------------------------------
+    // Metabolic / survival (rpg-13)
+    // -------------------------------------------------------------------------
+
+    /**
+     * ThermalResistance = baseline + kThermalResistanceSkin x (SkinThickness-3) +
+     * kThermalResistanceBodyFat x (BodyFat-3) + kThermalResistanceHypothalamus x
+     * (Hypothalamus-5). Natural human ceiling is 83 (SkinThickness UI-locked to 4) — the true
+     * ceiling (98, SkinThickness=7) is reserved for future non-human races.
+     */
+    public double getThermalResistance() {
+        return coeff().getBaseline()
+                + coeff().getKThermalResistanceSkin() * (genetics().getSkinThickness() - 3)
+                + coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3)
+                + coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5);
+    }
+
+    /** BreathOutput = baseline + kBreathOutputPulmonary x (PulmonaryCapacity-5). */
+    public double getBreathOutput() {
+        return coeff().getBaseline()
+                + coeff().getKBreathOutputPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5);
+    }
+
+    /**
+     * DehydrationResistance = baseline + kDehydrationResistanceHypothalamus x (Hypothalamus-5)
+     * + kDehydrationResistanceKetosis x (KetosisQuality-5).
+     */
+    public double getDehydrationResistance() {
+        return coeff().getBaseline()
+                + coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
+                + coeff().getKDehydrationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5);
+    }
+
+    /**
+     * StarvationResistance = baseline + kStarvationResistanceHypothalamus x (Hypothalamus-5) +
+     * kStarvationResistanceNutrient x (NutrientAbsorption-5) + kStarvationResistanceKetosis x
+     * (KetosisQuality-5).
+     */
+    public double getStarvationResistance() {
+        return coeff().getBaseline()
+                + coeff().getKStarvationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
+                + coeff().getKStarvationResistanceNutrient()
+                        * (bodySystems().getDigestiveSystem().getNutrientAbsorption() - 5)
+                + coeff().getKStarvationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5);
+    }
+
+    /**
+     * FoodPoisoningAlcoholResistance = baseline + kFoodPoisoningImpurity x (ImpurityCleaning-5)
+     * + kFoodPoisoningImmunity x (Immunity-5).
+     */
+    public double getFoodPoisoningAlcoholResistance() {
+        return coeff().getBaseline()
+                + coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5)
+                + coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5);
     }
 
     // -------------------------------------------------------------------------
@@ -315,8 +487,7 @@ public class PlayableCharacter {
     private Genetics genetics() { return body.getBiomechanics().getGenetics(); }
     private BodyComposition composition() { return body.getBiomechanics().getBodyComposition(); }
     private BodySystems bodySystems() { return body.getBodySystems(); }
-    private NervousSystem nervousSystem() { return body.getBodySystems().getNervousSystem(); }
-    private SpatialIntelligence spatialIntelligence() { return body.getSpatialIntelligence(); }
+    private NeuralSystem neuralSystem() { return body.getBodySystems().getNeuralSystem(); }
     private BodyCoefficients coeff() { return body.getCoefficients(); }
 
     /** Applies the shared safety floor used by Strength, FatigueResistance, Evasion, and MaxMovementSpeed. */

@@ -4,7 +4,6 @@ import com.keynor.rpg.domain.model.Biomechanics;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.BodySystems;
 import com.keynor.rpg.domain.model.PlayableCharacter;
-import com.keynor.rpg.domain.model.SpatialIntelligence;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 
 /**
@@ -15,9 +14,8 @@ import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 public class PreviewAttributesService implements PreviewAttributesUseCase {
 
     @Override
-    public PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems,
-                                        SpatialIntelligence spatialIntelligence) {
-        Body body = Body.previewTemplate(biomechanics, bodySystems, spatialIntelligence);
+    public PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems) {
+        Body body = Body.previewTemplate(biomechanics, bodySystems);
         return new PlayableCharacter("preview", body);
     }
 }

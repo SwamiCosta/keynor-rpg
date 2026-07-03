@@ -7,8 +7,9 @@ import static org.assertj.core.api.Assertions.within;
 
 /**
  * Covers the additive-standard formulas introduced in rpg-11 (baseline 60 + weighted
- * deviations from each input's neutral point). Human defaults land every deviation at
- * zero, so every baseline-anchored attribute equals exactly 60 on {@link Body#humanTemplate()}.
+ * deviations from each input's neutral point) and extended in rpg-13 (Neural/Hormonal/
+ * Digestive systems, 15 new attributes). Human defaults land every deviation at zero, so
+ * every baseline-anchored attribute equals exactly 60 on {@link Body#humanTemplate()}.
  */
 class PlayableCharacterTest {
 
@@ -51,7 +52,6 @@ class PlayableCharacterTest {
     @Test
     void getSymbolicTotalMass_increasesWithHeightMuscleMassBodyFatAndBoneDensity() {
         Body body = Body.humanTemplate();
-        body.getBiomechanics().getGenetics(); // sanity: genetics is immutable, composition/bone density mutate below
         body.getBiomechanics().getBodyComposition().setMuscleMass(10);
         body.getBiomechanics().getBodyComposition().setBodyFat(6);
         PlayableCharacter character = new PlayableCharacter("test", body);
@@ -80,13 +80,12 @@ class PlayableCharacterTest {
 
     @Test
     void getStrength_higherMuscleMassNeuromuscularFiberTypeLimbRatioAndMuscleDistribution_allIncreaseStrength() {
-        Genetics genetics = new Genetics(5, 5, 5, 7, 5, 5);
+        Genetics genetics = new Genetics(5, 5, 5, 7, 5, 5, 3);
         BodyComposition composition = new BodyComposition(3, 9, 9, 9, 9);
-        NervousSystem nervousSystem = new NervousSystem(5, 9);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), nervousSystem);
-        Body body = Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems,
-                SpatialIntelligence.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        Body body = Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         double expected = 60
@@ -122,10 +121,9 @@ class PlayableCharacterTest {
 
     @Test
     void getSpeed_isNotAffectedByLimbRatio() {
-        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5);
+        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5, 3);
         PlayableCharacter longLimbed = new PlayableCharacter("test",
-                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
-                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()), BodySystems.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(longLimbed.getSpeed()).isCloseTo(defaults.getSpeed(), within(TOLERANCE));
@@ -133,13 +131,12 @@ class PlayableCharacterTest {
 
     @Test
     void getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor() {
-        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9);
+        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9, 3);
         BodyComposition composition = new BodyComposition(10, 1, 1, 5, 5);
-        NervousSystem nervousSystem = new NervousSystem(5, 1);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 1, 5, 5, 5, 5, 5, 5, 5, 5);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), nervousSystem);
-        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems,
-                SpatialIntelligence.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         // SymbolicTotalMass = 10+15+1+10+(9-5) = 40; massPenalty = floor((40-25)/3) = 5
@@ -175,10 +172,9 @@ class PlayableCharacterTest {
 
     @Test
     void getMaxMovementSpeed_longerLimbRatio_increasesMaxMovementSpeed() {
-        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5);
+        Genetics longLimbs = new Genetics(5, 5, 5, 7, 5, 5, 3);
         PlayableCharacter longLimbed = new PlayableCharacter("test",
-                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()),
-                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+                Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()), BodySystems.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(longLimbed.getMaxMovementSpeed()).isGreaterThan(defaults.getMaxMovementSpeed());
@@ -186,10 +182,9 @@ class PlayableCharacterTest {
 
     @Test
     void getMaxMovementSpeed_shorterLimbRatio_reducesMaxMovementSpeed() {
-        Genetics shortLimbs = new Genetics(5, 5, 5, 7, 1, 5);
+        Genetics shortLimbs = new Genetics(5, 5, 5, 7, 1, 5, 3);
         PlayableCharacter shortLimbed = new PlayableCharacter("test",
-                Body.previewTemplate(new Biomechanics(shortLimbs, BodyComposition.defaults()),
-                        BodySystems.defaults(), SpatialIntelligence.defaults()));
+                Body.previewTemplate(new Biomechanics(shortLimbs, BodyComposition.defaults()), BodySystems.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(shortLimbed.getMaxMovementSpeed()).isLessThan(defaults.getMaxMovementSpeed());
@@ -228,6 +223,16 @@ class PlayableCharacterTest {
     }
 
     @Test
+    void getStaminaPool_higherNutrientAbsorption_increasesPool() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getDigestiveSystem().setNutrientAbsorption(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        double expected = 60 + 2 * (9 - 5);
+        assertThat(character.getStaminaPool()).isCloseTo(expected, within(TOLERANCE));
+    }
+
+    @Test
     void getFatigueResistance_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -236,17 +241,17 @@ class PlayableCharacterTest {
 
     @Test
     void getFatigueResistance_worstCaseSliderCombination_isStillPositiveButFlooredIfPushedFurther() {
-        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9);
+        Genetics worstCase = new Genetics(5, 5, 5, 15, 3, 9, 3);
         BodyComposition composition = new BodyComposition(10, 15, 5, 5, 5);
-        NervousSystem nervousSystem = new NervousSystem(5, 9);
-        BodySystems bodySystems = new BodySystems(new BloodSystem(1), new CardiacSystem(1),
-                new PulmonarySystem(1), nervousSystem);
-        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems,
-                SpatialIntelligence.defaults());
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5);
+        BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1),
+                new PulmonarySystem(1), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         // SymbolicTotalMass = 10+15+15+10+(9-5) = 54; massPenalty = floor((54-25)/2) = 14
-        // raw = 60 + 3*(1-5) + 1*(1-5) + 1*(1-5) - 2*(9-5) - 14 - 1*(15-5) = 60-12-4-4-8-14-10 = 8
+        // raw = 60 + 3*(1-5) + 1*(1-5) + 1*(1-5) - 2*(9-5) - 14 - 1*(15-5) + 1*(5-5) + 2*(5-5)
+        //     = 60-12-4-4-8-14-10+0+0 = 8
         assertThat(character.getFatigueResistance()).isCloseTo(8.0, within(TOLERANCE));
     }
 
@@ -258,6 +263,17 @@ class PlayableCharacterTest {
         PlayableCharacter character = new PlayableCharacter("test", body);
 
         assertThat(character.getFatigueResistance()).isEqualTo(body.getCoefficients().getAttributeFloor());
+    }
+
+    @Test
+    void getFatigueResistance_higherHypothalamusOrThyroid_increasesResistance() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getNeuralSystem().setHypothalamus(9);
+        body.getBodySystems().getHormonalSystem().setThyroid(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getFatigueResistance()).isGreaterThan(defaults.getFatigueResistance());
     }
 
     @Test
@@ -279,12 +295,11 @@ class PlayableCharacterTest {
 
     @Test
     void getStaminaRecovery_higherOxygenCarryingCapacity_increasesRecovery() {
-        Body body = Body.humanTemplate();
-        body.getBodySystems().getBloodSystem(); // BloodSystem is immutable — build a new one instead
-        BodySystems bodySystems = new BodySystems(new BloodSystem(9), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), NervousSystem.defaults());
+        BodySystems bodySystems = new BodySystems(new BloodSystem(9, 3), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalSystem.defaults(),
+                DigestiveSystem.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
-                Body.previewTemplate(Biomechanics.defaults(), bodySystems, SpatialIntelligence.defaults()));
+                Body.previewTemplate(Biomechanics.defaults(), bodySystems));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getStaminaRecovery()).isGreaterThan(defaults.getStaminaRecovery());
@@ -347,9 +362,9 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getSight_higherPerception_increasesAllSenses() {
+    void getSight_higherHippocampus_increasesAllSenses() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setPerception(9);
+        body.getBodySystems().getNeuralSystem().setHippocampus(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -359,7 +374,7 @@ class PlayableCharacterTest {
     @Test
     void getSight_higherNeuralDrive_increasesAllSenses() {
         Body body = Body.humanTemplate();
-        body.getBodySystems().getNervousSystem().setNeuralDrive(9);
+        body.getBodySystems().getNeuralSystem().setNeuralDrive(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -380,7 +395,7 @@ class PlayableCharacterTest {
     @Test
     void getEvasion_higherAgilityNeuralDriveOrFlexibility_increasesEvasion() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setAgility(9);
+        body.getBodySystems().getNeuralSystem().setAgility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -390,7 +405,7 @@ class PlayableCharacterTest {
     @Test
     void getEvasion_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setAgility(1);
+        body.getBodySystems().getNeuralSystem().setAgility(1);
         body.getCoefficients().setKEvasionAgility(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
@@ -411,7 +426,7 @@ class PlayableCharacterTest {
     @Test
     void getAcrobatics_higherAgilityOrFlexibility_increasesAcrobatics() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setAgility(9);
+        body.getBodySystems().getNeuralSystem().setAgility(9);
         body.getBiomechanics().getBodyComposition().setFlexibility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -429,7 +444,7 @@ class PlayableCharacterTest {
     @Test
     void getMeleeAccuracy_higherPrecision_increasesMeleeAccuracy() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setPrecision(9);
+        body.getBodySystems().getNeuralSystem().setPrecision(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -444,14 +459,300 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getAim_higherPerceptionOrPrecision_increasesAim() {
+    void getAim_higherHippocampusOrPrecision_increasesAim() {
         Body body = Body.humanTemplate();
-        body.getSpatialIntelligence().setPerception(9);
-        body.getSpatialIntelligence().setPrecision(9);
+        body.getBodySystems().getNeuralSystem().setHippocampus(9);
+        body.getBodySystems().getNeuralSystem().setPrecision(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getAim()).isGreaterThan(defaults.getAim());
+    }
+
+    // -------------------------------------------------------------------------
+    // Cognitive / Mental (rpg-13)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getMemoryPool_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getMemoryPool()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getMemoryPool_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getNeuralSystem().setCerebralCapacity(9);
+        max.getBodySystems().getNeuralSystem().setHippocampus(9);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getNeuralSystem().setCerebralCapacity(1);
+        min.getBodySystems().getNeuralSystem().setHippocampus(1);
+
+        assertThat(new PlayableCharacter("test", max).getMemoryPool()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getMemoryPool()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getReasoning_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getReasoning()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getReasoning_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getNeuralSystem().setSynapsisQuality(9);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getNeuralSystem().setSynapsisQuality(1);
+
+        assertThat(new PlayableCharacter("test", max).getReasoning()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getReasoning()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getShortMemory_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getShortMemory()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getShortMemory_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getNeuralSystem().setCerebralCapacity(9);
+        max.getBodySystems().getNeuralSystem().setSynapsisQuality(9);
+        max.getBodySystems().getNeuralSystem().setHippocampus(9);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getNeuralSystem().setCerebralCapacity(1);
+        min.getBodySystems().getNeuralSystem().setSynapsisQuality(1);
+        min.getBodySystems().getNeuralSystem().setHippocampus(1);
+
+        assertThat(new PlayableCharacter("test", max).getShortMemory()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getShortMemory()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getMentalHealthPool_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getMentalHealthPool()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getMentalHealthPool_higherAmygdala_reducesPool() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        assertThat(character.getMentalHealthPool()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getWill_alwaysEqualsMentalHealthPool() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(2);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+
+        assertThat(character.getWill()).isCloseTo(character.getMentalHealthPool(), within(TOLERANCE));
+    }
+
+    // -------------------------------------------------------------------------
+    // Sensory / Hormonal / Stress (rpg-13)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getBalance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBalance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getBalance_higherHippocampusOrNeuralDrive_increasesBalance() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getNeuralSystem().setHippocampus(9);
+        body.getBodySystems().getNeuralSystem().setNeuralDrive(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBalance()).isGreaterThan(defaults.getBalance());
+    }
+
+    @Test
+    void getStressResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getStressResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getStressResistance_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(1);
+        max.getBodySystems().getHormonalSystem().setAdrenalGlands(1);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9);
+        min.getBodySystems().getHormonalSystem().setAdrenalGlands(9);
+
+        assertThat(new PlayableCharacter("test", max).getStressResistance()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getStressResistance()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    // -------------------------------------------------------------------------
+    // Biological defense (rpg-13)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getPoisonResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getPoisonResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getPoisonResistance_atExtremes_staysWithinTwentyToOneHundred() {
+        NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 9, 5, 5); // immunity=9
+        BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1), PulmonarySystem.defaults(),
+                maxNeural, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        PlayableCharacter max = new PlayableCharacter("test", Body.previewTemplate(Biomechanics.defaults(), maxSystems));
+
+        NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 1, 5, 5); // immunity=1
+        BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9), PulmonarySystem.defaults(),
+                minNeural, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        PlayableCharacter min = new PlayableCharacter("test", Body.previewTemplate(Biomechanics.defaults(), minSystems));
+
+        assertThat(max.getPoisonResistance()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(min.getPoisonResistance()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getDiseaseResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getDiseaseResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getDiseaseResistance_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getNeuralSystem().setImmunity(9);
+        max.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getNeuralSystem().setImmunity(1);
+        min.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(1);
+
+        assertThat(new PlayableCharacter("test", max).getDiseaseResistance()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getDiseaseResistance()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getBleedingResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBleedingResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getBleedingResistance_higherBloodThickness_increasesResistance() {
+        BodySystems bodySystems = new BodySystems(new BloodSystem(5, 5), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalSystem.defaults(),
+                DigestiveSystem.defaults());
+        PlayableCharacter character = new PlayableCharacter("test",
+                Body.previewTemplate(Biomechanics.defaults(), bodySystems));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBleedingResistance()).isGreaterThan(defaults.getBleedingResistance());
+    }
+
+    // -------------------------------------------------------------------------
+    // Metabolic / survival (rpg-13)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getThermalResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getThermalResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getThermalResistance_humanUiCeiling_isEightyThree() {
+        // SkinThickness UI-locked to 4 for humans; BodyFat and Hypothalamus at their true max
+        Genetics genetics = new Genetics(5, 5, 5, 7, 3, 5, 4);
+        BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 9, 5, 5, 5, 5);
+        BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        PlayableCharacter character = new PlayableCharacter("test",
+                Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems));
+
+        assertThat(character.getThermalResistance()).isCloseTo(83.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getThermalResistance_trueRaceCeiling_neverExceedsOneHundred() {
+        Genetics genetics = new Genetics(5, 5, 5, 7, 3, 5, 7);
+        BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 9, 5, 5, 5, 5);
+        BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        PlayableCharacter character = new PlayableCharacter("test",
+                Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems));
+
+        assertThat(character.getThermalResistance()).isLessThanOrEqualTo(100.0);
+    }
+
+    @Test
+    void getBreathOutput_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBreathOutput()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getBreathOutput_atExtremes_staysWithinTwentyToOneHundred() {
+        Body max = Body.humanTemplate();
+        max.getBodySystems().getPulmonarySystem().setPulmonaryCapacity(9);
+        Body min = Body.humanTemplate();
+        min.getBodySystems().getPulmonarySystem().setPulmonaryCapacity(1);
+
+        assertThat(new PlayableCharacter("test", max).getBreathOutput()).isCloseTo(100.0, within(TOLERANCE));
+        assertThat(new PlayableCharacter("test", min).getBreathOutput()).isCloseTo(20.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getDehydrationResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getDehydrationResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getStarvationResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getStarvationResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getFoodPoisoningAlcoholResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getFoodPoisoningAlcoholResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getFoodPoisoningAlcoholResistance_higherImpurityCleaningOrImmunity_increasesResistance() {
+        Body body = Body.humanTemplate();
+        body.getBodySystems().getDigestiveSystem().setImpurityCleaning(9);
+        body.getBodySystems().getNeuralSystem().setImmunity(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getFoodPoisoningAlcoholResistance())
+                .isGreaterThan(defaults.getFoodPoisoningAlcoholResistance());
     }
 
     // -------------------------------------------------------------------------

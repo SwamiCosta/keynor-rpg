@@ -1,4 +1,4 @@
-# Additive Attribute Standard (rpg-11)
+# Additive Attribute Standard (rpg-11, extended rpg-13)
 
 **Scope:** `PlayableCharacter`'s derived-attribute formulas and `BodyCoefficients`, in this project only. Maintained by Gaemes; referenced from `gaemes.md`'s Mandatory reading (Skill 06 pattern — see workspace `SKILLS.md`).
 
@@ -57,6 +57,33 @@ At human defaults: `Strength = 60`, `MaxCapacityKg = floor(3600/150) + 60 = 84`,
 - **`FatigueRate(intensity)`** removed, replaced by **`FatigueResistance`** (no `intensity` parameter — fully static baseline attribute) — semantics inverted: higher `FatigueRate` used to mean "fatigues faster" (worse); higher `FatigueResistance` means "resists fatigue better" (better).
 - **`EnergyCost(intensity)`** removed — it was already excluded from the REST contract before rpg-11 (real-time-activity-dependent, not a static trait) and depended on the old mass model that no longer exists.
 - **`StaminaRecovery`** is new — oxygenation-led recovery speed, penalized by fast-twitch fiber bias.
+
+## NeuralSystem absorbed SpatialIntelligence (rpg-13)
+
+`SpatialIntelligence` (perception/agility/precision) no longer exists as its own `Body` field. Its three fields moved into `NeuralSystem` (renamed from `NervousSystem`) — `perception` was renamed `hippocampus` to match the biological-system naming the user chose for the rest of the group; `agility`/`precision` moved unchanged. `NeuralSystem` now holds ten 1-9 fields: `neuralDrive`, `neuromuscularEfficiency`, `cerebralCapacity`, `synapsisQuality`, `hippocampus`, `hypothalamus`, `amygdalaAndCingulum`, `immunity`, `agility`, `precision`. This was an explicit user instruction ("reestruturados... incorporação de Spatial Awareness dentro de Neural System") — a real domain-model merge, not just a UI grouping choice — and it broke the `body.spatialIntelligence` REST contract (removed entirely; those three values now live under `body.bodySystems.neuralSystem`).
+
+Two more systems were added as `BodySystems` siblings, both fully trainable (mutable), all fields 1-9 neutral 5:
+- **`HormonalSystem`**: `thyroid`, `adrenalGlands`.
+- **`DigestiveSystem`**: `nutrientAbsorption`, `impurityCleaning`, `ketosisQuality`.
+
+**`bloodThickness`** (added to `BloodSystem`, 1-5 neutral 3) and **`skinThickness`** (added to `Genetics`, 1-7 neutral 3) are both immutable/genetic for now, matching the precedent of every other structural/physical trait in those classes (`oxygenCarryingCapacity`, `boneDensity`). The user explicitly flagged these as provisional — expect a future revision to reconsider mutability workspace-wide. Flipping either to trainable is a two-line change (drop `final`, add a setter) with no other structural impact, by design.
+
+`skinThickness` accepts its full 1-7 domain range even though the frontend currently locks the human character-creation slider to [2-4] — the wider range exists for future non-human races (documented as a UI-only restriction, not a domain constraint).
+
+### The 15 rpg-13 attributes
+
+All new attributes follow the same `baseline + Σ weight × (input - neutral)` shape — no new exceptions were introduced. Every one of them was verified by computed worst-case combination (not just eyeballed) to land inside 20-100; several hit exactly 20/100 at the extremes by design (see `PlayableCharacterTest`'s `*_atExtremes_staysWithinTwentyToOneHundred` tests). None needed a floor — natural minimums are all positive.
+
+| Module | Attributes | Key inputs |
+|---|---|---|
+| Cognitive/Mental | `MemoryPool`, `Reasoning`, `ShortMemory`, `MentalHealthPool`, `Will` (= `MentalHealthPool`, kept deliberately simplified pending the future Mind pillar) | `cerebralCapacity`, `synapsisQuality`, `hippocampus`, `amygdalaAndCingulum` |
+| Sensory/Hormonal/Stress | `Balance`, `StressResistance` | `hippocampus`, `neuralDrive`, `amygdalaAndCingulum`, `adrenalGlands` |
+| Biological defense | `PoisonResistance`, `DiseaseResistance`, `BleedingResistance` | `immunity`, `cardiacOutput`, `bloodThickness`, `amygdalaAndCingulum` |
+| Metabolic/survival | `ThermalResistance`, `BreathOutput`, `DehydrationResistance`, `StarvationResistance`, `FoodPoisoningAlcoholResistance` | `skinThickness`, `bodyFat`, `hypothalamus`, `pulmonaryCapacity`, `ketosisQuality`, `nutrientAbsorption`, `impurityCleaning`, `immunity` |
+
+`ThermalResistance` is the one attribute with a documented sub-100 human ceiling: with `skinThickness` UI-locked to 4, the human-reachable maximum is 83 (`BodyFat`=10, `Hypothalamus`=9); the true domain ceiling (`skinThickness`=7, reserved for future races) is 98 — see `getThermalResistance_humanUiCeiling_isEightyThree` / `..._trueRaceCeiling_neverExceedsOneHundred`.
+
+Two pre-existing formulas gained a term in rpg-13: `StaminaPool` (+`kStaminaPoolNutrientAbsorption × (NutrientAbsorption-5)`) and `FatigueResistance` (+`kFatigueResistanceHypothalamus × (Hypothalamus-5)` + `kFatigueResistanceThyroid × (Thyroid-5)`).
 
 ## Extending this pattern
 
