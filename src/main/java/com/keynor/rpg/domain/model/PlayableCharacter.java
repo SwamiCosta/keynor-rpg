@@ -279,7 +279,7 @@ public class PlayableCharacter {
                 -massPenalty,
                 -coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5),
                 coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
-                coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalSystem().getThyroid() - 5)
+                coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalGlandularSystem().getThyroid() - 5)
         ));
     }
 
@@ -553,7 +553,7 @@ public class PlayableCharacter {
     public AttributeBreakdown getStressResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 -coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                -coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalSystem().getAdrenalGlands() - 5)
+                -coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalGlandularSystem().getAdrenalGlands() - 5)
         ));
     }
 
@@ -707,7 +707,7 @@ public class PlayableCharacter {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
                 coeff().getKDehydrationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
+                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5)
         ));
     }
 
@@ -726,7 +726,7 @@ public class PlayableCharacter {
                 coeff().getKStarvationResistanceDigestiveAbsorption()
                         * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
                 coeff().getKStarvationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5)
+                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5)
         ));
     }
 
@@ -817,7 +817,7 @@ public class PlayableCharacter {
                 -coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5),
                 coeff().getKFatGainRateDigestiveAbsorption()
                         * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                -coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisQuality() - 5),
+                -coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5),
                 -coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5)
         ));
     }
@@ -915,6 +915,47 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
+    // Arcane organs — magical races only. Each of the three organs (SubtleEpiphysealGland,
+    // AstralVentriculum, NoeticPlexus) is absent (0) on the human default template, and each
+    // formula reads only its own organ around a neutral point of 6 (not the usual 5) with a
+    // wider weight (8) — at the absent value (0), every one of these three attributes resolves
+    // to 60 - 48 = 12, reflecting a character with no capacity for magic whatsoever.
+    // -------------------------------------------------------------------------
+
+    /** ManaPool = baseline + kManaPoolEpiphyseal x (SubtleEpiphysealGland-6). */
+    public AttributeBreakdown getManaPoolBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKManaPoolEpiphyseal() * (bodySystems().getHormonalGlandularSystem().getSubtleEpiphysealGland() - 6)
+        ));
+    }
+
+    public double getManaPool() {
+        return getManaPoolBreakdown().total();
+    }
+
+    /** ArcaneOutput = baseline + kArcaneOutputVentriculum x (AstralVentriculum-6). */
+    public AttributeBreakdown getArcaneOutputBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKArcaneOutputVentriculum() * (bodySystems().getCardiacSystem().getAstralVentriculum() - 6)
+        ));
+    }
+
+    public double getArcaneOutput() {
+        return getArcaneOutputBreakdown().total();
+    }
+
+    /** SixthSense = baseline + kSixthSenseNoeticPlexus x (NoeticPlexus-6). */
+    public AttributeBreakdown getSixthSenseBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSixthSenseNoeticPlexus() * (neuralSystem().getNoeticPlexus() - 6)
+        ));
+    }
+
+    public double getSixthSense() {
+        return getSixthSenseBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
     // Lore link
     // -------------------------------------------------------------------------
 
@@ -956,7 +997,7 @@ public class PlayableCharacter {
      * below its neutral point (5) — {@code 5 - input}, ranging 1-4. Zero at or above neutral.
      */
     private int testosteroneModifier() {
-        int input = bodySystems().getHormonalSystem().getPredominantMorphicHormone();
+        int input = bodySystems().getHormonalGlandularSystem().getPredominantMorphicHormone();
         return input < 5 ? 5 - input : 0;
     }
 
@@ -965,7 +1006,7 @@ public class PlayableCharacter {
      * above its neutral point (5) — {@code input - 5}, ranging 1-4. Zero at or below neutral.
      */
     private int progesteroneModifier() {
-        int input = bodySystems().getHormonalSystem().getPredominantMorphicHormone();
+        int input = bodySystems().getHormonalGlandularSystem().getPredominantMorphicHormone();
         return input > 5 ? input - 5 : 0;
     }
 }

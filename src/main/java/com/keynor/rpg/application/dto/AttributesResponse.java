@@ -13,7 +13,8 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double diseaseResistance, double bleedingResistance, double thermalResistance,
                                   double breathOutput, double dehydrationResistance, double starvationResistance,
                                   double foodPoisoningAlcoholResistance, double fatGainRate, double muscleGainRate,
-                                  double intimidation, double diplomacy, double enfactuation, double command) {
+                                  double intimidation, double diplomacy, double enfactuation, double command,
+                                  double manaPool, double arcaneOutput, double sixthSense) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -59,6 +60,9 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getIntimidation(),
                 character.getDiplomacy(),
                 character.getEnfactuation(),
-                character.getCommand());
+                character.getCommand(),
+                character.getManaPool(),
+                character.getArcaneOutput(),
+                character.getSixthSense());
     }
 }

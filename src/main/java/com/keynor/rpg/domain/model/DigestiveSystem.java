@@ -2,15 +2,15 @@ package com.keynor.rpg.domain.model;
 
 /**
  * New system (rpg-13): trainable digestive/metabolic layer, sibling of {@link CardiacSystem}/
- * {@link PulmonarySystem}/{@link HormonalSystem} inside {@link BodySystems}. All three fields
- * are 1-9, neutral 5.
+ * {@link PulmonarySystem}/{@link HormonalGlandularSystem} inside {@link BodySystems}. All three
+ * fields are 1-9, neutral 5.
  *
  * <p>{@code digestiveAbsorption} (renamed from {@code nutrientAbsorption} in Delta V4) feeds
  * {@link PlayableCharacter#getStaminaPool()}, {@link PlayableCharacter#getStarvationResistance()},
  * {@link PlayableCharacter#getFatGainRate()}, {@link PlayableCharacter#getMuscleGainRate()}, and
- * (new, Delta V4) a light negative term on
- * {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}. {@code impurityCleaning} feeds
- * {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}. {@code ketosisQuality} feeds
+ * a light negative term on {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}.
+ * {@code impurityCleaning} feeds {@link PlayableCharacter#getFoodPoisoningAlcoholResistance()}.
+ * {@code ketosisEfficiency} (renamed from {@code ketosisQuality}) feeds
  * {@link PlayableCharacter#getDehydrationResistance()} and
  * {@link PlayableCharacter#getStarvationResistance()}.
  */
@@ -18,12 +18,12 @@ public class DigestiveSystem {
 
     private int digestiveAbsorption;
     private int impurityCleaning;
-    private int ketosisQuality;
+    private int ketosisEfficiency;
 
-    public DigestiveSystem(int digestiveAbsorption, int impurityCleaning, int ketosisQuality) {
+    public DigestiveSystem(int digestiveAbsorption, int impurityCleaning, int ketosisEfficiency) {
         this.digestiveAbsorption = digestiveAbsorption;
         this.impurityCleaning = impurityCleaning;
-        this.ketosisQuality = ketosisQuality;
+        this.ketosisEfficiency = ketosisEfficiency;
     }
 
     public static DigestiveSystem defaults() {
@@ -46,11 +46,11 @@ public class DigestiveSystem {
         this.impurityCleaning = impurityCleaning;
     }
 
-    public int getKetosisQuality() {
-        return ketosisQuality;
+    public int getKetosisEfficiency() {
+        return ketosisEfficiency;
     }
 
-    public void setKetosisQuality(int ketosisQuality) {
-        this.ketosisQuality = ketosisQuality;
+    public void setKetosisEfficiency(int ketosisEfficiency) {
+        this.ketosisEfficiency = ketosisEfficiency;
     }
 }

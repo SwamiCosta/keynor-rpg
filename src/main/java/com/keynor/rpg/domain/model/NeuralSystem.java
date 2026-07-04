@@ -26,6 +26,12 @@ package com.keynor.rpg.domain.model;
  * {@link PlayableCharacter#getShortMemory()}), while {@code thalamus} feeds the senses
  * ({@link PlayableCharacter#getSight()}, etc.), {@link PlayableCharacter#getAim()}, and
  * {@link PlayableCharacter#getBalance()}.
+ *
+ * <p>{@code noeticPlexus} ("a network of arcane nerves capable of perceiving and sensing
+ * magical signals") is a magical organ only magical races possess — absent (0) for the human
+ * default template, which locks its slider disabled in the frontend. When present, its neutral
+ * point is 6 (not 5) and it feeds {@link PlayableCharacter#getSixthSense()} exclusively, using a
+ * wider weight (8) than the standard 1-9 traits.
  */
 public class NeuralSystem {
 
@@ -40,10 +46,11 @@ public class NeuralSystem {
     private int immunity;
     private int agility;
     private int precision;
+    private int noeticPlexus;
 
     public NeuralSystem(int neuralDrive, int neuromuscularEfficiency, int cerebralCapacity, int synapsisQuality,
                          int hippocampus, int thalamus, int hypothalamus, int amygdalaAndCingulum, int immunity,
-                         int agility, int precision) {
+                         int agility, int precision, int noeticPlexus) {
         this.neuralDrive = neuralDrive;
         this.neuromuscularEfficiency = neuromuscularEfficiency;
         this.cerebralCapacity = cerebralCapacity;
@@ -55,10 +62,11 @@ public class NeuralSystem {
         this.immunity = immunity;
         this.agility = agility;
         this.precision = precision;
+        this.noeticPlexus = noeticPlexus;
     }
 
     public static NeuralSystem defaults() {
-        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5);
+        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
     }
 
     public int getNeuralDrive() {
@@ -147,5 +155,13 @@ public class NeuralSystem {
 
     public void setPrecision(int precision) {
         this.precision = precision;
+    }
+
+    public int getNoeticPlexus() {
+        return noeticPlexus;
+    }
+
+    public void setNoeticPlexus(int noeticPlexus) {
+        this.noeticPlexus = noeticPlexus;
     }
 }
