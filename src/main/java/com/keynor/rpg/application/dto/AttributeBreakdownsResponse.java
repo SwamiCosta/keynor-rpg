@@ -61,7 +61,32 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("command", AttributeBreakdownResponse.from(character.getCommandBreakdown()));
         map.put("manaPool", AttributeBreakdownResponse.from(character.getManaPoolBreakdown()));
         map.put("arcaneOutput", AttributeBreakdownResponse.from(character.getArcaneOutputBreakdown()));
-        map.put("sixthSense", AttributeBreakdownResponse.from(character.getSixthSenseBreakdown()));
+        map.put("mediunity", AttributeBreakdownResponse.from(character.getMediunityBreakdown()));
+        map.put("selfConcern", AttributeBreakdownResponse.from(character.getSelfConcernBreakdown()));
+        map.put("friendshipConcern", AttributeBreakdownResponse.from(character.getFriendshipConcernBreakdown()));
+        map.put("orderConcern", AttributeBreakdownResponse.from(character.getOrderConcernBreakdown()));
+        map.put("freedomConcern", AttributeBreakdownResponse.from(character.getFreedomConcernBreakdown()));
+        map.put("patriotismConcern", AttributeBreakdownResponse.from(character.getPatriotismConcernBreakdown()));
+        map.put("spiritualConcern", AttributeBreakdownResponse.from(character.getSpiritualConcernBreakdown()));
+        map.put("philosophyConcern", AttributeBreakdownResponse.from(character.getPhilosophyConcernBreakdown()));
+        map.put("academicConcern", AttributeBreakdownResponse.from(character.getAcademicConcernBreakdown()));
+        map.put("environmentalismConcern",
+                AttributeBreakdownResponse.from(character.getEnvironmentalismConcernBreakdown()));
+        map.put("moralityConcern", AttributeBreakdownResponse.from(character.getMoralityConcernBreakdown()));
+        map.put("traditionalismConcern", AttributeBreakdownResponse.from(character.getTraditionalismConcernBreakdown()));
+        map.put("justiceConcern", AttributeBreakdownResponse.from(character.getJusticeConcernBreakdown()));
+        map.put("progressConcern", AttributeBreakdownResponse.from(character.getProgressConcernBreakdown()));
+        map.put("peaceConcern", AttributeBreakdownResponse.from(character.getPeaceConcernBreakdown()));
+        map.put("survivalSkills", AttributeBreakdownResponse.from(character.getSurvivalSkillsBreakdown()));
+        map.put("animalCaring", AttributeBreakdownResponse.from(character.getAnimalCaringBreakdown()));
+        map.put("manipulation", AttributeBreakdownResponse.from(character.getManipulationBreakdown()));
+        map.put("behaviorReading", AttributeBreakdownResponse.from(character.getBehaviorReadingBreakdown()));
+        map.put("discretion", AttributeBreakdownResponse.from(character.getDiscretionBreakdown()));
+        map.put("bluffing", AttributeBreakdownResponse.from(character.getBluffingBreakdown()));
+        map.put("faith", AttributeBreakdownResponse.from(character.getFaithBreakdown()));
+        map.put("illusionResistanceSanity",
+                AttributeBreakdownResponse.from(character.getIllusionResistanceSanityBreakdown()));
+        map.put("creativity", AttributeBreakdownResponse.from(character.getCreativityBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

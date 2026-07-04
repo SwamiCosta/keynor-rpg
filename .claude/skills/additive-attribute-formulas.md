@@ -25,6 +25,7 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 - **`FatGainRate`** and **`MuscleGainRate`** (rpg-14) do not add `baseline` at all — they are zero-baseline **rate** attributes (positive = gaining faster, negative = losing/gaining slower, zero = stable at every input's neutral value), not absolute stat values. See the rpg-14 section below.
 - **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MaxMovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
 - **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MaxMovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
+- **The 14 Concern attributes** (rpg-18, Mind pillar) are direct mirrors of their matching `Values` field — `baseline = 0`, single term = the raw value, not a deviation from a neutral point. No `BodyCoefficients` field backs the mirror itself (there is nothing to tune in a strict 1:1 mirror) — see `.claude/skills/mind-pillar-traits-and-values.md`.
 
 ## Two mass numbers, not one
 
@@ -199,6 +200,36 @@ SixthSense   = 60 + 8×(NoeticPlexus-6)
 ```
 
 At the human-default absent value (`0`): each resolves to `60 + 8×(0-6) = 60 - 48 = 12` — confirmed against the user's exact stated expectation. No floor was added (a human character will always read exactly 12 on all three; a magical race's reachable range is undesigned pending that race's own character-creation UI, so there's nothing yet to compute a worst case against).
+
+## Mind pillar — cross-pillar terms, Concern mirrors, 9 new attributes, and a rename (rpg-18, 2026-07-04)
+
+The `Mind` pillar (`Values` + `Erudition`) is introduced — full domain-model rationale, `InputNature`, and the `Trait` input type are documented in `.claude/skills/mind-pillar-traits-and-values.md`; this section covers only the formula changes.
+
+**`SixthSense` renamed to `Mediunity`** (pure rename — field, formula, `kSixthSenseNoeticPlexus` → `kMediunityNoeticPlexus`, DTO field, no weight change): `Mediunity = 60 + 8×(NoeticPlexus-6)`, same as before under the old name.
+
+**Four existing formulas gained a `Values`-driven term** (each `Values` field's own neutral is 1, its own default — see the Mind-pillar skill, not the usual 5):
+```
+ShortMemory   += 3×(Knowledge-1)
+Reasoning     += 3×(Truth-1)
+Enfactuation  += 3×(Loyalty-1)
+Will          += 3×(Morality-1)   (Will no longer delegates to MentalHealthPool — see the Mind-pillar skill)
+```
+
+**14 Concern attributes**, one per `Values` field, each a direct mirror (see the exceptions list above): `SelfConcern` (Ego), `FriendshipConcern` (Loyalty), `OrderConcern` (Organization), `FreedomConcern` (Freedom), `PatriotismConcern` (Society), `SpiritualConcern` (Divinity), `PhilosophyConcern` (Truth), `AcademicConcern` (Knowledge), `EnvironmentalismConcern` (Nature), `MoralityConcern` (Morality), `TraditionalismConcern` (Tradition), `JusticeConcern` (Justice), `ProgressConcern` (Progress), `PeaceConcern` (Peace).
+
+**9 new attributes**, baseline 60 unless noted, driven by Erudition `Trait`s (as a 0/1 input, neutral 0 — see the Mind-pillar skill), `Values`, or existing `BodyStructure.shapeAesthetics`:
+```
+SurvivalSkills            = 60 + 2×hasEcology
+AnimalCaring              = 60 + 2×hasEcology + 2×hasBiology
+Manipulation              = 60                                    (no modifier yet)
+BehaviorReading           = 60                                    (no modifier yet)
+Discretion                = 60 - 10×|ShapeAesthetics-5|            (inverted-V, same |deviation| shape as Command, sign flipped — only a neutral ShapeAesthetics is discreet)
+Bluffing                  = 60 - 3×(Truth-1) - 3×(Morality-1)
+Faith                     = 60 + 3×(Divinity-1)
+IllusionResistanceSanity  = 60 + 3×(Truth-1)
+Creativity                = 60 + 3×(Progress-1)
+```
+`Discretion`'s weight (10) was not specified by the ticket — picked to match `Command`'s existing `kCommandShapeAesthetics` magnitude on the same input/deviation, per this file's own "default coefficients are not balanced game data" convention. Tune through play like every other coefficient in this class.
 
 ## Extending this pattern
 

@@ -1,6 +1,7 @@
 package com.keynor.rpg.application.usecase;
 
 import com.keynor.rpg.domain.model.Body;
+import com.keynor.rpg.domain.model.Mind;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.port.in.GetPlayableCharacterUseCase;
 
@@ -13,6 +14,6 @@ public class GetPlayableCharacterService implements GetPlayableCharacterUseCase 
      */
     @Override
     public PlayableCharacter getById(String id) {
-        return new PlayableCharacter("Keynor", Body.humanTemplate());
+        return new PlayableCharacter("Keynor", Body.humanTemplate(), Mind.humanTemplate());
     }
 }

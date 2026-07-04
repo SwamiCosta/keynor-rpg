@@ -175,6 +175,29 @@ class BodyCoefficientsTest {
     }
 
     @Test
+    void defaults_mediunityRenamedFromSixthSense_keepsTheSameWeight() {
+        assertThat(BodyCoefficients.defaults().getKMediunityNoeticPlexus()).isEqualTo(8);
+    }
+
+    @Test
+    void defaults_mindPillarWeightsMatchTheDesignDocument() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKShortMemoryKnowledge()).isEqualTo(3);
+        assertThat(coeff.getKReasoningTruth()).isEqualTo(3);
+        assertThat(coeff.getKEnfactuationLoyalty()).isEqualTo(3);
+        assertThat(coeff.getKWillMorality()).isEqualTo(3);
+        assertThat(coeff.getKSurvivalSkillsEcology()).isEqualTo(2);
+        assertThat(coeff.getKAnimalCaringEcology()).isEqualTo(2);
+        assertThat(coeff.getKAnimalCaringBiology()).isEqualTo(2);
+        assertThat(coeff.getKBluffingTruth()).isEqualTo(3);
+        assertThat(coeff.getKBluffingMorality()).isEqualTo(3);
+        assertThat(coeff.getKFaithDivinity()).isEqualTo(3);
+        assertThat(coeff.getKIllusionResistanceSanityTruth()).isEqualTo(3);
+        assertThat(coeff.getKCreativityProgress()).isEqualTo(3);
+    }
+
+    @Test
     void setters_allowRebalancingBaselineAndWeightsIndependently() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 

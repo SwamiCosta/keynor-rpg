@@ -52,6 +52,7 @@ When a task touches only one of the two repositories, you still keep both `CLAUD
 ### Project skills (`keynor-rpg/.claude/skills/`)
 
 - `.claude/skills/additive-attribute-formulas.md` — the baseline-60 additive attribute design introduced in rpg-11 (`attribute = baseline + Σ weight × (input - neutral)`), the SymbolicTotalMass/DisplayMassKg split, and the safety-floor rationale. Open it before proposing any change to a `PlayableCharacter` formula or `BodyCoefficients` field.
+- `.claude/skills/mind-pillar-traits-and-values.md` — the Mind pillar (Values + Erudition), the `InputNature` classification (Immutable/Trained/Eventful), and the new `Trait` boolean input type. Open it before proposing any change to `Mind`, `Values`, `Erudition`, `Trait`, or a new input's declared nature.
 
 ---
 
@@ -157,4 +158,4 @@ Escalate to Omnia whenever:
 
 ---
 
-*Last updated: 2026-07-03 (PR-target policy tightened to "main only, never stacked" after rpg-14/PR #21 merged into an already-landed base branch and never reached `main` — see root `CLAUDE.md` Git branching strategy. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
+*Last updated: 2026-07-04 (rpg-18: added `.claude/skills/mind-pillar-traits-and-values.md` to Project skills — Mind pillar, InputNature, and the Trait input type. Previous entry, 2026-07-03: PR-target policy tightened to "main only, never stacked" after rpg-14/PR #21 merged into an already-landed base branch and never reached `main` — see root `CLAUDE.md` Git branching strategy. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
