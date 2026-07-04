@@ -59,10 +59,10 @@ class PreviewAttributesServiceTest {
         PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults());
 
-        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5);
+        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 0);
         BodySystems bodySystems = new BodySystems(BodySystems.defaults().getBloodSystem(),
                 BodySystems.defaults().getCardiacSystem(), BodySystems.defaults().getPulmonarySystem(), agileNeural,
-                BodySystems.defaults().getHormonalSystem(), BodySystems.defaults().getDigestiveSystem());
+                BodySystems.defaults().getHormonalGlandularSystem(), BodySystems.defaults().getDigestiveSystem());
         PlayableCharacter result = service.calculate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults());
 
         assertThat(result.getEvasion()).isGreaterThan(baseline.getEvasion());

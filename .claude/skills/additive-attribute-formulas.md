@@ -178,6 +178,28 @@ This exists to back the frontend's new tooltip format ("60 + 4 + 0 + 0 + 0 = 64"
 
 For the four specialized strengths, the breakdown's `baseline` is the **dynamic `meanStrength()` value**, not the literal `60` — matching the design document's own framing of Mean Strength as "the base engine" for these four (at neutral inputs `meanStrength()` happens to equal 60, matching the doc's own worked example, but it moves with `MuscleMass`/`NeuromuscularEfficiency`/`FiberType` just like any other baseline in this design). `FatGainRate`/`MuscleGainRate` breakdowns use `baseline = 0`, matching their zero-baseline nature.
 
+## Ketosis/Hormonal renames and arcane organs (Delta V4 continued, 2026-07-04)
+
+Two pure renames, no weight/formula changes: `DigestiveSystem.ketosisQuality` → `ketosisEfficiency`; `HormonalSystem` (the class and the `BodySystems.hormonalSystem` field) → `HormonalGlandularSystem`/`hormonalGlandularSystem`. Every historical section above that still says "Ketosis Quality"/"HormonalSystem" is describing the model as it existed at the time that section was written — same convention already used for the `nutrientAbsorption`→`digestiveAbsorption` rename earlier in this same delta.
+
+### Arcane organs — magical races only
+
+Three new inputs, each absent (`0`) on the human default template and populated only for magical races (no magic-race character-creation flow exists yet — the frontend keeps these sliders permanently disabled/greyed for the current human-only template, passing `0`):
+
+- **`NeuralSystem.noeticPlexus`** (0 default; magical-race range undesigned/deferred) — "a network of arcane nerves capable of perceiving and sensing magical signals."
+- **`CardiacSystem.astralVentriculum`** (0 default) — "a fifth muscular chamber capable of pumping magical energy through the body."
+- **`HormonalGlandularSystem.subtleEpiphysealGland`** (0 default) — "a gland that contains and concentrates magical energy."
+
+Unlike every other input in this codebase, these three read a **neutral point of 6, not 5** — chosen so that the absent value (`0`) lands exactly `6 × weight` below baseline, per the user's explicit worked example (`60 - 48 = 12`). Each formula reads **only its own single input** — no cross-terms, unlike almost every other formula in this file:
+
+```
+ManaPool     = 60 + 8×(SubtleEpiphysealGland-6)
+ArcaneOutput = 60 + 8×(AstralVentriculum-6)
+SixthSense   = 60 + 8×(NoeticPlexus-6)
+```
+
+At the human-default absent value (`0`): each resolves to `60 + 8×(0-6) = 60 - 48 = 12` — confirmed against the user's exact stated expectation. No floor was added (a human character will always read exactly 12 on all three; a magical race's reachable range is undesigned pending that race's own character-creation UI, so there's nothing yet to compute a worst case against).
+
 ## Extending this pattern
 
 When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`.

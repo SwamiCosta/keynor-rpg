@@ -59,6 +59,9 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("diplomacy", AttributeBreakdownResponse.from(character.getDiplomacyBreakdown()));
         map.put("enfactuation", AttributeBreakdownResponse.from(character.getEnfactuationBreakdown()));
         map.put("command", AttributeBreakdownResponse.from(character.getCommandBreakdown()));
+        map.put("manaPool", AttributeBreakdownResponse.from(character.getManaPoolBreakdown()));
+        map.put("arcaneOutput", AttributeBreakdownResponse.from(character.getArcaneOutputBreakdown()));
+        map.put("sixthSense", AttributeBreakdownResponse.from(character.getSixthSenseBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

@@ -4,7 +4,8 @@ import com.keynor.rpg.domain.model.BodySystems;
 
 public record BodySystemsResponse(BloodSystemResponse bloodSystem, CardiacSystemResponse cardiacSystem,
                                    PulmonarySystemResponse pulmonarySystem, NeuralSystemResponse neuralSystem,
-                                   HormonalSystemResponse hormonalSystem, DigestiveSystemResponse digestiveSystem) {
+                                   HormonalGlandularSystemResponse hormonalGlandularSystem,
+                                   DigestiveSystemResponse digestiveSystem) {
 
     public static BodySystemsResponse from(BodySystems bodySystems) {
         return new BodySystemsResponse(
@@ -12,7 +13,7 @@ public record BodySystemsResponse(BloodSystemResponse bloodSystem, CardiacSystem
                 CardiacSystemResponse.from(bodySystems.getCardiacSystem()),
                 PulmonarySystemResponse.from(bodySystems.getPulmonarySystem()),
                 NeuralSystemResponse.from(bodySystems.getNeuralSystem()),
-                HormonalSystemResponse.from(bodySystems.getHormonalSystem()),
+                HormonalGlandularSystemResponse.from(bodySystems.getHormonalGlandularSystem()),
                 DigestiveSystemResponse.from(bodySystems.getDigestiveSystem()));
     }
 }

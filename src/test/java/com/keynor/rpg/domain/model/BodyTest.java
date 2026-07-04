@@ -151,7 +151,7 @@ class BodyTest {
         assertThat(body.getBodySystems()).isNotNull();
         assertThat(body.getBodySystems().getBloodSystem()).isNotNull();
         assertThat(body.getBodySystems().getNeuralSystem()).isNotNull();
-        assertThat(body.getBodySystems().getHormonalSystem()).isNotNull();
+        assertThat(body.getBodySystems().getHormonalGlandularSystem()).isNotNull();
         assertThat(body.getBodySystems().getDigestiveSystem()).isNotNull();
         assertThat(body.getPhysicalTraits()).isNotNull();
         assertThat(body.getPhysicalTraits().getSensorialOrgans()).isNotNull();

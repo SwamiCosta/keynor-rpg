@@ -8,7 +8,7 @@ import com.keynor.rpg.application.dto.BodySystemsInput;
 import com.keynor.rpg.application.dto.CardiacSystemInput;
 import com.keynor.rpg.application.dto.DigestiveSystemInput;
 import com.keynor.rpg.application.dto.GeneticsInput;
-import com.keynor.rpg.application.dto.HormonalSystemInput;
+import com.keynor.rpg.application.dto.HormonalGlandularSystemInput;
 import com.keynor.rpg.application.dto.NeuralSystemInput;
 import com.keynor.rpg.application.dto.PhysicalTraitsInput;
 import com.keynor.rpg.application.dto.PulmonarySystemInput;
@@ -47,9 +47,9 @@ class BiomechanicsPreviewControllerTest {
         BiomechanicsPreviewRequest request = new BiomechanicsPreviewRequest(
                 new GeneticsInput(5, 5, 5, 7, 3),
                 new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
-                new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5),
-                        new PulmonarySystemInput(5), new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5),
-                        new HormonalSystemInput(5, 5, 5), new DigestiveSystemInput(5, 5, 5)),
+                new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0),
+                        new PulmonarySystemInput(5), new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0),
+                        new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
                 new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5)));
 
         when(previewAttributesUseCase.calculate(any(), any(), any()))
@@ -100,6 +100,9 @@ class BiomechanicsPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.diplomacy").exists())
                 .andExpect(jsonPath("$.attributes.enfactuation").exists())
                 .andExpect(jsonPath("$.attributes.command").exists())
+                .andExpect(jsonPath("$.attributes.manaPool").exists())
+                .andExpect(jsonPath("$.attributes.arcaneOutput").exists())
+                .andExpect(jsonPath("$.attributes.sixthSense").exists())
                 .andExpect(jsonPath("$.calculatedValues.symbolicTotalMass").exists())
                 .andExpect(jsonPath("$.calculatedValues.displayMassKg").exists())
                 .andExpect(jsonPath("$.loadCapacity.lightLoadKg").exists())

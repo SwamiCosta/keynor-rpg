@@ -177,6 +177,12 @@ A hidden `meanStrength()` engine (never exposed via any DTO — UI/API must neve
 
 Every additive-standard getter now has a companion `getXxxBreakdown()` returning a new `AttributeBreakdown(baseline, terms)` record — backs the frontend's resolved-calculation tooltip format without duplicating formula logic client-side (the frontend has never independently computed attributes). Served via a new sibling DTO, `AttributeBreakdownsResponse`, alongside the existing flat `attributes` in both response shapes. Full formula list and rationale: `.claude/skills/additive-attribute-formulas.md`.
 
+### Delta V4 continued — renames, arcane organs, 3 new attributes (2026-07-04)
+
+Two pure renames: `DigestiveSystem.ketosisQuality` → `ketosisEfficiency`; `HormonalSystem` (class + `BodySystems.hormonalSystem` field) → `HormonalGlandularSystem`/`hormonalGlandularSystem`. Three new inputs, each absent (`0`) on the human default template and populated only for magical races (no magic-race UI exists yet, so the frontend permanently disables these three sliders for the current human-only flow): `NeuralSystem.noeticPlexus`, `CardiacSystem.astralVentriculum`, `HormonalGlandularSystem.subtleEpiphysealGland`.
+
+3 new attributes, each reading only its own single input around a neutral point of **6** (not the usual 5) with weight 8: `ManaPool = 60 + 8×(SubtleEpiphysealGland-6)`, `ArcaneOutput = 60 + 8×(AstralVentriculum-6)`, `SixthSense = 60 + 8×(NoeticPlexus-6)`. At the human-default absent value (0), all three resolve to exactly `60 - 48 = 12`. Full detail: `.claude/skills/additive-attribute-formulas.md`.
+
 ---
 
 ## REST API

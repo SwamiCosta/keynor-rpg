@@ -2,9 +2,9 @@ package com.keynor.rpg.application.dto;
 
 import com.keynor.rpg.domain.model.CardiacSystem;
 
-public record CardiacSystemInput(int cardiacOutput) {
+public record CardiacSystemInput(int cardiacOutput, int astralVentriculum) {
 
     public CardiacSystem toDomain() {
-        return new CardiacSystem(cardiacOutput);
+        return new CardiacSystem(cardiacOutput, astralVentriculum);
     }
 }

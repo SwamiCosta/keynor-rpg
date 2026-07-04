@@ -214,6 +214,12 @@ public class BodyCoefficients {
     private double kFoodPoisoningCellularHealth = 2; // added rpg-14
     private double kFoodPoisoningDigestiveAbsorption = 1; // added Delta V4 — subtracted (light penalty)
 
+    // Arcane organs — magical races only, absent (0) for the human default template. Each reads
+    // a single input around a neutral point of 6 (not the usual 5), with a wider weight (8).
+    private double kManaPoolEpiphyseal = 8;
+    private double kArcaneOutputVentriculum = 8;
+    private double kSixthSenseNoeticPlexus = 8;
+
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
     // Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
@@ -641,6 +647,15 @@ public class BodyCoefficients {
 
     public double getKFoodPoisoningDigestiveAbsorption() { return kFoodPoisoningDigestiveAbsorption; }
     public void setKFoodPoisoningDigestiveAbsorption(double v) { this.kFoodPoisoningDigestiveAbsorption = v; }
+
+    public double getKManaPoolEpiphyseal() { return kManaPoolEpiphyseal; }
+    public void setKManaPoolEpiphyseal(double v) { this.kManaPoolEpiphyseal = v; }
+
+    public double getKArcaneOutputVentriculum() { return kArcaneOutputVentriculum; }
+    public void setKArcaneOutputVentriculum(double v) { this.kArcaneOutputVentriculum = v; }
+
+    public double getKSixthSenseNoeticPlexus() { return kSixthSenseNoeticPlexus; }
+    public void setKSixthSenseNoeticPlexus(double v) { this.kSixthSenseNoeticPlexus = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

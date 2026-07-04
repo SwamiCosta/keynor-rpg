@@ -108,9 +108,9 @@ class PlayableCharacterTest {
     void getPushStrength_higherMuscleMassNeuromuscularOrFiberType_increasesEveryStrength() {
         Genetics genetics = new Genetics(5, 5, 5, 7, 3);
         BodyComposition composition = new BodyComposition(3, 9, 9, 9, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems, PhysicalTraits.defaults());
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -264,9 +264,9 @@ class PlayableCharacterTest {
     void getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor() {
         Genetics worstCase = new Genetics(5, 5, 5, 15, 3);
         BodyComposition composition = new BodyComposition(10, 1, 1, 5, 5, 9, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems, PhysicalTraits.defaults());
         PlayableCharacter character = new PlayableCharacter("test", body);
 
@@ -387,9 +387,9 @@ class PlayableCharacterTest {
     void getFatigueResistance_worstCaseSliderCombination_isStillPositiveButFlooredIfPushedFurther() {
         Genetics worstCase = new Genetics(5, 5, 5, 15, 3);
         BodyComposition composition = new BodyComposition(10, 15, 5, 5, 5, 9, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5);
-        BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1),
-                new PulmonarySystem(1), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
+        BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1, 0),
+                new PulmonarySystem(1), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems, PhysicalTraits.defaults());
         PlayableCharacter character = new PlayableCharacter("test", body);
 
@@ -413,7 +413,7 @@ class PlayableCharacterTest {
     void getFatigueResistance_higherHypothalamusOrThyroid_increasesResistance() {
         Body body = Body.humanTemplate();
         body.getBodySystems().getNeuralSystem().setHypothalamus(9);
-        body.getBodySystems().getHormonalSystem().setThyroid(9);
+        body.getBodySystems().getHormonalGlandularSystem().setThyroid(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
@@ -440,7 +440,7 @@ class PlayableCharacterTest {
     @Test
     void getStaminaRecovery_higherOxygenCarryingCapacity_increasesRecovery() {
         BodySystems bodySystems = new BodySystems(new BloodSystem(9, 3), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalSystem.defaults(),
+                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalGlandularSystem.defaults(),
                 DigestiveSystem.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults()));
@@ -583,7 +583,7 @@ class PlayableCharacterTest {
 
     @Test
     void getSight_higherPredominantMorphicHormoneAboveNeutral_increasesAllThreeSensesViaProgesteroneModifier() {
-        HormonalSystem highHormone = new HormonalSystem(5, 5, 9); // Pmod = 4
+        HormonalGlandularSystem highHormone = new HormonalGlandularSystem(5, 5, 9, 0); // Pmod = 4
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), NeuralSystem.defaults(), highHormone, DigestiveSystem.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
@@ -786,10 +786,10 @@ class PlayableCharacterTest {
     void getMentalHealthPool_atExtremes_staysWithinTwentyToOneHundred() {
         Body max = Body.humanTemplate();
         max.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(1); // +20
-        max.getBodySystems().getHormonalSystem().setPredominantMorphicHormone(9); // Pmod=4, +20
+        max.getBodySystems().getHormonalGlandularSystem().setPredominantMorphicHormone(9); // Pmod=4, +20
         Body min = Body.humanTemplate();
         min.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9); // -20
-        min.getBodySystems().getHormonalSystem().setPredominantMorphicHormone(1); // Tmod=4, -20
+        min.getBodySystems().getHormonalGlandularSystem().setPredominantMorphicHormone(1); // Tmod=4, -20
 
         assertThat(new PlayableCharacter("test", max).getMentalHealthPool()).isCloseTo(100.0, within(TOLERANCE));
         assertThat(new PlayableCharacter("test", min).getMentalHealthPool()).isCloseTo(20.0, within(TOLERANCE));
@@ -859,10 +859,10 @@ class PlayableCharacterTest {
     void getStressResistance_atExtremes_staysWithinTwentyToOneHundred() {
         Body max = Body.humanTemplate();
         max.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(1);
-        max.getBodySystems().getHormonalSystem().setAdrenalGlands(1);
+        max.getBodySystems().getHormonalGlandularSystem().setAdrenalGlands(1);
         Body min = Body.humanTemplate();
         min.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9);
-        min.getBodySystems().getHormonalSystem().setAdrenalGlands(9);
+        min.getBodySystems().getHormonalGlandularSystem().setAdrenalGlands(9);
 
         assertThat(new PlayableCharacter("test", max).getStressResistance()).isCloseTo(100.0, within(TOLERANCE));
         assertThat(new PlayableCharacter("test", min).getStressResistance()).isCloseTo(20.0, within(TOLERANCE));
@@ -950,18 +950,18 @@ class PlayableCharacterTest {
     @Test
     void getPoisonResistance_atExtremes_reflectsTheAddedCellularHealthTerm() {
         // Cellular health (added rpg-14) widens the old exact [20,100] bounds by +-8.
-        NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5); // immunity=9
+        NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 0); // immunity=9
         BodyStructure maxStructure = new BodyStructure(3, 5, 9); // cellularHealth=9
-        BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1), PulmonarySystem.defaults(),
-                maxNeural, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1, 0), PulmonarySystem.defaults(),
+                maxNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         PhysicalTraits maxTraits = new PhysicalTraits(SensorialOrgans.defaults(), maxStructure);
         PlayableCharacter max = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), maxSystems, maxTraits));
 
-        NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5); // immunity=1
+        NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5, 0); // immunity=1
         BodyStructure minStructure = new BodyStructure(3, 5, 1); // cellularHealth=1
-        BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9), PulmonarySystem.defaults(),
-                minNeural, HormonalSystem.defaults(), DigestiveSystem.defaults());
+        BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9, 0), PulmonarySystem.defaults(),
+                minNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         PhysicalTraits minTraits = new PhysicalTraits(SensorialOrgans.defaults(), minStructure);
         PlayableCharacter min = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), minSystems, minTraits));
@@ -1028,7 +1028,7 @@ class PlayableCharacterTest {
     @Test
     void getBleedingResistance_higherBloodThickness_increasesResistance() {
         BodySystems bodySystems = new BodySystems(new BloodSystem(5, 5), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalSystem.defaults(),
+                PulmonarySystem.defaults(), NeuralSystem.defaults(), HormonalGlandularSystem.defaults(),
                 DigestiveSystem.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults()));
@@ -1052,9 +1052,9 @@ class PlayableCharacterTest {
     void getThermalResistance_humanUiCeiling_isEightyThree() {
         // SkinThickness UI-locked to 4 for humans; BodyFat and Hypothalamus at their true max
         BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure humanMaxSkin = new BodyStructure(4, 5, 5);
         PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), humanMaxSkin);
         PlayableCharacter character = new PlayableCharacter("test",
@@ -1066,9 +1066,9 @@ class PlayableCharacterTest {
     @Test
     void getThermalResistance_trueRaceCeiling_neverExceedsOneHundred() {
         BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
-                PulmonarySystem.defaults(), neuralSystem, HormonalSystem.defaults(), DigestiveSystem.defaults());
+                PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure raceMaxSkin = new BodyStructure(7, 5, 5);
         PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), raceMaxSkin);
         PlayableCharacter character = new PlayableCharacter("test",
@@ -1206,7 +1206,7 @@ class PlayableCharacterTest {
     @Test
     void getMuscleGainRate_higherMesomorphyOrDigestiveAbsorptionOrTestosterone_increasesRate() {
         Genetics highMesomorphy = new Genetics(5, 9, 5, 7, 3);
-        HormonalSystem lowHormone = new HormonalSystem(5, 5, 1); // Tmod = 4
+        HormonalGlandularSystem lowHormone = new HormonalGlandularSystem(5, 5, 1, 0); // Tmod = 4
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), NeuralSystem.defaults(), lowHormone, DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(highMesomorphy, BodyComposition.defaults()), bodySystems,
@@ -1231,7 +1231,7 @@ class PlayableCharacterTest {
     @Test
     void getIntimidation_lowerShapeAestheticsOrHigherTestosteroneOrMass_increasesIntimidation() {
         BodyStructure repulsive = new BodyStructure(3, 1, 5);
-        HormonalSystem lowHormone = new HormonalSystem(5, 5, 1); // Tmod = 4
+        HormonalGlandularSystem lowHormone = new HormonalGlandularSystem(5, 5, 1, 0); // Tmod = 4
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), NeuralSystem.defaults(), lowHormone, DigestiveSystem.defaults());
         PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), repulsive);

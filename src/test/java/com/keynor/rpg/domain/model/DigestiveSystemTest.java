@@ -12,7 +12,7 @@ class DigestiveSystemTest {
 
         assertThat(digestiveSystem.getDigestiveAbsorption()).isEqualTo(5);
         assertThat(digestiveSystem.getImpurityCleaning()).isEqualTo(5);
-        assertThat(digestiveSystem.getKetosisQuality()).isEqualTo(5);
+        assertThat(digestiveSystem.getKetosisEfficiency()).isEqualTo(5);
     }
 
     @Test
@@ -21,10 +21,10 @@ class DigestiveSystemTest {
 
         digestiveSystem.setDigestiveAbsorption(8);
         digestiveSystem.setImpurityCleaning(2);
-        digestiveSystem.setKetosisQuality(9);
+        digestiveSystem.setKetosisEfficiency(9);
 
         assertThat(digestiveSystem.getDigestiveAbsorption()).isEqualTo(8);
         assertThat(digestiveSystem.getImpurityCleaning()).isEqualTo(2);
-        assertThat(digestiveSystem.getKetosisQuality()).isEqualTo(9);
+        assertThat(digestiveSystem.getKetosisEfficiency()).isEqualTo(9);
     }
 }
