@@ -53,6 +53,11 @@ When a task touches only one of the two repositories, you still keep both `CLAUD
 
 - `.claude/skills/additive-attribute-formulas.md` — the baseline-60 additive attribute design introduced in rpg-11 (`attribute = baseline + Σ weight × (input - neutral)`), the SymbolicTotalMass/DisplayMassKg split, and the safety-floor rationale. Open it before proposing any change to a `PlayableCharacter` formula or `BodyCoefficients` field.
 
+### Project skills (`keynor-rpg-client/.claude/skills/`)
+
+- `.claude/skills/slider-scale-and-labels.md` — the discrete slider scales, the one-label-per-position convention, and the physical/motor negative-combo guardrail. Open it before confirming any change to a slider's range, label, or the combo guard.
+- `.claude/skills/formulas-reference-page.md` — the in-app "Formulas" reference page and its data file, `src/lib/formulasReferenceData.ts`, a hand-maintained mirror of every `keynor-rpg` formula/coefficient/input. **Any approved change to a formula, coefficient, or input range/neutral/default on either side of the contract is not complete until this file reflects it** — this is now part of what a Gaemes review checks before considering a formula-touching PR done, on either repository.
+
 ---
 
 ## Responsibilities
@@ -65,6 +70,7 @@ When a task touches only one of the two repositories, you still keep both `CLAUD
 - Propose new Level 2 developer agents for either repository as implementation work begins (e.g. a Java backend developer, a React frontend developer, a test engineer per stack)
 - Propose updates to either project's `CLAUDE.md`, always via PR within that project's own repository — never bundle changes from both repos into a single PR
 - Propose version bumps independently for each project (they version separately, per workspace `CLAUDE.md` — Versioning strategy)
+- Ensure `keynor-rpg-client`'s in-app Formulas reference page (`src/lib/formulasReferenceData.ts`) stays in sync with any `keynor-rpg` formula, `BodyCoefficients` field, or input range/neutral/default change — see `formulas-reference-page.md`; treat an out-of-sync reference page the same as an out-of-sync `additive-attribute-formulas.md`
 
 ---
 
@@ -157,4 +163,4 @@ Escalate to Omnia whenever:
 
 ---
 
-*Last updated: 2026-07-03 (PR-target policy tightened to "main only, never stacked" after rpg-14/PR #21 merged into an already-landed base branch and never reached `main` — see root `CLAUDE.md` Git branching strategy. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
+*Last updated: 2026-07-04 (rpgc-17: added a `keynor-rpg-client/.claude/skills/` project-skills subsection (previously missing entirely) covering `slider-scale-and-labels.md` and the new `formulas-reference-page.md`; added a Responsibilities bullet making the in-app Formulas reference page's sync with `keynor-rpg` formulas a standing Gaemes duty, on par with `additive-attribute-formulas.md`. Previous entry, 2026-07-03: PR-target policy tightened to "main only, never stacked" after rpg-14/PR #21 merged into an already-landed base branch and never reached `main` — see root `CLAUDE.md` Git branching strategy. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — added missing Always skills 11/12/13, fixed the fallback's wrong situational citation of Skill 11, and renamed "Level 3 column" to "Gaemes column" to match the table's per-persona restructure)*
