@@ -231,6 +231,72 @@ Creativity                = 60 + 3×(Progress-1)
 ```
 `Discretion`'s weight (10) was not specified by the ticket — picked to match `Command`'s existing `kCommandShapeAesthetics` magnitude on the same input/deviation, per this file's own "default coefficients are not balanced game data" convention. Tune through play like every other coefficient in this class.
 
+## rpg-19 — cross-pillar terms reverted, Knowledge levels replace boolean traits, 28 Values-trait bonus terms, 4 new attributes
+
+Full domain-model rationale for `Knowledge`/`Personality`/`Labours`/the rewritten `Trait` catalog lives in `.claude/skills/mind-pillar-traits-and-values.md` — this section covers only the formula-level changes. **Verify against `PlayableCharacter.java` itself before trusting any older section of this file (including the rpg-18 section above) about which cross-pillar terms currently exist** — this delta reverted several of them, and a stale changelog read is exactly how that mistake was nearly repeated while implementing rpg-19.
+
+### 8 cross-pillar `Values` terms reverted outright
+
+`ShortMemory`, `Reasoning`, `Enfactuation`, `Will`, `Bluffing` (both its `Truth` and `Morality` terms), `Faith`, `IllusionResistanceSanity`, and `Creativity` all lost their rpg-18 `Values`-reading term, per explicit user instruction. `ShortMemory`/`Reasoning`/`Enfactuation`/`Will` return to their pre-rpg-18 shape (see the rpg-13/Delta-V4 sections above). `Bluffing`/`Faith`/`IllusionResistanceSanity`/`Creativity` (all rpg-18-only attributes) temporarily became flat `baseline`-only formulas — most immediately gained a `Trait`-driven replacement term in the same delta (see below), so "flat 60" was never actually shipped as their final rpg-19 state, just an intermediate one during the revert.
+
+### Ecology/Biology terms: flag → per-level multiplier
+
+`SurvivalSkills`/`AnimalCaring`'s `Trait.ECOLOGY`/`Trait.BIOLOGY` terms became `Knowledge.ECOLOGY`/`Knowledge.BIOLOGY` level reads — same `BodyCoefficients` field and magnitude, now multiplied by the 0-4 level instead of gated by a 0/1 flag:
+```
+SurvivalSkills += kSurvivalSkillsEcology × EcologyLevel                              (was: × hasEcology)
+AnimalCaring   += kAnimalCaringEcology × EcologyLevel + kAnimalCaringBiology × BiologyLevel
+```
+
+### IllusionResistanceSanity renamed IllusionResistance
+
+Pure rename (ticket-requested), landing in the same delta as its formula rewrite (see below).
+
+### Values-trait bonus terms (the new 28-trait catalog)
+
+Every *passive, unconditional* bonus a Values-trait grants is a real additive term, added directly to the affected attribute(s) — never inferred, always exactly the flat number the ticket specified per trait. *Situational* effects (conditional on a specific opponent type or narrative action) are not formulas at all — see the Personality skill's "Effect split" section. The full per-trait bonus list:
+
+```
+FearResistance  += kFearResistanceSelfSacrifice×hasSelfSacrifice + kFearResistanceSuicidal×hasSuicidal   (4, 4)
+PainThreshold   += kPainThresholdSelfSacrifice×hasSelfSacrifice                                          (8)
+Discretion      += kDiscretionLoneWolf×hasLoneWolf + kDiscretionBackstabber×hasBackstabber                (8, 8)
+Command         += kCommandDominant×hasDominant + kCommandPossessive×hasPossessive                        (4, 4)
+Manipulation    += kManipulationDominant×hasDominant + kManipulationPossessive×hasPossessive + kManipulationRelativist×hasRelativist  (4, 4, 4)
+SurvivalSkills  += kSurvivalSkillsExpatriated×hasExpatriated + kSurvivalSkillsAnarchist×hasAnarchist       (10, 10)
+Mediunity       -= kMediunityPagan×hasPagan                                                                (5)
+Faith           = 60 - kFaithPagan×hasPagan + kFaithRelativist×hasRelativist - kFaithProfane×hasProfane    (10, 4, 5)
+Intimidation    += kIntimidationProfane×hasProfane + kIntimidationBellicose×hasBellicose                   (4, 6)
+Will            = mentalHealthCoreTerms() + kWillRelativist×hasRelativist + kWillPracticalist×hasPracticalist - kWillNihilist×hasNihilist   (4, 4, 10)
+Enfactuation    += kEnfactuationRelativist×hasRelativist - kEnfactuationBellicose×hasBellicose             (4, 4)
+Reasoning       -= kReasoningRelativist×hasRelativist + kReasoningIliterate×hasIliterate                   (5, 5)
+IllusionResistance = 60 - kIllusionResistanceRelativist×hasRelativist + kIllusionResistancePracticalist×hasPracticalist  (5, 5 — cancel out if both selected)
+AngerResistance += kAngerResistancePracticalist×hasPracticalist - kAngerResistanceBellicose×hasBellicose   (4, 3)
+MentalHealthPool += kMentalHealthPracticalist×hasPracticalist - kMentalHealthNihilist×hasNihilist          (4, 15)
+MemoryPool      += kMemoryPoolIliterate×hasIliterate + kMemoryPoolPastEraser×hasPastEraser                 (20, 5)
+AnimalCaring    -= kAnimalCaringAntiNaturalist×hasAntiNaturalist                                            (5)
+PoisonResistance += kPoisonResistanceAntiNaturalist×hasAntiNaturalist                                       (2)
+FoodPoisoningAlcoholResistance += kFoodPoisoningAntiNaturalist×hasAntiNaturalist                            (2)
+DiseaseResistance += kDiseaseResistanceAntiNaturalist×hasAntiNaturalist                                     (6)
+Creativity      = 60 + kCreativityOrphanMind×hasOrphanMind + kCreativityPastEraser×hasPastEraser            (5, 5)
+BehaviorReading += kBehaviorReadingDogEatDog×hasDogEatDog                                                   (5)
+MeleeAccuracy   += kMeleeAccuracyDogEatDog×hasDogEatDog                                                     (5)
+Aim             += kAimDogEatDog×hasDogEatDog                                                               (5)
+ArcaneOutput    += kArcaneOutputConservative×hasConservative                                                (5)
+ManaPool        += kManaPoolConservative×hasConservative                                                    (5)
+```
+
+**`Will`/`MentalHealthPool` and Nihilist — why the shared core was factored out.** Nihilist penalizes `MentalHealthPool` by 15 but `Will` by only 10 — two different magnitudes on the same trait. Since `getWillBreakdown()` used to copy `getMentalHealthPoolBreakdown()`'s terms wholesale (see the rpg-18 section above), adding Nihilist/Practicalist directly to `MentalHealthPool`'s term list would have made `Will` inherit the *same* magnitude via the copy — wrong for Nihilist specifically. `mentalHealthCoreTerms()` (a new private helper) now returns only the three original physiological terms (Amygdala/Tmod/Pmod); both `getMentalHealthPoolBreakdown()` and `getWillBreakdown()` start from that shared core and then each add their *own* independent Values-trait terms with their own magnitudes. Follow this pattern — do not add a new shared trait term back into `MentalHealthPool`'s own list expecting `Will` to inherit it correctly, unless the two really do share the exact same magnitude.
+
+### 4 new attributes
+
+```
+Analysis        = 60 + floor(kAnalysisReasoning × (Reasoning-60)) + kAnalysisDogEatDog×hasDogEatDog   (kAnalysisReasoning = 0.5, kAnalysisDogEatDog = 5)
+CloseCombat     = 60 + kCloseCombatBellicose×hasBellicose        (4)
+LowRangeCombat  = 60 + kLowRangeCombatBellicose×hasBellicose     (4)
+LongRangeCombat = 60                                              (no modifier yet)
+```
+
+`Analysis` is the second formula in the codebase (after `Balance`'s `LegDrive` term) to read another *derived* attribute (`Reasoning`) as an additive term rather than a raw input — the `floor()` wrapper matches the ticket's literal `floor(0.5 × (Reasoning-60))` specification.
+
 ## Extending this pattern
 
 When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`.

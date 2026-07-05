@@ -6,12 +6,17 @@ import com.keynor.rpg.domain.model.BodySystems;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.Erudition;
 import com.keynor.rpg.domain.model.Genetics;
+import com.keynor.rpg.domain.model.Knowledge;
+import com.keynor.rpg.domain.model.Labours;
 import com.keynor.rpg.domain.model.Mind;
 import com.keynor.rpg.domain.model.NeuralSystem;
+import com.keynor.rpg.domain.model.Personality;
 import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.model.Values;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,9 +24,16 @@ class PreviewAttributesServiceTest {
 
     private final PreviewAttributesService service = new PreviewAttributesService();
 
+    private PlayableCharacter calculateWithDefaults(Biomechanics biomechanics, BodySystems bodySystems,
+                                                      PhysicalTraits physicalTraits, Values values,
+                                                      Erudition erudition) {
+        return service.calculate(biomechanics, bodySystems, physicalTraits, values, erudition,
+                Personality.defaults(), Labours.defaults());
+    }
+
     @Test
     void calculate_withDefaults_returnsCharacterWithSameAttributesAsHumanTemplate() {
-        PlayableCharacter result = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+        PlayableCharacter result = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
         PlayableCharacter expected = new PlayableCharacter("expected", Body.humanTemplate(), Mind.humanTemplate());
@@ -45,15 +57,17 @@ class PreviewAttributesServiceTest {
         assertThat(result.getPainThreshold()).isEqualTo(expected.getPainThreshold());
         assertThat(result.getSelfConcern()).isEqualTo(expected.getSelfConcern());
         assertThat(result.getSurvivalSkills()).isEqualTo(expected.getSurvivalSkills());
+        assertThat(result.getAnalysis()).isEqualTo(expected.getAnalysis());
+        assertThat(result.getCloseCombat()).isEqualTo(expected.getCloseCombat());
     }
 
     @Test
     void calculate_reactsToInputChanges_higherMuscleMassIncreasesPushStrength() {
-        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+        PlayableCharacter baseline = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
         BodyComposition heavierMuscle = new BodyComposition(3, 12, 5, 5, 5, 5, 5);
-        PlayableCharacter result = service.calculate(new Biomechanics(Genetics.defaults(), heavierMuscle),
+        PlayableCharacter result = calculateWithDefaults(new Biomechanics(Genetics.defaults(), heavierMuscle),
                 BodySystems.defaults(), PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
         assertThat(result.getPushStrength()).isGreaterThan(baseline.getPushStrength());
@@ -61,29 +75,28 @@ class PreviewAttributesServiceTest {
 
     @Test
     void calculate_reactsToInputChanges_higherAgilityIncreasesEvasion() {
-        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+        PlayableCharacter baseline = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
         NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 0);
         BodySystems bodySystems = new BodySystems(BodySystems.defaults().getBloodSystem(),
                 BodySystems.defaults().getCardiacSystem(), BodySystems.defaults().getPulmonarySystem(), agileNeural,
                 BodySystems.defaults().getHormonalGlandularSystem(), BodySystems.defaults().getDigestiveSystem());
-        PlayableCharacter result = service.calculate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults(),
-                Values.defaults(), Erudition.defaults());
+        PlayableCharacter result = calculateWithDefaults(Biomechanics.defaults(), bodySystems,
+                PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
         assertThat(result.getEvasion()).isGreaterThan(baseline.getEvasion());
     }
 
     @Test
-    void calculate_reactsToInputChanges_higherKnowledgeIncreasesShortMemory() {
-        PlayableCharacter baseline = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
+    void calculate_reactsToInputChanges_higherEcologyLevelIncreasesSurvivalSkills() {
+        PlayableCharacter baseline = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
-        Values knowledgeable = Values.defaults();
-        knowledgeable.setKnowledge(5);
-        PlayableCharacter result = service.calculate(Biomechanics.defaults(), BodySystems.defaults(),
-                PhysicalTraits.defaults(), knowledgeable, Erudition.defaults());
+        Erudition ecologist = new Erudition(Map.of(Knowledge.ECOLOGY, 2));
+        PlayableCharacter result = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
+                PhysicalTraits.defaults(), Values.defaults(), ecologist);
 
-        assertThat(result.getShortMemory()).isGreaterThan(baseline.getShortMemory());
+        assertThat(result.getSurvivalSkills()).isGreaterThan(baseline.getSurvivalSkills());
     }
 }

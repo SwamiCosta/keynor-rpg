@@ -6,40 +6,89 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TraitTest {
 
-    private final PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+    private PlayableCharacter characterWithValues(Values values) {
+        return new PlayableCharacter("test", Body.humanTemplate(), Mind.previewTemplate(values,
+                Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+    }
 
     @Test
-    void everyTrait_isEventfulByDefault() {
+    void everyTrait_isEventful() {
         for (Trait trait : Trait.values()) {
             assertThat(trait.getNature()).isEqualTo(InputNature.EVENTFUL);
         }
     }
 
     @Test
-    void everyTrait_hasNoPrerequisiteYet_soAlwaysAvailable() {
-        for (Trait trait : Trait.values()) {
-            assertThat(trait.prerequisitesMet(character)).isTrue();
+    void everyTrait_hasFourteenPairs_groupedByItsOwnConcern() {
+        assertThat(Trait.values()).hasSize(28);
+        for (TraitGroup group : TraitGroup.values()) {
+            long count = java.util.Arrays.stream(Trait.values()).filter(trait -> trait.getGroup() == group).count();
+            assertThat(count).as("group %s should have exactly 2 traits", group).isEqualTo(2);
         }
     }
 
     @Test
-    void groups_matchTheEruditionTabMapping() {
-        assertThat(Trait.CALLIGRAPHY.getGroup()).isEqualTo(TraitGroup.LANGUAGES_AND_COMMUNICATION);
-        assertThat(Trait.ECOLOGY.getGroup()).isEqualTo(TraitGroup.LIFE_STUDIES);
-        assertThat(Trait.BIOLOGY.getGroup()).isEqualTo(TraitGroup.LIFE_STUDIES);
-        assertThat(Trait.MEDICINE.getGroup()).isEqualTo(TraitGroup.LIFE_STUDIES);
-        assertThat(Trait.HERBOLOGY.getGroup()).isEqualTo(TraitGroup.LIFE_STUDIES);
-        assertThat(Trait.ALCHEMY_CHEMISTRY.getGroup()).isEqualTo(TraitGroup.MATTER_STUDIES);
-        assertThat(Trait.METALLURGY.getGroup()).isEqualTo(TraitGroup.MATTER_STUDIES);
-        assertThat(Trait.POTTERY.getGroup()).isEqualTo(TraitGroup.MATTER_STUDIES);
-        assertThat(Trait.COMPUTER_SCIENCE.getGroup()).isEqualTo(TraitGroup.MATHEMATICS);
-        assertThat(Trait.ENGINEERING.getGroup()).isEqualTo(TraitGroup.MATHEMATICS);
-        assertThat(Trait.WIZARDRY.getGroup()).isEqualTo(TraitGroup.ARCANE_STUDIES);
-        assertThat(Trait.SORCERY.getGroup()).isEqualTo(TraitGroup.ARCANE_STUDIES);
-        assertThat(Trait.ARCHERY.getGroup()).isEqualTo(TraitGroup.ATHLETISM_AND_MARTIAL_ARTS);
-        assertThat(Trait.HISTORY.getGroup()).isEqualTo(TraitGroup.VALKANI_STUDIES);
-        assertThat(Trait.PHILOSOPHY.getGroup()).isEqualTo(TraitGroup.VALKANI_STUDIES);
-        assertThat(Trait.CARTOGRAPHY.getGroup()).isEqualTo(TraitGroup.VALKANI_STUDIES);
-        assertThat(Trait.ART.getGroup()).isEqualTo(TraitGroup.VALKANI_STUDIES);
+    void baseTrait_prerequisiteMet_whenLinkedConcernAtDefault() {
+        Values values = Values.defaults(); // Ego defaults to 1
+        PlayableCharacter character = characterWithValues(values);
+
+        assertThat(Trait.SELF_SACRIFICE.prerequisitesMet(character)).isTrue();
+    }
+
+    @Test
+    void baseTrait_prerequisiteNotMet_whenLinkedConcernMovedAwayFromDefault() {
+        Values values = Values.defaults();
+        values.setEgo(3);
+        PlayableCharacter character = characterWithValues(values);
+
+        assertThat(Trait.SELF_SACRIFICE.prerequisitesMet(character)).isFalse();
+    }
+
+    @Test
+    void advancedTrait_prerequisiteNotMet_withoutItsBaseTraitSelected() {
+        PlayableCharacter character = characterWithValues(Values.defaults());
+
+        assertThat(Trait.SUICIDAL.prerequisitesMet(character)).isFalse();
+    }
+
+    @Test
+    void advancedTrait_prerequisiteMet_onceBaseTraitSelected() {
+        Values values = Values.defaults();
+        PlayableCharacter character = characterWithValues(values);
+        character.getMind().getPersonality().select(Trait.SELF_SACRIFICE, character);
+
+        assertThat(Trait.SUICIDAL.prerequisitesMet(character)).isTrue();
+    }
+
+    @Test
+    void applyForcedValue_forcesTheLinkedConcernToZero() {
+        Values values = Values.defaults();
+
+        Trait.SELF_SACRIFICE.applyForcedValue(values);
+
+        assertThat(values.getEgo()).isZero();
+    }
+
+    @Test
+    void applyForcedValue_isNoOpForAdvancedTraits() {
+        Values values = Values.defaults();
+
+        Trait.SUICIDAL.applyForcedValue(values);
+
+        assertThat(values.getEgo()).isEqualTo(1);
+    }
+
+    @Test
+    void knowledgePointsModifier_onlyIliterateAndOrphanMindAreNonZero() {
+        assertThat(Trait.ILLITERATE.getKnowledgePointsModifier()).isEqualTo(-1);
+        assertThat(Trait.ORPHAN_MIND.getKnowledgePointsModifier()).isEqualTo(1);
+        assertThat(Trait.SELF_SACRIFICE.getKnowledgePointsModifier()).isZero();
+    }
+
+    @Test
+    void labourPointsModifier_onlyConservativeAndLuddite() {
+        assertThat(Trait.CONSERVATIVE.getLabourPointsModifier()).isEqualTo(1);
+        assertThat(Trait.LUDDITE.getLabourPointsModifier()).isEqualTo(1);
+        assertThat(Trait.SELF_SACRIFICE.getLabourPointsModifier()).isZero();
     }
 }

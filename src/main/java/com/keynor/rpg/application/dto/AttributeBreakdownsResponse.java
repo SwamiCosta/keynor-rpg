@@ -84,9 +84,12 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("discretion", AttributeBreakdownResponse.from(character.getDiscretionBreakdown()));
         map.put("bluffing", AttributeBreakdownResponse.from(character.getBluffingBreakdown()));
         map.put("faith", AttributeBreakdownResponse.from(character.getFaithBreakdown()));
-        map.put("illusionResistanceSanity",
-                AttributeBreakdownResponse.from(character.getIllusionResistanceSanityBreakdown()));
+        map.put("illusionResistance", AttributeBreakdownResponse.from(character.getIllusionResistanceBreakdown()));
         map.put("creativity", AttributeBreakdownResponse.from(character.getCreativityBreakdown()));
+        map.put("analysis", AttributeBreakdownResponse.from(character.getAnalysisBreakdown()));
+        map.put("closeCombat", AttributeBreakdownResponse.from(character.getCloseCombatBreakdown()));
+        map.put("lowRangeCombat", AttributeBreakdownResponse.from(character.getLowRangeCombatBreakdown()));
+        map.put("longRangeCombat", AttributeBreakdownResponse.from(character.getLongRangeCombatBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

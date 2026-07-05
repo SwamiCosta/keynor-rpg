@@ -1,61 +1,67 @@
 package com.keynor.rpg.domain.model;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
- * Second data group of the {@link Mind} pillar: the knowledge {@link Trait}s a character has
- * selected. A character gets {@link #FREE_TRAIT_SLOTS} knowledge traits for free; selecting
- * beyond that is documented intent only (would spend from {@link Mind#getEventPoints()} once
- * per-trait costs are defined, the same deferred-cost precedent as the genetic/training pools)
- * — not implemented yet, so {@link #canSelect(Trait)} simply caps selection at the free slots.
+ * Second data group of the {@link Mind} pillar: how far a character has invested in each
+ * {@link Knowledge}. Rewritten in rpg-19 — knowledge stopped being a boolean {@link Trait} pick
+ * and became a leveled slider (0 "Unknown" to {@link Knowledge#MAX_LEVEL} "Master"), spending
+ * from a small shared point budget instead of a free-slot cap: {@link #BASE_POINTS} (2) points
+ * total, distributable as 2-in-one or 1-in-two, e.g. Ecology at level 2 or Ecology and Biology
+ * each at level 1.
  *
- * <p>Every {@link Trait} constant today belongs to Erudition; if a future pillar introduces
- * traits of its own, this class should only ever hold the subset that are actually knowledge
- * traits (currently all of them).
+ * <p>The effective budget can be adjusted by a selected {@link Trait} ({@code ILLITERATE} costs a
+ * point, {@code ORPHAN_MIND} grants one back) — see
+ * {@link Personality#getKnowledgePointsModifier()} — so the cap is computed per-character via
+ * {@link #getEffectivePoints(PlayableCharacter)}, not read as a constant.
  */
 public class Erudition {
 
-    public static final int FREE_TRAIT_SLOTS = 2;
+    public static final int BASE_POINTS = 2;
 
-    private final Set<Trait> selectedTraits;
+    private final Map<Knowledge, Integer> levels;
 
-    public Erudition(Set<Trait> selectedTraits) {
-        this.selectedTraits = new LinkedHashSet<>(selectedTraits);
+    public Erudition(Map<Knowledge, Integer> levels) {
+        this.levels = new EnumMap<>(Knowledge.class);
+        for (Knowledge knowledge : Knowledge.values()) {
+            this.levels.put(knowledge, levels.getOrDefault(knowledge, 0));
+        }
     }
 
     public static Erudition defaults() {
-        return new Erudition(Set.of());
+        return new Erudition(Map.of());
     }
 
-    /**
-     * A trait can be selected if it is already selected (no-op), or a free slot remains and its
-     * prerequisites are met.
-     */
-    public boolean canSelect(Trait trait, PlayableCharacter character) {
-        if (selectedTraits.contains(trait)) {
-            return true;
+    public int getLevel(Knowledge knowledge) {
+        return levels.get(knowledge);
+    }
+
+    public int getSpentPoints() {
+        return levels.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public int getEffectivePoints(PlayableCharacter character) {
+        return BASE_POINTS + character.getMind().getPersonality().getKnowledgePointsModifier();
+    }
+
+    public boolean canSetLevel(Knowledge knowledge, int newLevel, PlayableCharacter character) {
+        if (newLevel < Knowledge.MIN_LEVEL || newLevel > Knowledge.MAX_LEVEL) {
+            return false;
         }
-        return selectedTraits.size() < FREE_TRAIT_SLOTS && trait.prerequisitesMet(character);
+        int spentWithoutThis = getSpentPoints() - getLevel(knowledge);
+        return spentWithoutThis + newLevel <= getEffectivePoints(character);
     }
 
-    public void select(Trait trait, PlayableCharacter character) {
-        if (!canSelect(trait, character)) {
-            throw new IllegalStateException("Cannot select trait " + trait + ": no free slot or prerequisites not met");
+    public void setLevel(Knowledge knowledge, int newLevel, PlayableCharacter character) {
+        if (!canSetLevel(knowledge, newLevel, character)) {
+            throw new IllegalStateException(
+                    "Cannot set " + knowledge + " to " + newLevel + ": exceeds available knowledge points");
         }
-        selectedTraits.add(trait);
+        levels.put(knowledge, newLevel);
     }
 
-    public void deselect(Trait trait) {
-        selectedTraits.remove(trait);
-    }
-
-    public boolean hasTrait(Trait trait) {
-        return selectedTraits.contains(trait);
-    }
-
-    public Set<Trait> getSelectedTraits() {
-        return Collections.unmodifiableSet(selectedTraits);
+    public Map<Knowledge, Integer> getLevels() {
+        return Map.copyOf(levels);
     }
 }

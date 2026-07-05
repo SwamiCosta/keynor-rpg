@@ -220,23 +220,65 @@ public class BodyCoefficients {
     private double kArcaneOutputVentriculum = 8;
     private double kMediunityNoeticPlexus = 8;
 
-    // Mind pillar — cross-pillar terms added to existing Body cognitive/social formulas
-    // (new attribute values default to 1, so every one of these contributes zero at defaults)
-    private double kShortMemoryKnowledge = 3;
-    private double kReasoningTruth = 3;
-    private double kEnfactuationLoyalty = 3;
-    private double kWillMorality = 3;
-
-    // Mind pillar — new attributes (Erudition traits + Values), baseline 60 unless noted
+    // Mind pillar — new attributes (Knowledge + Values), baseline 60 unless noted
     private double kSurvivalSkillsEcology = 2;
     private double kAnimalCaringEcology = 2;
     private double kAnimalCaringBiology = 2;
     private double kDiscretionShapeAesthetics = 10; // same magnitude as kCommandShapeAesthetics, sign inverted
-    private double kBluffingTruth = 3;
-    private double kBluffingMorality = 3;
-    private double kFaithDivinity = 3;
-    private double kIllusionResistanceSanityTruth = 3;
-    private double kCreativityProgress = 3;
+
+    // rpg-19 — Values-trait bonuses (the 28-trait catalog introduced alongside Knowledge
+    // sliders and the Labours tab). The rpg-18 cross-pillar terms these traits replaced
+    // (kShortMemoryKnowledge, kReasoningTruth, kEnfactuationLoyalty, kWillMorality,
+    // kBluffingTruth, kBluffingMorality, kFaithDivinity, kIllusionResistanceSanityTruth,
+    // kCreativityProgress) were deleted outright, not kept as dead fields.
+    private double kFearResistanceSelfSacrifice = 4;
+    private double kFearResistanceSuicidal = 4;
+    private double kPainThresholdSelfSacrifice = 8;
+    private double kDiscretionLoneWolf = 8;
+    private double kDiscretionBackstabber = 8;
+    private double kCommandDominant = 4;
+    private double kCommandPossessive = 4;
+    private double kManipulationDominant = 4;
+    private double kManipulationPossessive = 4;
+    private double kManipulationRelativist = 4;
+    private double kSurvivalSkillsExpatriated = 10;
+    private double kSurvivalSkillsAnarchist = 10;
+    private double kMediunityPagan = 5;
+    private double kFaithPagan = 10;
+    private double kFaithRelativist = 4;
+    private double kFaithProfane = 5;
+    private double kIntimidationProfane = 4;
+    private double kIntimidationBellicose = 6;
+    private double kWillRelativist = 4;
+    private double kWillPracticalist = 4;
+    private double kWillNihilist = 10;
+    private double kEnfactuationRelativist = 4;
+    private double kEnfactuationBellicose = 4;
+    private double kReasoningRelativist = 5;
+    private double kReasoningIliterate = 5;
+    private double kIllusionResistanceRelativist = 5;
+    private double kIllusionResistancePracticalist = 5;
+    private double kAngerResistancePracticalist = 4;
+    private double kAngerResistanceBellicose = 3;
+    private double kMentalHealthPracticalist = 4;
+    private double kMentalHealthNihilist = 15;
+    private double kMemoryPoolIliterate = 20;
+    private double kMemoryPoolPastEraser = 5;
+    private double kAnimalCaringAntiNaturalist = 5;
+    private double kPoisonResistanceAntiNaturalist = 2;
+    private double kFoodPoisoningAntiNaturalist = 2;
+    private double kDiseaseResistanceAntiNaturalist = 6;
+    private double kCreativityOrphanMind = 5;
+    private double kCreativityPastEraser = 5;
+    private double kBehaviorReadingDogEatDog = 5;
+    private double kAnalysisReasoning = 0.5;
+    private double kAnalysisDogEatDog = 5;
+    private double kMeleeAccuracyDogEatDog = 5;
+    private double kAimDogEatDog = 5;
+    private double kArcaneOutputConservative = 5;
+    private double kManaPoolConservative = 5;
+    private double kCloseCombatBellicose = 4;
+    private double kLowRangeCombatBellicose = 4;
 
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
     // Evasion, MaxMovementSpeed
@@ -675,18 +717,6 @@ public class BodyCoefficients {
     public double getKMediunityNoeticPlexus() { return kMediunityNoeticPlexus; }
     public void setKMediunityNoeticPlexus(double v) { this.kMediunityNoeticPlexus = v; }
 
-    public double getKShortMemoryKnowledge() { return kShortMemoryKnowledge; }
-    public void setKShortMemoryKnowledge(double v) { this.kShortMemoryKnowledge = v; }
-
-    public double getKReasoningTruth() { return kReasoningTruth; }
-    public void setKReasoningTruth(double v) { this.kReasoningTruth = v; }
-
-    public double getKEnfactuationLoyalty() { return kEnfactuationLoyalty; }
-    public void setKEnfactuationLoyalty(double v) { this.kEnfactuationLoyalty = v; }
-
-    public double getKWillMorality() { return kWillMorality; }
-    public void setKWillMorality(double v) { this.kWillMorality = v; }
-
     public double getKSurvivalSkillsEcology() { return kSurvivalSkillsEcology; }
     public void setKSurvivalSkillsEcology(double v) { this.kSurvivalSkillsEcology = v; }
 
@@ -699,20 +729,149 @@ public class BodyCoefficients {
     public double getKDiscretionShapeAesthetics() { return kDiscretionShapeAesthetics; }
     public void setKDiscretionShapeAesthetics(double v) { this.kDiscretionShapeAesthetics = v; }
 
-    public double getKBluffingTruth() { return kBluffingTruth; }
-    public void setKBluffingTruth(double v) { this.kBluffingTruth = v; }
+    public double getKFearResistanceSelfSacrifice() { return kFearResistanceSelfSacrifice; }
+    public void setKFearResistanceSelfSacrifice(double v) { this.kFearResistanceSelfSacrifice = v; }
 
-    public double getKBluffingMorality() { return kBluffingMorality; }
-    public void setKBluffingMorality(double v) { this.kBluffingMorality = v; }
+    public double getKFearResistanceSuicidal() { return kFearResistanceSuicidal; }
+    public void setKFearResistanceSuicidal(double v) { this.kFearResistanceSuicidal = v; }
 
-    public double getKFaithDivinity() { return kFaithDivinity; }
-    public void setKFaithDivinity(double v) { this.kFaithDivinity = v; }
+    public double getKPainThresholdSelfSacrifice() { return kPainThresholdSelfSacrifice; }
+    public void setKPainThresholdSelfSacrifice(double v) { this.kPainThresholdSelfSacrifice = v; }
 
-    public double getKIllusionResistanceSanityTruth() { return kIllusionResistanceSanityTruth; }
-    public void setKIllusionResistanceSanityTruth(double v) { this.kIllusionResistanceSanityTruth = v; }
+    public double getKDiscretionLoneWolf() { return kDiscretionLoneWolf; }
+    public void setKDiscretionLoneWolf(double v) { this.kDiscretionLoneWolf = v; }
 
-    public double getKCreativityProgress() { return kCreativityProgress; }
-    public void setKCreativityProgress(double v) { this.kCreativityProgress = v; }
+    public double getKDiscretionBackstabber() { return kDiscretionBackstabber; }
+    public void setKDiscretionBackstabber(double v) { this.kDiscretionBackstabber = v; }
+
+    public double getKCommandDominant() { return kCommandDominant; }
+    public void setKCommandDominant(double v) { this.kCommandDominant = v; }
+
+    public double getKCommandPossessive() { return kCommandPossessive; }
+    public void setKCommandPossessive(double v) { this.kCommandPossessive = v; }
+
+    public double getKManipulationDominant() { return kManipulationDominant; }
+    public void setKManipulationDominant(double v) { this.kManipulationDominant = v; }
+
+    public double getKManipulationPossessive() { return kManipulationPossessive; }
+    public void setKManipulationPossessive(double v) { this.kManipulationPossessive = v; }
+
+    public double getKManipulationRelativist() { return kManipulationRelativist; }
+    public void setKManipulationRelativist(double v) { this.kManipulationRelativist = v; }
+
+    public double getKSurvivalSkillsExpatriated() { return kSurvivalSkillsExpatriated; }
+    public void setKSurvivalSkillsExpatriated(double v) { this.kSurvivalSkillsExpatriated = v; }
+
+    public double getKSurvivalSkillsAnarchist() { return kSurvivalSkillsAnarchist; }
+    public void setKSurvivalSkillsAnarchist(double v) { this.kSurvivalSkillsAnarchist = v; }
+
+    public double getKMediunityPagan() { return kMediunityPagan; }
+    public void setKMediunityPagan(double v) { this.kMediunityPagan = v; }
+
+    public double getKFaithPagan() { return kFaithPagan; }
+    public void setKFaithPagan(double v) { this.kFaithPagan = v; }
+
+    public double getKFaithRelativist() { return kFaithRelativist; }
+    public void setKFaithRelativist(double v) { this.kFaithRelativist = v; }
+
+    public double getKFaithProfane() { return kFaithProfane; }
+    public void setKFaithProfane(double v) { this.kFaithProfane = v; }
+
+    public double getKIntimidationProfane() { return kIntimidationProfane; }
+    public void setKIntimidationProfane(double v) { this.kIntimidationProfane = v; }
+
+    public double getKIntimidationBellicose() { return kIntimidationBellicose; }
+    public void setKIntimidationBellicose(double v) { this.kIntimidationBellicose = v; }
+
+    public double getKWillRelativist() { return kWillRelativist; }
+    public void setKWillRelativist(double v) { this.kWillRelativist = v; }
+
+    public double getKWillPracticalist() { return kWillPracticalist; }
+    public void setKWillPracticalist(double v) { this.kWillPracticalist = v; }
+
+    public double getKWillNihilist() { return kWillNihilist; }
+    public void setKWillNihilist(double v) { this.kWillNihilist = v; }
+
+    public double getKEnfactuationRelativist() { return kEnfactuationRelativist; }
+    public void setKEnfactuationRelativist(double v) { this.kEnfactuationRelativist = v; }
+
+    public double getKEnfactuationBellicose() { return kEnfactuationBellicose; }
+    public void setKEnfactuationBellicose(double v) { this.kEnfactuationBellicose = v; }
+
+    public double getKReasoningRelativist() { return kReasoningRelativist; }
+    public void setKReasoningRelativist(double v) { this.kReasoningRelativist = v; }
+
+    public double getKReasoningIliterate() { return kReasoningIliterate; }
+    public void setKReasoningIliterate(double v) { this.kReasoningIliterate = v; }
+
+    public double getKIllusionResistanceRelativist() { return kIllusionResistanceRelativist; }
+    public void setKIllusionResistanceRelativist(double v) { this.kIllusionResistanceRelativist = v; }
+
+    public double getKIllusionResistancePracticalist() { return kIllusionResistancePracticalist; }
+    public void setKIllusionResistancePracticalist(double v) { this.kIllusionResistancePracticalist = v; }
+
+    public double getKAngerResistancePracticalist() { return kAngerResistancePracticalist; }
+    public void setKAngerResistancePracticalist(double v) { this.kAngerResistancePracticalist = v; }
+
+    public double getKAngerResistanceBellicose() { return kAngerResistanceBellicose; }
+    public void setKAngerResistanceBellicose(double v) { this.kAngerResistanceBellicose = v; }
+
+    public double getKMentalHealthPracticalist() { return kMentalHealthPracticalist; }
+    public void setKMentalHealthPracticalist(double v) { this.kMentalHealthPracticalist = v; }
+
+    public double getKMentalHealthNihilist() { return kMentalHealthNihilist; }
+    public void setKMentalHealthNihilist(double v) { this.kMentalHealthNihilist = v; }
+
+    public double getKMemoryPoolIliterate() { return kMemoryPoolIliterate; }
+    public void setKMemoryPoolIliterate(double v) { this.kMemoryPoolIliterate = v; }
+
+    public double getKMemoryPoolPastEraser() { return kMemoryPoolPastEraser; }
+    public void setKMemoryPoolPastEraser(double v) { this.kMemoryPoolPastEraser = v; }
+
+    public double getKAnimalCaringAntiNaturalist() { return kAnimalCaringAntiNaturalist; }
+    public void setKAnimalCaringAntiNaturalist(double v) { this.kAnimalCaringAntiNaturalist = v; }
+
+    public double getKPoisonResistanceAntiNaturalist() { return kPoisonResistanceAntiNaturalist; }
+    public void setKPoisonResistanceAntiNaturalist(double v) { this.kPoisonResistanceAntiNaturalist = v; }
+
+    public double getKFoodPoisoningAntiNaturalist() { return kFoodPoisoningAntiNaturalist; }
+    public void setKFoodPoisoningAntiNaturalist(double v) { this.kFoodPoisoningAntiNaturalist = v; }
+
+    public double getKDiseaseResistanceAntiNaturalist() { return kDiseaseResistanceAntiNaturalist; }
+    public void setKDiseaseResistanceAntiNaturalist(double v) { this.kDiseaseResistanceAntiNaturalist = v; }
+
+    public double getKCreativityOrphanMind() { return kCreativityOrphanMind; }
+    public void setKCreativityOrphanMind(double v) { this.kCreativityOrphanMind = v; }
+
+    public double getKCreativityPastEraser() { return kCreativityPastEraser; }
+    public void setKCreativityPastEraser(double v) { this.kCreativityPastEraser = v; }
+
+    public double getKBehaviorReadingDogEatDog() { return kBehaviorReadingDogEatDog; }
+    public void setKBehaviorReadingDogEatDog(double v) { this.kBehaviorReadingDogEatDog = v; }
+
+    public double getKAnalysisReasoning() { return kAnalysisReasoning; }
+    public void setKAnalysisReasoning(double v) { this.kAnalysisReasoning = v; }
+
+    public double getKAnalysisDogEatDog() { return kAnalysisDogEatDog; }
+    public void setKAnalysisDogEatDog(double v) { this.kAnalysisDogEatDog = v; }
+
+    public double getKMeleeAccuracyDogEatDog() { return kMeleeAccuracyDogEatDog; }
+    public void setKMeleeAccuracyDogEatDog(double v) { this.kMeleeAccuracyDogEatDog = v; }
+
+    public double getKAimDogEatDog() { return kAimDogEatDog; }
+    public void setKAimDogEatDog(double v) { this.kAimDogEatDog = v; }
+
+    public double getKArcaneOutputConservative() { return kArcaneOutputConservative; }
+    public void setKArcaneOutputConservative(double v) { this.kArcaneOutputConservative = v; }
+
+    public double getKManaPoolConservative() { return kManaPoolConservative; }
+    public void setKManaPoolConservative(double v) { this.kManaPoolConservative = v; }
+
+    public double getKCloseCombatBellicose() { return kCloseCombatBellicose; }
+    public void setKCloseCombatBellicose(double v) { this.kCloseCombatBellicose = v; }
+
+    public double getKLowRangeCombatBellicose() { return kLowRangeCombatBellicose; }
+    public void setKLowRangeCombatBellicose(double v) { this.kLowRangeCombatBellicose = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

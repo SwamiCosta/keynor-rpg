@@ -4,7 +4,9 @@ import com.keynor.rpg.domain.model.Biomechanics;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.BodySystems;
 import com.keynor.rpg.domain.model.Erudition;
+import com.keynor.rpg.domain.model.Labours;
 import com.keynor.rpg.domain.model.Mind;
+import com.keynor.rpg.domain.model.Personality;
 import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.model.Values;
@@ -19,9 +21,10 @@ public class PreviewAttributesService implements PreviewAttributesUseCase {
 
     @Override
     public PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems,
-                                        PhysicalTraits physicalTraits, Values values, Erudition erudition) {
+                                        PhysicalTraits physicalTraits, Values values, Erudition erudition,
+                                        Personality personality, Labours labours) {
         Body body = Body.previewTemplate(biomechanics, bodySystems, physicalTraits);
-        Mind mind = Mind.previewTemplate(values, erudition);
+        Mind mind = Mind.previewTemplate(values, erudition, personality, labours);
         return new PlayableCharacter("preview", body, mind);
     }
 }

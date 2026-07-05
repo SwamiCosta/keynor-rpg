@@ -64,10 +64,10 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getDisplayMassKg_onHumanDefaults_equalsSeventyOne() {
+    void getTotalMassKg_onHumanDefaults_equalsSeventyOne() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getDisplayMassKg()).isCloseTo(71.0, within(TOLERANCE));
+        assertThat(character.getTotalMassKg()).isCloseTo(71.0, within(TOLERANCE));
     }
 
     // -------------------------------------------------------------------------
@@ -1370,7 +1370,15 @@ class PlayableCharacterTest {
     private static PlayableCharacter withValues(java.util.function.Consumer<Values> customize) {
         Values values = Values.defaults();
         customize.accept(values);
-        return new PlayableCharacter("test", Body.humanTemplate(), Mind.previewTemplate(values, Erudition.defaults()));
+        return new PlayableCharacter("test", Body.humanTemplate(),
+                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+    }
+
+    private static PlayableCharacter withTrait(Values values, Trait trait) {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(),
+                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+        character.getMind().getPersonality().select(trait, character);
+        return character;
     }
 
     @Test
@@ -1401,40 +1409,67 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getShortMemory_higherKnowledge_increasesShortMemory() {
+    void getShortMemory_higherKnowledgeValue_noLongerAffectsShortMemory_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter knowledgeable = withValues(values -> values.setKnowledge(5));
 
-        assertThat(knowledgeable.getShortMemory()).isGreaterThan(defaults.getShortMemory());
-        // kShortMemoryKnowledge (3) * (5 - 1) = 12
-        assertThat(knowledgeable.getShortMemory() - defaults.getShortMemory()).isCloseTo(12.0, within(TOLERANCE));
+        assertThat(knowledgeable.getShortMemory()).isEqualTo(defaults.getShortMemory());
     }
 
     @Test
-    void getReasoning_higherTruth_increasesReasoning() {
+    void getReasoning_higherTruthValue_noLongerAffectsReasoning_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter truthful = withValues(values -> values.setTruth(5));
 
-        assertThat(truthful.getReasoning()).isGreaterThan(defaults.getReasoning());
-        assertThat(truthful.getReasoning() - defaults.getReasoning()).isCloseTo(12.0, within(TOLERANCE));
+        assertThat(truthful.getReasoning()).isEqualTo(defaults.getReasoning());
     }
 
     @Test
-    void getEnfactuation_higherLoyalty_increasesEnfactuationButNotDiplomacy() {
+    void getReasoning_relativistOrIliterateTrait_decreasesReasoning() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter relativist = withTrait(Values.defaults(), Trait.RELATIVIST);
+
+        assertThat(relativist.getReasoning()).isLessThan(defaults.getReasoning());
+    }
+
+    @Test
+    void getEnfactuation_higherLoyaltyValue_noLongerAffectsEnfactuation_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter loyal = withValues(values -> values.setLoyalty(5));
 
-        assertThat(loyal.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
-        assertThat(loyal.getDiplomacy()).isEqualTo(defaults.getDiplomacy());
+        assertThat(loyal.getEnfactuation()).isEqualTo(defaults.getEnfactuation());
     }
 
     @Test
-    void getWill_higherMorality_increasesWillButNotMentalHealthPool() {
+    void getEnfactuation_relativistTrait_increasesEnfactuationButNotDiplomacy() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter relativist = withTrait(Values.defaults(), Trait.RELATIVIST);
+
+        assertThat(relativist.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
+        assertThat(relativist.getDiplomacy()).isEqualTo(defaults.getDiplomacy());
+    }
+
+    @Test
+    void getWill_higherMoralityValue_noLongerAffectsWill_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter moral = withValues(values -> values.setMorality(5));
 
-        assertThat(moral.getWill()).isGreaterThan(defaults.getWill());
+        assertThat(moral.getWill()).isEqualTo(defaults.getWill());
         assertThat(moral.getMentalHealthPool()).isEqualTo(defaults.getMentalHealthPool());
+    }
+
+    @Test
+    void getWill_nihilistTrait_penalizesWillMoreThanMentalHealthPool() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setMorality(1);
+        PlayableCharacter reckless = withTrait(values, Trait.RECKLESS);
+        reckless.getMind().getPersonality().select(Trait.NIHILIST, reckless);
+
+        double willPenalty = defaults.getWill() - reckless.getWill();
+        double mhpPenalty = defaults.getMentalHealthPool() - reckless.getMentalHealthPool();
+        assertThat(willPenalty).isCloseTo(10.0, within(TOLERANCE));
+        assertThat(mhpPenalty).isCloseTo(15.0, within(TOLERANCE));
     }
 
     @Test
@@ -1445,17 +1480,23 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getSurvivalSkills_withEcologyTrait_increasesByTwo() {
-        Mind mind = Mind.previewTemplate(Values.defaults(), new Erudition(java.util.Set.of(Trait.ECOLOGY)));
-        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
+    void getSurvivalSkills_withEcologyKnowledgeLevel_scalesPerPoint() {
+        Mind mindLevelOne = Mind.previewTemplate(Values.defaults(),
+                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1)), Personality.defaults(), Labours.defaults());
+        Mind mindLevelTwo = Mind.previewTemplate(Values.defaults(),
+                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 2)), Personality.defaults(), Labours.defaults());
+        PlayableCharacter levelOne = new PlayableCharacter("test", Body.humanTemplate(), mindLevelOne);
+        PlayableCharacter levelTwo = new PlayableCharacter("test", Body.humanTemplate(), mindLevelTwo);
 
-        assertThat(character.getSurvivalSkills()).isCloseTo(62.0, within(TOLERANCE));
+        assertThat(levelOne.getSurvivalSkills()).isCloseTo(62.0, within(TOLERANCE));
+        assertThat(levelTwo.getSurvivalSkills()).isCloseTo(64.0, within(TOLERANCE));
     }
 
     @Test
-    void getAnimalCaring_withEcologyAndBiologyTraits_increasesByFour() {
+    void getAnimalCaring_withEcologyAndBiologyKnowledgeLevels_scalesPerPoint() {
         Mind mind = Mind.previewTemplate(Values.defaults(),
-                new Erudition(java.util.Set.of(Trait.ECOLOGY, Trait.BIOLOGY)));
+                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1, Knowledge.BIOLOGY, 1)), Personality.defaults(),
+                Labours.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
 
         assertThat(character.getAnimalCaring()).isCloseTo(64.0, within(TOLERANCE));
@@ -1492,38 +1533,68 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getBluffing_higherTruthOrMorality_decreasesBluffing() {
+    void getBluffing_higherTruthOrMoralityValue_noLongerAffectsBluffing_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter honest = withValues(values -> {
             values.setTruth(5);
             values.setMorality(5);
         });
 
-        assertThat(honest.getBluffing()).isLessThan(defaults.getBluffing());
+        assertThat(honest.getBluffing()).isEqualTo(defaults.getBluffing());
     }
 
     @Test
-    void getFaith_higherDivinity_increasesFaith() {
+    void getFaith_higherDivinityValue_noLongerAffectsFaith_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter devout = withValues(values -> values.setDivinity(5));
 
-        assertThat(devout.getFaith()).isGreaterThan(defaults.getFaith());
+        assertThat(devout.getFaith()).isEqualTo(defaults.getFaith());
     }
 
     @Test
-    void getIllusionResistanceSanity_higherTruth_increases() {
+    void getFaith_paganTrait_decreasesFaithAndMediunity() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter pagan = withTrait(Values.defaults(), Trait.PAGAN);
+
+        assertThat(pagan.getFaith()).isLessThan(defaults.getFaith());
+        assertThat(pagan.getMediunity()).isLessThan(defaults.getMediunity());
+    }
+
+    @Test
+    void getIllusionResistance_higherTruthValue_noLongerAffectsIt_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter truthful = withValues(values -> values.setTruth(5));
 
-        assertThat(truthful.getIllusionResistanceSanity()).isGreaterThan(defaults.getIllusionResistanceSanity());
+        assertThat(truthful.getIllusionResistance()).isEqualTo(defaults.getIllusionResistance());
     }
 
     @Test
-    void getCreativity_higherProgress_increases() {
+    void getIllusionResistance_practicalistCancelsRelativistPenalty() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter relativist = withTrait(Values.defaults(), Trait.RELATIVIST);
+        double relativistOnlyResistance = relativist.getIllusionResistance();
+
+        relativist.getMind().getPersonality().select(Trait.PRACTICALIST, relativist);
+
+        assertThat(relativistOnlyResistance).isLessThan(defaults.getIllusionResistance());
+        assertThat(relativist.getIllusionResistance()).isEqualTo(defaults.getIllusionResistance());
+    }
+
+    @Test
+    void getCreativity_higherProgressValue_noLongerAffectsCreativity_rpg19Revert() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter progressive = withValues(values -> values.setProgress(5));
 
-        assertThat(progressive.getCreativity()).isGreaterThan(defaults.getCreativity());
+        assertThat(progressive.getCreativity()).isEqualTo(defaults.getCreativity());
+    }
+
+    @Test
+    void getCreativity_orphanMindTrait_increasesCreativityAndKnowledgePoints() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter orphan = withTrait(Values.defaults(), Trait.ORPHAN_MIND);
+
+        assertThat(orphan.getCreativity()).isGreaterThan(defaults.getCreativity());
+        assertThat(orphan.getMind().getErudition().getEffectivePoints(orphan)).isEqualTo(Erudition.BASE_POINTS + 1);
     }
 
     @Test
@@ -1531,5 +1602,82 @@ class PlayableCharacterTest {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(character.getMediunity()).isCloseTo(12.0, within(TOLERANCE));
+    }
+
+    // -------------------------------------------------------------------------
+    // rpg-19 — Analysis, Close/Low/Long Range Combat (new attributes)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getAnalysis_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getAnalysis()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getAnalysis_higherReasoning_increasesAnalysis() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Body sharperMind = Body.humanTemplate();
+        sharperMind.getBodySystems().getNeuralSystem().setSynapsisQuality(9);
+        PlayableCharacter sharper = new PlayableCharacter("test", sharperMind, Mind.humanTemplate());
+
+        assertThat(sharper.getReasoning()).isGreaterThan(defaults.getReasoning());
+        assertThat(sharper.getAnalysis()).isGreaterThan(defaults.getAnalysis());
+    }
+
+    @Test
+    void getCloseCombatAndLowRangeCombat_onHumanDefaults_equalBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getCloseCombat()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getLowRangeCombat()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getLongRangeCombat()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getCloseCombatAndLowRangeCombat_bellicoseTrait_increasesBoth() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter bellicose = withTrait(Values.defaults(), Trait.BELLICOSE);
+
+        assertThat(bellicose.getCloseCombat()).isGreaterThan(defaults.getCloseCombat());
+        assertThat(bellicose.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
+        assertThat(bellicose.getLongRangeCombat()).isEqualTo(defaults.getLongRangeCombat());
+    }
+
+    // -------------------------------------------------------------------------
+    // rpg-19 — Values-trait forced value and prerequisite gating (Personality)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void selectingABaseTrait_forcesItsLinkedValueToZero_andUnlocksTheAdvancedTrait() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+        character.getMind().getPersonality().select(Trait.SELF_SACRIFICE, character);
+
+        assertThat(character.getMind().getValues().getEgo()).isZero();
+        assertThat(Trait.SUICIDAL.prerequisitesMet(character)).isTrue();
+        assertThat(character.getFearResistance()).isGreaterThan(60.0);
+        assertThat(character.getPainThreshold()).isGreaterThan(60.0);
+    }
+
+    // -------------------------------------------------------------------------
+    // rpg-19 — Labours (Jobs) point budget
+    // -------------------------------------------------------------------------
+
+    @Test
+    void labours_onHumanDefaults_hasBasePointsUnspent() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getMind().getLabours().getEffectivePoints(character)).isEqualTo(Labours.BASE_POINTS);
+        assertThat(character.getMind().getLabours().getSpentPoints()).isZero();
+    }
+
+    @Test
+    void labours_conservativeAndLudditeTraits_eachGrantOneExtraPoint() {
+        Values values = Values.defaults();
+        PlayableCharacter character = withTrait(values, Trait.CONSERVATIVE);
+        character.getMind().getPersonality().select(Trait.LUDDITE, character);
+
+        assertThat(character.getMind().getLabours().getEffectivePoints(character)).isEqualTo(Labours.BASE_POINTS + 2);
     }
 }
