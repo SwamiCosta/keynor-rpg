@@ -14,7 +14,15 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double breathOutput, double dehydrationResistance, double starvationResistance,
                                   double foodPoisoningAlcoholResistance, double fatGainRate, double muscleGainRate,
                                   double intimidation, double diplomacy, double enfactuation, double command,
-                                  double manaPool, double arcaneOutput, double sixthSense) {
+                                  double manaPool, double arcaneOutput, double mediunity,
+                                  double selfConcern, double friendshipConcern, double orderConcern,
+                                  double freedomConcern, double patriotismConcern, double spiritualConcern,
+                                  double philosophyConcern, double academicConcern, double environmentalismConcern,
+                                  double moralityConcern, double traditionalismConcern, double justiceConcern,
+                                  double progressConcern, double peaceConcern,
+                                  double survivalSkills, double animalCaring, double manipulation,
+                                  double behaviorReading, double discretion, double bluffing, double faith,
+                                  double illusionResistanceSanity, double creativity) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -63,6 +71,29 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getCommand(),
                 character.getManaPool(),
                 character.getArcaneOutput(),
-                character.getSixthSense());
+                character.getMediunity(),
+                character.getSelfConcern(),
+                character.getFriendshipConcern(),
+                character.getOrderConcern(),
+                character.getFreedomConcern(),
+                character.getPatriotismConcern(),
+                character.getSpiritualConcern(),
+                character.getPhilosophyConcern(),
+                character.getAcademicConcern(),
+                character.getEnvironmentalismConcern(),
+                character.getMoralityConcern(),
+                character.getTraditionalismConcern(),
+                character.getJusticeConcern(),
+                character.getProgressConcern(),
+                character.getPeaceConcern(),
+                character.getSurvivalSkills(),
+                character.getAnimalCaring(),
+                character.getManipulation(),
+                character.getBehaviorReading(),
+                character.getDiscretion(),
+                character.getBluffing(),
+                character.getFaith(),
+                character.getIllusionResistanceSanity(),
+                character.getCreativity());
     }
 }

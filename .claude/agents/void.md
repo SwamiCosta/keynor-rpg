@@ -45,6 +45,7 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 ### Project skills (`keynor-rpg/.claude/skills/`)
 
 - `.claude/skills/additive-attribute-formulas.md` — the baseline-60 additive design (`attribute = baseline + Σ weight × (input - neutral)`), the SymbolicTotalMass/DisplayMassKg split, and which attributes carry a safety floor. Open it before touching any `PlayableCharacter` formula or `BodyCoefficients` field.
+- `.claude/skills/mind-pillar-traits-and-values.md` — the Mind pillar (Values + Erudition), `InputNature`, and the `Trait` boolean input type. Open it before touching `Mind`, `Values`, `Erudition`, `Trait`, or declaring a new input's nature.
 
 ---
 
@@ -130,4 +131,4 @@ When a task contains protected actions:
 
 ---
 
-*Last updated: 2026-07-04 (rpgc-17: added a Responsibilities bullet requiring any formula/coefficient/input change to be flagged to Gaemes, so keynor-rpg-client's in-app Formulas reference page stays in sync — see that project's formulas-reference-page.md skill. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — removed Skill 05, which is Never for this role; added missing Always skills 06/11/12/13; renamed "Level 2 (dev) column" to "Void column" to match the table's per-persona restructure)*
+*Last updated: 2026-07-04 (rpg-18: added `.claude/skills/mind-pillar-traits-and-values.md` to Project skills. Previous entry, same day — rpg-18 (formulas-reference-page-docs): added a Responsibilities bullet requiring any formula/coefficient/input change to be flagged to Gaemes, so keynor-rpg-client's in-app Formulas reference page stays in sync — see that project's formulas-reference-page.md skill. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — removed Skill 05, which is Never for this role; added missing Always skills 06/11/12/13; renamed "Level 2 (dev) column" to "Void column" to match the table's per-persona restructure)*

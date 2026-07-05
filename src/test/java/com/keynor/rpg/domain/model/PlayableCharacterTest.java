@@ -1358,4 +1358,178 @@ class PlayableCharacterTest {
         int expected = (int) Math.floor(Math.pow(floor, 2) / 150.0) + floor;
         assertThat(character.getMaxCapacityKg()).isEqualTo(expected);
     }
+
+    // -------------------------------------------------------------------------
+    // Mind pillar (new) — Concern mirrors, cross-pillar terms on existing Body attributes, and
+    // 9 new Mind-driven attributes. Human template pairs Body.humanTemplate() with
+    // Mind.humanTemplate() (every Value at its own neutral, 1), so every Mind-driven deviation
+    // term is zero and every baseline-60 Mind attribute equals exactly 60, same convention as
+    // the Body-pillar tests above.
+    // -------------------------------------------------------------------------
+
+    private static PlayableCharacter withValues(java.util.function.Consumer<Values> customize) {
+        Values values = Values.defaults();
+        customize.accept(values);
+        return new PlayableCharacter("test", Body.humanTemplate(), Mind.previewTemplate(values, Erudition.defaults()));
+    }
+
+    @Test
+    void concernAttributes_onHumanDefaults_mirrorEachValueAtOne() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getSelfConcern()).isEqualTo(1);
+        assertThat(character.getFriendshipConcern()).isEqualTo(1);
+        assertThat(character.getOrderConcern()).isEqualTo(1);
+        assertThat(character.getFreedomConcern()).isEqualTo(1);
+        assertThat(character.getPatriotismConcern()).isEqualTo(1);
+        assertThat(character.getSpiritualConcern()).isEqualTo(1);
+        assertThat(character.getPhilosophyConcern()).isEqualTo(1);
+        assertThat(character.getAcademicConcern()).isEqualTo(1);
+        assertThat(character.getEnvironmentalismConcern()).isEqualTo(1);
+        assertThat(character.getMoralityConcern()).isEqualTo(1);
+        assertThat(character.getTraditionalismConcern()).isEqualTo(1);
+        assertThat(character.getJusticeConcern()).isEqualTo(1);
+        assertThat(character.getProgressConcern()).isEqualTo(1);
+        assertThat(character.getPeaceConcern()).isEqualTo(1);
+    }
+
+    @Test
+    void concernAttribute_mirrorsItsValueDirectly_notADeviation() {
+        PlayableCharacter character = withValues(values -> values.setKnowledge(4));
+
+        assertThat(character.getAcademicConcern()).isEqualTo(4);
+    }
+
+    @Test
+    void getShortMemory_higherKnowledge_increasesShortMemory() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter knowledgeable = withValues(values -> values.setKnowledge(5));
+
+        assertThat(knowledgeable.getShortMemory()).isGreaterThan(defaults.getShortMemory());
+        // kShortMemoryKnowledge (3) * (5 - 1) = 12
+        assertThat(knowledgeable.getShortMemory() - defaults.getShortMemory()).isCloseTo(12.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getReasoning_higherTruth_increasesReasoning() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter truthful = withValues(values -> values.setTruth(5));
+
+        assertThat(truthful.getReasoning()).isGreaterThan(defaults.getReasoning());
+        assertThat(truthful.getReasoning() - defaults.getReasoning()).isCloseTo(12.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getEnfactuation_higherLoyalty_increasesEnfactuationButNotDiplomacy() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter loyal = withValues(values -> values.setLoyalty(5));
+
+        assertThat(loyal.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
+        assertThat(loyal.getDiplomacy()).isEqualTo(defaults.getDiplomacy());
+    }
+
+    @Test
+    void getWill_higherMorality_increasesWillButNotMentalHealthPool() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter moral = withValues(values -> values.setMorality(5));
+
+        assertThat(moral.getWill()).isGreaterThan(defaults.getWill());
+        assertThat(moral.getMentalHealthPool()).isEqualTo(defaults.getMentalHealthPool());
+    }
+
+    @Test
+    void getSurvivalSkills_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getSurvivalSkills()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getSurvivalSkills_withEcologyTrait_increasesByTwo() {
+        Mind mind = Mind.previewTemplate(Values.defaults(), new Erudition(java.util.Set.of(Trait.ECOLOGY)));
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
+
+        assertThat(character.getSurvivalSkills()).isCloseTo(62.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getAnimalCaring_withEcologyAndBiologyTraits_increasesByFour() {
+        Mind mind = Mind.previewTemplate(Values.defaults(),
+                new Erudition(java.util.Set.of(Trait.ECOLOGY, Trait.BIOLOGY)));
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
+
+        assertThat(character.getAnimalCaring()).isCloseTo(64.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getManipulationAndBehaviorReading_onHumanDefaults_equalBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getManipulation()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getBehaviorReading()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getDiscretion_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getDiscretion()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getDiscretion_shapeAestheticsAwayFromNeutralInEitherDirection_alwaysDecreasesDiscretion() {
+        Body attractive = Body.humanTemplate();
+        attractive.getPhysicalTraits().getBodyStructure().setShapeAesthetics(9);
+        Body repulsive = Body.humanTemplate();
+        repulsive.getPhysicalTraits().getBodyStructure().setShapeAesthetics(1);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter attractiveCharacter = new PlayableCharacter("test", attractive, Mind.humanTemplate());
+        PlayableCharacter repulsiveCharacter = new PlayableCharacter("test", repulsive, Mind.humanTemplate());
+
+        assertThat(attractiveCharacter.getDiscretion()).isLessThan(defaults.getDiscretion());
+        assertThat(repulsiveCharacter.getDiscretion()).isLessThan(defaults.getDiscretion());
+        assertThat(attractiveCharacter.getDiscretion()).isEqualTo(repulsiveCharacter.getDiscretion());
+    }
+
+    @Test
+    void getBluffing_higherTruthOrMorality_decreasesBluffing() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter honest = withValues(values -> {
+            values.setTruth(5);
+            values.setMorality(5);
+        });
+
+        assertThat(honest.getBluffing()).isLessThan(defaults.getBluffing());
+    }
+
+    @Test
+    void getFaith_higherDivinity_increasesFaith() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter devout = withValues(values -> values.setDivinity(5));
+
+        assertThat(devout.getFaith()).isGreaterThan(defaults.getFaith());
+    }
+
+    @Test
+    void getIllusionResistanceSanity_higherTruth_increases() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter truthful = withValues(values -> values.setTruth(5));
+
+        assertThat(truthful.getIllusionResistanceSanity()).isGreaterThan(defaults.getIllusionResistanceSanity());
+    }
+
+    @Test
+    void getCreativity_higherProgress_increases() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter progressive = withValues(values -> values.setProgress(5));
+
+        assertThat(progressive.getCreativity()).isGreaterThan(defaults.getCreativity());
+    }
+
+    @Test
+    void getMediunity_renamedFromSixthSense_onHumanDefaultAbsentOrgan_equalsTwelve() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getMediunity()).isCloseTo(12.0, within(TOLERANCE));
+    }
 }

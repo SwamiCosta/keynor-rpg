@@ -1,23 +1,23 @@
 package com.keynor.rpg.application.dto;
 
-import com.keynor.rpg.domain.model.PlayableCharacter;
+import com.keynor.rpg.domain.model.Body;
 
+/**
+ * Structural Body-pillar inputs only. {@code attributes}, {@code attributeBreakdowns},
+ * {@code calculatedValues}, and {@code loadCapacity} moved up to {@link CharacterResponse}
+ * (unified preview contract) since they are now a whole-character concern computed from both
+ * Body and Mind, not a Body-only one.
+ */
 public record BodyResponse(BiomechanicsResponse biomechanics, BodySystemsResponse bodySystems,
-                            PhysicalTraitsResponse physicalTraits, AttributesResponse attributes,
-                            AttributeBreakdownsResponse attributeBreakdowns,
-                            CalculatedValuesResponse calculatedValues, LoadCapacityResponse loadCapacity,
-                            PointBudgetResponse geneticPoints, PointBudgetResponse trainingPoints) {
+                            PhysicalTraitsResponse physicalTraits, PointBudgetResponse geneticPoints,
+                            PointBudgetResponse trainingPoints) {
 
-    public static BodyResponse from(PlayableCharacter character) {
+    public static BodyResponse from(Body body) {
         return new BodyResponse(
-                BiomechanicsResponse.from(character.getBody().getBiomechanics()),
-                BodySystemsResponse.from(character.getBody().getBodySystems()),
-                PhysicalTraitsResponse.from(character.getBody().getPhysicalTraits()),
-                AttributesResponse.from(character),
-                AttributeBreakdownsResponse.from(character),
-                CalculatedValuesResponse.from(character),
-                LoadCapacityResponse.from(character),
-                PointBudgetResponse.from(character.getBody().getGeneticPoints()),
-                PointBudgetResponse.from(character.getBody().getTrainingPoints()));
+                BiomechanicsResponse.from(body.getBiomechanics()),
+                BodySystemsResponse.from(body.getBodySystems()),
+                PhysicalTraitsResponse.from(body.getPhysicalTraits()),
+                PointBudgetResponse.from(body.getGeneticPoints()),
+                PointBudgetResponse.from(body.getTrainingPoints()));
     }
 }

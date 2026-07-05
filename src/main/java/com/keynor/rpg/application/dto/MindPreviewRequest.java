@@ -1,0 +1,4 @@
+package com.keynor.rpg.application.dto;
+
+public record MindPreviewRequest(ValuesInput values, EruditionInput erudition) {
+}

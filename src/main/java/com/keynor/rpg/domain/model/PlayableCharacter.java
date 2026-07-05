@@ -1,5 +1,6 @@
 package com.keynor.rpg.domain.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,11 +46,22 @@ public class PlayableCharacter {
 
     private final String name;
     private final Body body;
+    private final Mind mind;
     private String loreReference;
 
+    /**
+     * Convenience constructor for the many call sites (chiefly tests) that only care about the
+     * Body pillar — defaults {@link Mind} to {@link Mind#humanTemplate()} so every Mind-driven
+     * formula still resolves (every Value sits at its own neutral, contributing zero).
+     */
     public PlayableCharacter(String name, Body body) {
+        this(name, body, Mind.humanTemplate());
+    }
+
+    public PlayableCharacter(String name, Body body, Mind mind) {
         this.name = name;
         this.body = body;
+        this.mind = mind;
     }
 
     // -------------------------------------------------------------------------
@@ -462,10 +474,15 @@ public class PlayableCharacter {
         return getMemoryPoolBreakdown().total();
     }
 
-    /** Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5). */
+    /**
+     * Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5) + kReasoningTruth x
+     * (Truth-1) (Mind pillar, new). {@code Truth}'s neutral is 1, its own default — see
+     * {@link Values}.
+     */
     public AttributeBreakdown getReasoningBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5)
+                coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5),
+                coeff().getKReasoningTruth() * (values().getTruth() - 1)
         ));
     }
 
@@ -475,15 +492,18 @@ public class PlayableCharacter {
 
     /**
      * ShortMemory = baseline + kShortMemoryCerebral x (CerebralCapacity-5) +
-     * kShortMemorySynapsis x (SynapsisQuality-5) + kShortMemoryHippocampus x (Hippocampus-5).
-     * Still reads {@code Hippocampus} (memory), not {@code Thalamus} — unlike Sight/Hearing/Smell/
-     * Balance/Aim, which moved to Thalamus in Delta V4.
+     * kShortMemorySynapsis x (SynapsisQuality-5) + kShortMemoryHippocampus x (Hippocampus-5) +
+     * kShortMemoryKnowledge x (Knowledge-1) (Mind pillar, new). Still reads {@code Hippocampus}
+     * (memory), not {@code Thalamus} — unlike Sight/Hearing/Smell/Balance/Aim, which moved to
+     * Thalamus in Delta V4. {@code Knowledge}'s neutral is 1 (its own default), not 5 — see
+     * {@link Values}.
      */
     public AttributeBreakdown getShortMemoryBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5),
                 coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5),
-                coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5)
+                coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5),
+                coeff().getKShortMemoryKnowledge() * (values().getKnowledge() - 1)
         ));
     }
 
@@ -509,15 +529,22 @@ public class PlayableCharacter {
     }
 
     /**
-     * Will — same formula as {@link #getMentalHealthPool()} for now; expected to diverge once
-     * the Mind pillar is implemented.
+     * Will = MentalHealthPool's own baseline and terms, plus kWillMorality x (Morality-1) (Mind
+     * pillar, new) — the divergence from {@link #getMentalHealthPool()} anticipated when Will
+     * was first written as a simplified alias. Reuses {@link #getMentalHealthPoolBreakdown()}'s
+     * terms rather than recomputing Amygdala/Tmod/Pmod, so the two formulas cannot drift apart
+     * by accident on those shared terms. {@code Morality}'s neutral is 1, its own default — see
+     * {@link Values}.
      */
     public AttributeBreakdown getWillBreakdown() {
-        return getMentalHealthPoolBreakdown();
+        AttributeBreakdown mentalHealthPool = getMentalHealthPoolBreakdown();
+        List<Double> terms = new ArrayList<>(mentalHealthPool.terms());
+        terms.add(coeff().getKWillMorality() * (values().getMorality() - 1));
+        return new AttributeBreakdown(mentalHealthPool.baseline(), terms);
     }
 
     public double getWill() {
-        return getMentalHealthPool();
+        return getWillBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -884,14 +911,16 @@ public class PlayableCharacter {
 
     /**
      * Enfactuation = baseline + kEnfactuationShapeAesthetics x (ShapeAesthetics-5) +
-     * kEnfactuationPmod x Pmod. Currently identical in shape to {@link #getDiplomacy()} — both
-     * read the same morphology/hormone inputs today; expected to diverge once the Mind pillar
-     * adds cognitive/social inputs that only one of the two should use.
+     * kEnfactuationPmod x Pmod + kEnfactuationLoyalty x (Loyalty-1) (Mind pillar, new — this is
+     * the divergence from {@link #getDiplomacy()} anticipated when both formulas were first
+     * written: a character who values loyalty forms attachments more easily). {@code Loyalty}'s
+     * neutral is 1, its own default — see {@link Values}.
      */
     public AttributeBreakdown getEnfactuationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKEnfactuationPmod() * progesteroneModifier()
+                coeff().getKEnfactuationPmod() * progesteroneModifier(),
+                coeff().getKEnfactuationLoyalty() * (values().getLoyalty() - 1)
         ));
     }
 
@@ -944,15 +973,172 @@ public class PlayableCharacter {
         return getArcaneOutputBreakdown().total();
     }
 
-    /** SixthSense = baseline + kSixthSenseNoeticPlexus x (NoeticPlexus-6). */
-    public AttributeBreakdown getSixthSenseBreakdown() {
+    /** Mediunity (renamed from SixthSense) = baseline + kMediunityNoeticPlexus x (NoeticPlexus-6). */
+    public AttributeBreakdown getMediunityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSixthSenseNoeticPlexus() * (neuralSystem().getNoeticPlexus() - 6)
+                coeff().getKMediunityNoeticPlexus() * (neuralSystem().getNoeticPlexus() - 6)
         ));
     }
 
-    public double getSixthSense() {
-        return getSixthSenseBreakdown().total();
+    public double getMediunity() {
+        return getMediunityBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
+    // Concern attributes (Mind pillar, new) — direct mirrors of each Values field, not the
+    // usual baseline+deviation shape. A documented exception to the additive standard: baseline
+    // 0, single term equal to the raw Value (not a deviation from its neutral). Each represents
+    // a character's vulnerability to stress in a situation touching that value (e.g. a high
+    // AcademicConcern character is rattled by a destroyed library).
+    // -------------------------------------------------------------------------
+
+    public AttributeBreakdown getSelfConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getEgo())); }
+    public double getSelfConcern() { return getSelfConcernBreakdown().total(); }
+
+    public AttributeBreakdown getFriendshipConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getLoyalty())); }
+    public double getFriendshipConcern() { return getFriendshipConcernBreakdown().total(); }
+
+    public AttributeBreakdown getOrderConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getOrganization())); }
+    public double getOrderConcern() { return getOrderConcernBreakdown().total(); }
+
+    public AttributeBreakdown getFreedomConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getFreedom())); }
+    public double getFreedomConcern() { return getFreedomConcernBreakdown().total(); }
+
+    public AttributeBreakdown getPatriotismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getSociety())); }
+    public double getPatriotismConcern() { return getPatriotismConcernBreakdown().total(); }
+
+    public AttributeBreakdown getSpiritualConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getDivinity())); }
+    public double getSpiritualConcern() { return getSpiritualConcernBreakdown().total(); }
+
+    public AttributeBreakdown getPhilosophyConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getTruth())); }
+    public double getPhilosophyConcern() { return getPhilosophyConcernBreakdown().total(); }
+
+    public AttributeBreakdown getAcademicConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getKnowledge())); }
+    public double getAcademicConcern() { return getAcademicConcernBreakdown().total(); }
+
+    public AttributeBreakdown getEnvironmentalismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getNature())); }
+    public double getEnvironmentalismConcern() { return getEnvironmentalismConcernBreakdown().total(); }
+
+    public AttributeBreakdown getMoralityConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getMorality())); }
+    public double getMoralityConcern() { return getMoralityConcernBreakdown().total(); }
+
+    public AttributeBreakdown getTraditionalismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getTradition())); }
+    public double getTraditionalismConcern() { return getTraditionalismConcernBreakdown().total(); }
+
+    public AttributeBreakdown getJusticeConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getJustice())); }
+    public double getJusticeConcern() { return getJusticeConcernBreakdown().total(); }
+
+    public AttributeBreakdown getProgressConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getProgress())); }
+    public double getProgressConcern() { return getProgressConcernBreakdown().total(); }
+
+    public AttributeBreakdown getPeaceConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getPeace())); }
+    public double getPeaceConcern() { return getPeaceConcernBreakdown().total(); }
+
+    // -------------------------------------------------------------------------
+    // Mind-driven attributes (new) — mix of Erudition traits, Values, and existing Body
+    // PhysicalTraits inputs. All baseline 60, additive-standard shape, except where noted.
+    // -------------------------------------------------------------------------
+
+    /** SurvivalSkills = baseline + kSurvivalSkillsEcology x hasEcology. */
+    public AttributeBreakdown getSurvivalSkillsBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSurvivalSkillsEcology() * flag(hasTrait(Trait.ECOLOGY))
+        ));
+    }
+
+    public double getSurvivalSkills() {
+        return getSurvivalSkillsBreakdown().total();
+    }
+
+    /** AnimalCaring = baseline + kAnimalCaringEcology x hasEcology + kAnimalCaringBiology x hasBiology. */
+    public AttributeBreakdown getAnimalCaringBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKAnimalCaringEcology() * flag(hasTrait(Trait.ECOLOGY)),
+                coeff().getKAnimalCaringBiology() * flag(hasTrait(Trait.BIOLOGY))
+        ));
+    }
+
+    public double getAnimalCaring() {
+        return getAnimalCaringBreakdown().total();
+    }
+
+    /** Manipulation = baseline. No modifier yet — the ability to provoke emotion in others. */
+    public AttributeBreakdown getManipulationBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of());
+    }
+
+    public double getManipulation() {
+        return getManipulationBreakdown().total();
+    }
+
+    /** BehaviorReading = baseline. No modifier yet. */
+    public AttributeBreakdown getBehaviorReadingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of());
+    }
+
+    public double getBehaviorReading() {
+        return getBehaviorReadingBreakdown().total();
+    }
+
+    /**
+     * Discretion = baseline - kDiscretionShapeAesthetics x |ShapeAesthetics-5|. Inverted-V:
+     * ShapeAesthetics always penalizes Discretion regardless of direction — only a character
+     * with a neutral ShapeAesthetics is discreet. Same |deviation| shape as {@link #getCommand()},
+     * sign flipped.
+     */
+    public AttributeBreakdown getDiscretionBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKDiscretionShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)
+        ));
+    }
+
+    public double getDiscretion() {
+        return getDiscretionBreakdown().total();
+    }
+
+    /** Bluffing = baseline - kBluffingTruth x (Truth-1) - kBluffingMorality x (Morality-1). */
+    public AttributeBreakdown getBluffingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKBluffingTruth() * (values().getTruth() - 1),
+                -coeff().getKBluffingMorality() * (values().getMorality() - 1)
+        ));
+    }
+
+    public double getBluffing() {
+        return getBluffingBreakdown().total();
+    }
+
+    /** Faith = baseline + kFaithDivinity x (Divinity-1). */
+    public AttributeBreakdown getFaithBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKFaithDivinity() * (values().getDivinity() - 1)
+        ));
+    }
+
+    public double getFaith() {
+        return getFaithBreakdown().total();
+    }
+
+    /** IllusionResistanceSanity = baseline + kIllusionResistanceSanityTruth x (Truth-1). */
+    public AttributeBreakdown getIllusionResistanceSanityBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKIllusionResistanceSanityTruth() * (values().getTruth() - 1)
+        ));
+    }
+
+    public double getIllusionResistanceSanity() {
+        return getIllusionResistanceSanityBreakdown().total();
+    }
+
+    /** Creativity = baseline + kCreativityProgress x (Progress-1). */
+    public AttributeBreakdown getCreativityBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKCreativityProgress() * (values().getProgress() - 1)
+        ));
+    }
+
+    public double getCreativity() {
+        return getCreativityBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -969,6 +1155,7 @@ public class PlayableCharacter {
 
     public String getName() { return name; }
     public Body getBody() { return body; }
+    public Mind getMind() { return mind; }
     public String getLoreReference() { return loreReference; }
 
     // -------------------------------------------------------------------------
@@ -983,6 +1170,12 @@ public class PlayableCharacter {
     private SensorialOrgans sensorialOrgans() { return body.getPhysicalTraits().getSensorialOrgans(); }
     private BodyStructure bodyStructure() { return body.getPhysicalTraits().getBodyStructure(); }
     private BodyCoefficients coeff() { return body.getCoefficients(); }
+    private Values values() { return mind.getValues(); }
+    private Erudition erudition() { return mind.getErudition(); }
+
+    private boolean hasTrait(Trait trait) { return erudition().hasTrait(trait); }
+
+    private double flag(boolean present) { return present ? 1 : 0; }
 
     /**
      * Applies the shared safety floor used by the Strength-family (Push/Leg/Grip/Lift Strength,

@@ -218,7 +218,25 @@ public class BodyCoefficients {
     // a single input around a neutral point of 6 (not the usual 5), with a wider weight (8).
     private double kManaPoolEpiphyseal = 8;
     private double kArcaneOutputVentriculum = 8;
-    private double kSixthSenseNoeticPlexus = 8;
+    private double kMediunityNoeticPlexus = 8;
+
+    // Mind pillar — cross-pillar terms added to existing Body cognitive/social formulas
+    // (new attribute values default to 1, so every one of these contributes zero at defaults)
+    private double kShortMemoryKnowledge = 3;
+    private double kReasoningTruth = 3;
+    private double kEnfactuationLoyalty = 3;
+    private double kWillMorality = 3;
+
+    // Mind pillar — new attributes (Erudition traits + Values), baseline 60 unless noted
+    private double kSurvivalSkillsEcology = 2;
+    private double kAnimalCaringEcology = 2;
+    private double kAnimalCaringBiology = 2;
+    private double kDiscretionShapeAesthetics = 10; // same magnitude as kCommandShapeAesthetics, sign inverted
+    private double kBluffingTruth = 3;
+    private double kBluffingMorality = 3;
+    private double kFaithDivinity = 3;
+    private double kIllusionResistanceSanityTruth = 3;
+    private double kCreativityProgress = 3;
 
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
     // Evasion, MaxMovementSpeed
@@ -654,8 +672,47 @@ public class BodyCoefficients {
     public double getKArcaneOutputVentriculum() { return kArcaneOutputVentriculum; }
     public void setKArcaneOutputVentriculum(double v) { this.kArcaneOutputVentriculum = v; }
 
-    public double getKSixthSenseNoeticPlexus() { return kSixthSenseNoeticPlexus; }
-    public void setKSixthSenseNoeticPlexus(double v) { this.kSixthSenseNoeticPlexus = v; }
+    public double getKMediunityNoeticPlexus() { return kMediunityNoeticPlexus; }
+    public void setKMediunityNoeticPlexus(double v) { this.kMediunityNoeticPlexus = v; }
+
+    public double getKShortMemoryKnowledge() { return kShortMemoryKnowledge; }
+    public void setKShortMemoryKnowledge(double v) { this.kShortMemoryKnowledge = v; }
+
+    public double getKReasoningTruth() { return kReasoningTruth; }
+    public void setKReasoningTruth(double v) { this.kReasoningTruth = v; }
+
+    public double getKEnfactuationLoyalty() { return kEnfactuationLoyalty; }
+    public void setKEnfactuationLoyalty(double v) { this.kEnfactuationLoyalty = v; }
+
+    public double getKWillMorality() { return kWillMorality; }
+    public void setKWillMorality(double v) { this.kWillMorality = v; }
+
+    public double getKSurvivalSkillsEcology() { return kSurvivalSkillsEcology; }
+    public void setKSurvivalSkillsEcology(double v) { this.kSurvivalSkillsEcology = v; }
+
+    public double getKAnimalCaringEcology() { return kAnimalCaringEcology; }
+    public void setKAnimalCaringEcology(double v) { this.kAnimalCaringEcology = v; }
+
+    public double getKAnimalCaringBiology() { return kAnimalCaringBiology; }
+    public void setKAnimalCaringBiology(double v) { this.kAnimalCaringBiology = v; }
+
+    public double getKDiscretionShapeAesthetics() { return kDiscretionShapeAesthetics; }
+    public void setKDiscretionShapeAesthetics(double v) { this.kDiscretionShapeAesthetics = v; }
+
+    public double getKBluffingTruth() { return kBluffingTruth; }
+    public void setKBluffingTruth(double v) { this.kBluffingTruth = v; }
+
+    public double getKBluffingMorality() { return kBluffingMorality; }
+    public void setKBluffingMorality(double v) { this.kBluffingMorality = v; }
+
+    public double getKFaithDivinity() { return kFaithDivinity; }
+    public void setKFaithDivinity(double v) { this.kFaithDivinity = v; }
+
+    public double getKIllusionResistanceSanityTruth() { return kIllusionResistanceSanityTruth; }
+    public void setKIllusionResistanceSanityTruth(double v) { this.kIllusionResistanceSanityTruth = v; }
+
+    public double getKCreativityProgress() { return kCreativityProgress; }
+    public void setKCreativityProgress(double v) { this.kCreativityProgress = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }
