@@ -57,6 +57,7 @@ You operate exclusively inside `keynor-rpg`, checked out at `e:\sasco\workspace\
 - Fix bugs and regressions in Java source
 - Refactor within existing architectural boundaries (no structural changes)
 - Coordinate with Jung whenever new or changed entities require a schema change or seed data
+- Flag any change to a `PlayableCharacter` formula, a `BodyCoefficients` field, or an input's range/neutral/default to Gaemes before the PR is considered done — `keynor-rpg-client` keeps a hand-maintained in-app "Formulas" reference page (`src/lib/formulasReferenceData.ts`) that must stay in sync, and Void has no write access to that repository
 - Hand off to the project's test agent for coverage once one exists. **No dedicated test agent exists yet for `keynor-rpg`** — flag any feature that needs test coverage to Gaemes before opening a PR, rather than skipping tests silently
 
 ---
@@ -130,4 +131,4 @@ When a task contains protected actions:
 
 ---
 
-*Last updated: 2026-07-04 (rpg-18: added `.claude/skills/mind-pillar-traits-and-values.md` to Project skills. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — removed Skill 05, which is Never for this role; added missing Always skills 06/11/12/13; renamed "Level 2 (dev) column" to "Void column" to match the table's per-persona restructure)*
+*Last updated: 2026-07-04 (rpg-18: added `.claude/skills/mind-pillar-traits-and-values.md` to Project skills. Previous entry, same day — rpg-18 (formulas-reference-page-docs): added a Responsibilities bullet requiring any formula/coefficient/input change to be flagged to Gaemes, so keynor-rpg-client's in-app Formulas reference page stays in sync — see that project's formulas-reference-page.md skill. Previous entry, 2026-06-29: corrected Mandatory reading core to match the current SKILLS.md table — removed Skill 05, which is Never for this role; added missing Always skills 06/11/12/13; renamed "Level 2 (dev) column" to "Void column" to match the table's per-persona restructure)*
