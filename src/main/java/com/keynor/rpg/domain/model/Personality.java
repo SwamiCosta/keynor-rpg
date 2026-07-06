@@ -10,10 +10,10 @@ import java.util.Set;
  * trait is gated purely by its own prerequisite ({@link Trait#prerequisitesMet(PlayableCharacter)}
  * — a concern sitting at its default value, or the pair's base trait already being selected).
  *
- * <p>Selecting a base trait permanently forces its linked {@link Values} field to 0 (see
- * {@link Trait#applyForcedValue(Values)}) — this is a one-way personality commitment, not a
- * reversible slider tweak, so {@link #select(Trait, PlayableCharacter)} applies it immediately
- * and {@link #deselect(Trait)} does not undo it.
+ * <p>Selecting a base trait forces its linked {@link Values} field to 0 (see
+ * {@link Trait#applyForcedValue(Values)}); a value of 0 is only ever valid while that trait
+ * remains selected, so {@link #deselect(Trait, PlayableCharacter)} reverts it back to 1 (see
+ * {@link Trait#revertForcedValue(Values)}).
  */
 public class Personality {
 
@@ -39,8 +39,9 @@ public class Personality {
         trait.applyForcedValue(character.getMind().getValues());
     }
 
-    public void deselect(Trait trait) {
+    public void deselect(Trait trait, PlayableCharacter character) {
         selectedTraits.remove(trait);
+        trait.revertForcedValue(character.getMind().getValues());
     }
 
     public boolean hasTrait(Trait trait) {

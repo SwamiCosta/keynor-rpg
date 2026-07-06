@@ -11,9 +11,11 @@ package com.keynor.rpg.domain.model;
  * linked concern sits at exactly its default value (1)" — representing a character whose history
  * around that concern is unremarkable, not one who has already invested in it via the sliders.
  * An advanced trait's prerequisite is always "the character already has the base trait of the
- * same pair". Selecting a base trait also forces its linked {@link Values} field to 0 (see
- * {@link #applyForcedValue(Values)}) — a deliberate, permanent personality commitment, not a
- * reversible slider tweak.
+ * same pair". Selecting a base trait forces its linked {@link Values} field to 0 (see
+ * {@link #applyForcedValue(Values)}); deselecting it reverts that field back to 1 (see
+ * {@link #revertForcedValue(Values)}) — 0 is only ever a valid value while the trait that forced
+ * it remains selected (corrected after an initial delta shipped the revert as a no-op, treating
+ * the forced value as a one-way commitment — that was a bug, not the intended design).
  *
  * <p><b>Effect split (explicit product decision):</b> every <i>passive, unconditional</i> bonus
  * a trait grants (e.g. Self Sacrifice's +4 Fear Resistance) is implemented as a real additive
@@ -43,6 +45,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setEgo(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setEgo(1);
+        }
     },
     SUICIDAL(TraitGroup.SELF,
             "The character no longer fears their own death and takes on no stress from coming "
@@ -65,6 +72,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setLoyalty(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setLoyalty(1);
         }
     },
     BACKSTABBER(TraitGroup.FRIENDSHIP,
@@ -93,6 +105,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setOrganization(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setOrganization(1);
+        }
     },
     CHAOTIC(TraitGroup.ORDER,
             "The character no longer takes on stress of any kind for committing rule "
@@ -115,6 +132,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setFreedom(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setFreedom(1);
         }
     },
     POSSESSIVE(TraitGroup.FREEDOM,
@@ -142,6 +164,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setSociety(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setSociety(1);
+        }
     },
     ANARCHIST(TraitGroup.PATRIOTISM,
             "The character gains a bonus on resisted tests against politicians, guards, or other "
@@ -166,6 +193,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setDivinity(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setDivinity(1);
         }
     },
     PROFANE(TraitGroup.SPIRITUAL,
@@ -194,6 +226,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setTruth(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setTruth(1);
+        }
     },
     PRACTICALIST(TraitGroup.PHILOSOPHY,
             "The character has channeled their relativism into a grounded, practical outlook, "
@@ -216,6 +253,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setKnowledge(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setKnowledge(1);
         }
 
         @Override
@@ -246,6 +288,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setNature(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setNature(1);
+        }
     },
     DEFORESTER(TraitGroup.ENVIRONMENTALISM,
             "The character gains a bonus on resisted tests against animals, indigenous people, "
@@ -269,6 +316,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setMorality(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setMorality(1);
         }
     },
     NIHILIST(TraitGroup.MORALITY,
@@ -294,6 +346,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setTradition(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setTradition(1);
         }
 
         @Override
@@ -324,6 +381,11 @@ public enum Trait {
         public void applyForcedValue(Values values) {
             values.setJustice(0);
         }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setJustice(1);
+        }
     },
     BEYOND_AUTHORITY(TraitGroup.JUSTICE,
             "The character becomes immune to guilt stress from committing any crime.") {
@@ -346,6 +408,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setProgress(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setProgress(1);
         }
 
         @Override
@@ -380,6 +447,11 @@ public enum Trait {
         @Override
         public void applyForcedValue(Values values) {
             values.setPeace(0);
+        }
+
+        @Override
+        public void revertForcedValue(Values values) {
+            values.setPeace(1);
         }
     },
     INSTIGATOR(TraitGroup.PEACE,
@@ -427,6 +499,15 @@ public enum Trait {
      * No-op for advanced traits, which don't force a value of their own.
      */
     public void applyForcedValue(Values values) {
+        // no-op by default
+    }
+
+    /**
+     * Applied once, when the trait is deselected: reverts the linked {@link Values} field back
+     * to its default (1). No-op for advanced traits. A value of 0 is only ever valid while the
+     * base trait that forced it remains selected — see {@link Personality#deselect}.
+     */
+    public void revertForcedValue(Values values) {
         // no-op by default
     }
 

@@ -38,13 +38,27 @@ class PersonalityTest {
     }
 
     @Test
-    void deselect_doesNotRevertTheForcedValue() {
+    void deselect_revertsTheForcedValueBackToDefault() {
         PlayableCharacter character = characterWithValues(Values.defaults());
         character.getMind().getPersonality().select(Trait.SELF_SACRIFICE, character);
 
-        character.getMind().getPersonality().deselect(Trait.SELF_SACRIFICE);
+        character.getMind().getPersonality().deselect(Trait.SELF_SACRIFICE, character);
 
         assertThat(character.getMind().getPersonality().hasTrait(Trait.SELF_SACRIFICE)).isFalse();
+        assertThat(character.getMind().getValues().getEgo()).isEqualTo(1);
+    }
+
+    @Test
+    void deselect_ofAnAdvancedTrait_doesNotRevertAnyValue() {
+        PlayableCharacter character = characterWithValues(Values.defaults());
+        Personality personality = character.getMind().getPersonality();
+        personality.select(Trait.SELF_SACRIFICE, character);
+        personality.select(Trait.SUICIDAL, character);
+
+        personality.deselect(Trait.SUICIDAL, character);
+
+        assertThat(personality.hasTrait(Trait.SUICIDAL)).isFalse();
+        assertThat(personality.hasTrait(Trait.SELF_SACRIFICE)).isTrue();
         assertThat(character.getMind().getValues().getEgo()).isZero();
     }
 
