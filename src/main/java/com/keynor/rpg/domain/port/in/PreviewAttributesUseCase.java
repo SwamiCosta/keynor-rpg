@@ -9,10 +9,11 @@ import com.keynor.rpg.domain.model.Personality;
 import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.model.Values;
+import com.keynor.rpg.domain.model.WeaponProficiencies;
 
 public interface PreviewAttributesUseCase {
 
     PlayableCharacter calculate(Biomechanics biomechanics, BodySystems bodySystems, PhysicalTraits physicalTraits,
                                  Values values, Erudition erudition, Personality personality, Labours labours,
-                                 GeneralPersonality generalPersonality);
+                                 GeneralPersonality generalPersonality, WeaponProficiencies weaponProficiencies);
 }

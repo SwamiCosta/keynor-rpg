@@ -312,6 +312,18 @@ public class BodyCoefficients {
     private double kAnimalCaringOutdoorLifestyle = 6;
     private double kCreativityInventor = 6;
 
+    // Astral Atrium (second CardiacSystem arcane organ), Chi Pool, Training and Conditioning
+    // (Vigor/Reflexes), Reaction Speed, Hiding, Sneaking — StaminaPool's new terms read
+    // AstralAtrium/Vigor as raw values (not a neutral-6 deviation), same "zero at the
+    // organ/training-absent default" shape as the rest of this group.
+    private double kStaminaPoolAstralAtrium = 4;
+    private double kStaminaPoolVigor = 5;
+    private double kChiPoolAstralAtrium = 8;
+    private double kReactionSpeedNeuralDrive = 6;
+    private double kReactionSpeedReflexes = 5;
+    private double kHidingShapeAesthetics = 1;
+    private double kSneakingAgility = 1;
+
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
     // Evasion, MovementSpeed
     private double attributeFloor = 5;
@@ -967,6 +979,27 @@ public class BodyCoefficients {
 
     public double getKCreativityInventor() { return kCreativityInventor; }
     public void setKCreativityInventor(double v) { this.kCreativityInventor = v; }
+
+    public double getKStaminaPoolAstralAtrium() { return kStaminaPoolAstralAtrium; }
+    public void setKStaminaPoolAstralAtrium(double v) { this.kStaminaPoolAstralAtrium = v; }
+
+    public double getKStaminaPoolVigor() { return kStaminaPoolVigor; }
+    public void setKStaminaPoolVigor(double v) { this.kStaminaPoolVigor = v; }
+
+    public double getKChiPoolAstralAtrium() { return kChiPoolAstralAtrium; }
+    public void setKChiPoolAstralAtrium(double v) { this.kChiPoolAstralAtrium = v; }
+
+    public double getKReactionSpeedNeuralDrive() { return kReactionSpeedNeuralDrive; }
+    public void setKReactionSpeedNeuralDrive(double v) { this.kReactionSpeedNeuralDrive = v; }
+
+    public double getKReactionSpeedReflexes() { return kReactionSpeedReflexes; }
+    public void setKReactionSpeedReflexes(double v) { this.kReactionSpeedReflexes = v; }
+
+    public double getKHidingShapeAesthetics() { return kHidingShapeAesthetics; }
+    public void setKHidingShapeAesthetics(double v) { this.kHidingShapeAesthetics = v; }
+
+    public double getKSneakingAgility() { return kSneakingAgility; }
+    public void setKSneakingAgility(double v) { this.kSneakingAgility = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }
