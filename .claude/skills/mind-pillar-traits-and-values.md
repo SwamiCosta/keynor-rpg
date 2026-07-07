@@ -81,6 +81,10 @@ These do **not** follow the base/advanced pair pattern — no `applyForcedValue`
 
 `MindResponse`/`MindPreviewRequest` gained `generalPersonality` (`GeneralPersonalityResponse`/`GeneralPersonalityInput`, `{vanity, focus}`). `NeuralSystemInput`/`NeuralSystemResponse` gained `phaxicCerebelum`. `PreviewAttributesUseCase.calculate(...)` grew from 7 to 8 parameters.
 
+## Testing scope for domain rules (reduced 2026-07-08)
+
+Same reduced policy as `additive-attribute-formulas.md`'s "Testing scope for formulas" section — read that section for the full rationale, this is the domain-rule/use-case equivalent. For a new prerequisite, point-budget rule, or forced-value side effect: one test for the happy path (rule satisfied, action succeeds) and one test for the specific rule being enforced (rule violated, action rejected/no-ops as documented) are enough. Don't add a battery of near-duplicate tests sweeping every combination of concern value, selected-trait set, or budget total unless the ticket specifically calls out an edge case that needs locking down (e.g. a documented copy-paste correction like `RETRIBUTION_SEEKER`'s group fix above). The same applies to use-case/application-layer tests (`PreviewAttributesService` and similar) — one test confirming defaults resolve correctly, one or two confirming an input change is actually threaded through, not an exhaustive matrix of every field.
+
 ## Extending this pattern
 
 When adding a new `Trait` (personality): pick its linked `Values` concern, add the base/advanced pair to the matching `TraitGroup`, override `prerequisitesMet`/`applyForcedValue` on the base constant, and add real formula terms only for unconditional bonuses — situational effects go in `getDescription()` only. A concern-threshold trait (no forced value, gated by `>= N` instead of `== 1` or "base already selected") is also valid — see the section above.
