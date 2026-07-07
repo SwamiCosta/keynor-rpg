@@ -485,14 +485,16 @@ public class PlayableCharacter {
 
     /**
      * Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5) - kReasoningRelativist x
-     * hasRelativist - kReasoningIliterate x hasIliterate. The rpg-18 {@code Truth} cross-pillar
-     * term was reverted in rpg-19 in favor of these two Values-trait terms.
+     * hasRelativist - kReasoningIliterate x hasIliterate + kReasoningPhilosopher x hasPhilosopher.
+     * The rpg-18 {@code Truth} cross-pillar term was reverted in rpg-19 in favor of the
+     * Relativist/Iliterate Values-trait terms; Philosopher was added later.
      */
     public AttributeBreakdown getReasoningBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5),
                 -coeff().getKReasoningRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKReasoningIliterate() * flag(hasTrait(Trait.ILLITERATE))
+                -coeff().getKReasoningIliterate() * flag(hasTrait(Trait.ILLITERATE)),
+                coeff().getKReasoningPhilosopher() * flag(hasTrait(Trait.PHILOSOPHER))
         ));
     }
 
@@ -917,8 +919,10 @@ public class PlayableCharacter {
 
     /**
      * Intimidation = baseline - kIntimidationShapeAesthetics x (ShapeAesthetics-5) +
-     * kIntimidationTmod x Tmod + kIntimidationMass x (SymbolicTotalMass-kIntimidationMassNeutral).
-     * Unattractive, testosterone-driven, physically imposing characters intimidate more.
+     * kIntimidationTmod x Tmod + kIntimidationMass x (SymbolicTotalMass-kIntimidationMassNeutral)
+     * - kIntimidationVanity x (Vanity-5) - kIntimidationPeacekeeper x hasPeacekeeper.
+     * Unattractive, testosterone-driven, physically imposing characters intimidate more; a vain
+     * or peace-seeking character intimidates less.
      */
     public AttributeBreakdown getIntimidationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
@@ -926,7 +930,9 @@ public class PlayableCharacter {
                 coeff().getKIntimidationTmod() * testosteroneModifier(),
                 coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral()),
                 coeff().getKIntimidationProfane() * flag(hasTrait(Trait.PROFANE)),
-                coeff().getKIntimidationBellicose() * flag(hasTrait(Trait.BELLICOSE))
+                coeff().getKIntimidationBellicose() * flag(hasTrait(Trait.BELLICOSE)),
+                -coeff().getKIntimidationVanity() * (generalPersonality().getVanity() - 5),
+                -coeff().getKIntimidationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER))
         ));
     }
 
@@ -952,15 +958,20 @@ public class PlayableCharacter {
     /**
      * Enfactuation = baseline + kEnfactuationShapeAesthetics x (ShapeAesthetics-5) +
      * kEnfactuationPmod x Pmod + kEnfactuationRelativist x hasRelativist -
-     * kEnfactuationBellicose x hasBellicose. The rpg-18 {@code Loyalty} cross-pillar term was
-     * reverted in rpg-19 in favor of these two Values-trait terms.
+     * kEnfactuationBellicose x hasBellicose + kEnfactuationVanity x (Vanity-5) +
+     * kEnfactuationReliable x hasReliable + kEnfactuationPeacekeeper x hasPeacekeeper. The
+     * rpg-18 {@code Loyalty} cross-pillar term was reverted in rpg-19 in favor of the
+     * Relativist/Bellicose Values-trait terms; Vanity/Reliable/Peacekeeper were added later.
      */
     public AttributeBreakdown getEnfactuationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
                 coeff().getKEnfactuationPmod() * progesteroneModifier(),
                 coeff().getKEnfactuationRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKEnfactuationBellicose() * flag(hasTrait(Trait.BELLICOSE))
+                -coeff().getKEnfactuationBellicose() * flag(hasTrait(Trait.BELLICOSE)),
+                coeff().getKEnfactuationVanity() * (generalPersonality().getVanity() - 5),
+                coeff().getKEnfactuationReliable() * flag(hasTrait(Trait.RELIABLE)),
+                coeff().getKEnfactuationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER))
         ));
     }
 
@@ -1096,13 +1107,15 @@ public class PlayableCharacter {
 
     /**
      * SurvivalSkills = baseline + kSurvivalSkillsEcology x EcologyLevel + kSurvivalSkillsExpatriated x
-     * hasExpatriated + kSurvivalSkillsAnarchist x hasAnarchist.
+     * hasExpatriated + kSurvivalSkillsAnarchist x hasAnarchist + kSurvivalSkillsOutdoorLifestyle x
+     * hasOutdoorLifestyle.
      */
     public AttributeBreakdown getSurvivalSkillsBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKSurvivalSkillsEcology() * erudition().getLevel(Knowledge.ECOLOGY),
                 coeff().getKSurvivalSkillsExpatriated() * flag(hasTrait(Trait.EXPATRIATED)),
-                coeff().getKSurvivalSkillsAnarchist() * flag(hasTrait(Trait.ANARCHIST))
+                coeff().getKSurvivalSkillsAnarchist() * flag(hasTrait(Trait.ANARCHIST)),
+                coeff().getKSurvivalSkillsOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE))
         ));
     }
 
@@ -1112,13 +1125,15 @@ public class PlayableCharacter {
 
     /**
      * AnimalCaring = baseline + kAnimalCaringEcology x EcologyLevel + kAnimalCaringBiology x
-     * BiologyLevel - kAnimalCaringAntiNaturalist x hasAntiNaturalist.
+     * BiologyLevel - kAnimalCaringAntiNaturalist x hasAntiNaturalist + kAnimalCaringOutdoorLifestyle x
+     * hasOutdoorLifestyle.
      */
     public AttributeBreakdown getAnimalCaringBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKAnimalCaringEcology() * erudition().getLevel(Knowledge.ECOLOGY),
                 coeff().getKAnimalCaringBiology() * erudition().getLevel(Knowledge.BIOLOGY),
-                -coeff().getKAnimalCaringAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST))
+                -coeff().getKAnimalCaringAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST)),
+                coeff().getKAnimalCaringOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE))
         ));
     }
 
@@ -1173,12 +1188,14 @@ public class PlayableCharacter {
     }
 
     /**
-     * Bluffing = baseline. The rpg-18 {@code Truth}/{@code Morality} cross-pillar terms were
-     * reverted outright in rpg-19 (no replacement — no current Values trait grants a Bluffing
-     * bonus).
+     * Bluffing = baseline - kBluffingRealitic x hasRealitic. The rpg-18 {@code Truth}/
+     * {@code Morality} cross-pillar terms were reverted outright in rpg-19; Realitic later added
+     * the first Values-trait term this attribute has had since.
      */
     public AttributeBreakdown getBluffingBreakdown() {
-        return new AttributeBreakdown(coeff().getBaseline(), List.of());
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKBluffingRealitic() * flag(hasTrait(Trait.REALITIC))
+        ));
     }
 
     public double getBluffing() {
@@ -1187,14 +1204,16 @@ public class PlayableCharacter {
 
     /**
      * Faith = baseline - kFaithPagan x hasPagan + kFaithRelativist x hasRelativist -
-     * kFaithProfane x hasProfane. The rpg-18 {@code Divinity} cross-pillar term was reverted in
-     * rpg-19 in favor of these Values-trait terms.
+     * kFaithProfane x hasProfane + kFaithReligionPractitioner x hasReligionPractitioner. The
+     * rpg-18 {@code Divinity} cross-pillar term was reverted in rpg-19 in favor of the
+     * Pagan/Relativist/Profane Values-trait terms; Religion Practitioner was added later.
      */
     public AttributeBreakdown getFaithBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 -coeff().getKFaithPagan() * flag(hasTrait(Trait.PAGAN)),
                 coeff().getKFaithRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKFaithProfane() * flag(hasTrait(Trait.PROFANE))
+                -coeff().getKFaithProfane() * flag(hasTrait(Trait.PROFANE)),
+                coeff().getKFaithReligionPractitioner() * flag(hasTrait(Trait.RELIGION_PRACTITIONER))
         ));
     }
 
@@ -1205,14 +1224,16 @@ public class PlayableCharacter {
     /**
      * IllusionResistance (renamed from IllusionResistanceSanity in rpg-19) = baseline -
      * kIllusionResistanceRelativist x hasRelativist + kIllusionResistancePracticalist x
-     * hasPracticalist. The rpg-18 {@code Truth} cross-pillar term was reverted in rpg-19 in
-     * favor of these Values-trait terms (Practicalist's +5 exactly cancels Relativist's -5 when
-     * a character holds both).
+     * hasPracticalist + kIllusionResistanceRealitic x hasRealitic. The rpg-18 {@code Truth}
+     * cross-pillar term was reverted in rpg-19 in favor of the Relativist/Practicalist
+     * Values-trait terms (Practicalist's +5 exactly cancels Relativist's -5 when a character
+     * holds both); Realitic was added later.
      */
     public AttributeBreakdown getIllusionResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 -coeff().getKIllusionResistanceRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                coeff().getKIllusionResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST))
+                coeff().getKIllusionResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST)),
+                coeff().getKIllusionResistanceRealitic() * flag(hasTrait(Trait.REALITIC))
         ));
     }
 
@@ -1222,13 +1243,15 @@ public class PlayableCharacter {
 
     /**
      * Creativity = baseline + kCreativityOrphanMind x hasOrphanMind + kCreativityPastEraser x
-     * hasPastEraser. The rpg-18 {@code Progress} cross-pillar term was reverted in rpg-19 in
-     * favor of these Values-trait terms.
+     * hasPastEraser + kCreativityInventor x hasInventor. The rpg-18 {@code Progress} cross-pillar
+     * term was reverted in rpg-19 in favor of the OrphanMind/PastEraser Values-trait terms;
+     * Inventor was added later.
      */
     public AttributeBreakdown getCreativityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
                 coeff().getKCreativityOrphanMind() * flag(hasTrait(Trait.ORPHAN_MIND)),
-                coeff().getKCreativityPastEraser() * flag(hasTrait(Trait.PAST_ERASER))
+                coeff().getKCreativityPastEraser() * flag(hasTrait(Trait.PAST_ERASER)),
+                coeff().getKCreativityInventor() * flag(hasTrait(Trait.INVENTOR))
         ));
     }
 
@@ -1290,6 +1313,92 @@ public class PlayableCharacter {
     }
 
     // -------------------------------------------------------------------------
+    // Psyquism, Charm Resistance, Concentration, Purity — added alongside GeneralPersonality
+    // (Vanity/Focus) and NeuralSystem.phaxicCerebelum. Psyquism Output/Defense follow the arcane
+    // organs' shape exactly (own single input, neutral 6, weight 8). CharmResistance reads
+    // Discretion and Concentration reads CerebralCapacity as ordinary inputs (not derived-
+    // attribute terms); floor() on CharmResistance's Discretion term matches Analysis's own
+    // floor() usage for a fractional weight (0.5).
+    // -------------------------------------------------------------------------
+
+    /**
+     * PsyquismOutput (Supernatural) = baseline + kPsyquismOutputPhaxicCerebelum x
+     * (PhaxicCerebelum-6) + kPsyquismOutputCerebralCapacity x (CerebralCapacity-5). At the
+     * human-default absent value (PhaxicCerebelum=0), resolves to 60 - 48 + 0 = 12.
+     */
+    public AttributeBreakdown getPsyquismOutputBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKPsyquismOutputPhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6),
+                coeff().getKPsyquismOutputCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5)
+        ));
+    }
+
+    public double getPsyquismOutput() {
+        return getPsyquismOutputBreakdown().total();
+    }
+
+    /**
+     * PsyquismDefense (Supernatural) = baseline + kPsyquismDefensePhaxicCerebelum x
+     * (PhaxicCerebelum-6). At the human-default absent value, resolves to 60 - 48 = 12.
+     */
+    public AttributeBreakdown getPsyquismDefenseBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKPsyquismDefensePhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6)
+        ));
+    }
+
+    public double getPsyquismDefense() {
+        return getPsyquismDefenseBreakdown().total();
+    }
+
+    /**
+     * CharmResistance (Social) = baseline - kCharmResistanceVanity x (Vanity-5) +
+     * floor(kCharmResistanceDiscretion x (Discretion-60)) - kCharmResistanceProtagonist x
+     * hasProtagonist. Reads {@link #getDiscretion()} as an ordinary additive term, same pattern
+     * as {@link #getBalance()}'s LegDrive term and {@link #getAnalysis()}'s Reasoning term.
+     */
+    public AttributeBreakdown getCharmResistanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKCharmResistanceVanity() * (generalPersonality().getVanity() - 5),
+                Math.floor(coeff().getKCharmResistanceDiscretion() * (getDiscretion() - coeff().getBaseline())),
+                -coeff().getKCharmResistanceProtagonist() * flag(hasTrait(Trait.PROTAGONIST))
+        ));
+    }
+
+    public double getCharmResistance() {
+        return getCharmResistanceBreakdown().total();
+    }
+
+    /**
+     * Concentration (Cognitive) = baseline + kConcentrationFocus x (Focus-5) -
+     * kConcentrationCerebralCapacity x (CerebralCapacity-5).
+     */
+    public AttributeBreakdown getConcentrationBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKConcentrationFocus() * (generalPersonality().getFocus() - 5),
+                -coeff().getKConcentrationCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5)
+        ));
+    }
+
+    public double getConcentration() {
+        return getConcentrationBreakdown().total();
+    }
+
+    /**
+     * Purity (Supernatural) = baseline + kPurityCleanVessel x hasCleanVessel. No other
+     * modifiers.
+     */
+    public AttributeBreakdown getPurityBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKPurityCleanVessel() * flag(hasTrait(Trait.CLEAN_VESSEL))
+        ));
+    }
+
+    public double getPurity() {
+        return getPurityBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
     // Lore link
     // -------------------------------------------------------------------------
 
@@ -1322,6 +1431,7 @@ public class PlayableCharacter {
     private Erudition erudition() { return mind.getErudition(); }
     private Personality personality() { return mind.getPersonality(); }
     private Labours labours() { return mind.getLabours(); }
+    private GeneralPersonality generalPersonality() { return mind.getGeneralPersonality(); }
 
     private boolean hasTrait(Trait trait) { return personality().hasTrait(trait); }
 

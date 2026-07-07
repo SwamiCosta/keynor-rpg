@@ -22,11 +22,12 @@ class NeuralSystemTest {
         assertThat(neuralSystem.getAgility()).isEqualTo(5);
         assertThat(neuralSystem.getPrecision()).isEqualTo(5);
         assertThat(neuralSystem.getNoeticPlexus()).isEqualTo(0);
+        assertThat(neuralSystem.getPhaxicCerebelum()).isEqualTo(0);
     }
 
     @Test
     void constructor_storesEachFieldIndependently() {
-        NeuralSystem neuralSystem = new NeuralSystem(1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3);
+        NeuralSystem neuralSystem = new NeuralSystem(1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4);
 
         assertThat(neuralSystem.getNeuralDrive()).isEqualTo(1);
         assertThat(neuralSystem.getNeuromuscularEfficiency()).isEqualTo(2);
@@ -40,6 +41,7 @@ class NeuralSystemTest {
         assertThat(neuralSystem.getAgility()).isEqualTo(1);
         assertThat(neuralSystem.getPrecision()).isEqualTo(2);
         assertThat(neuralSystem.getNoeticPlexus()).isEqualTo(3);
+        assertThat(neuralSystem.getPhaxicCerebelum()).isEqualTo(4);
     }
 
     @Test
@@ -53,6 +55,7 @@ class NeuralSystemTest {
         neuralSystem.setAgility(6);
         neuralSystem.setPrecision(4);
         neuralSystem.setNoeticPlexus(6);
+        neuralSystem.setPhaxicCerebelum(7);
 
         assertThat(neuralSystem.getNeuralDrive()).isEqualTo(8);
         assertThat(neuralSystem.getCerebralCapacity()).isEqualTo(9);
@@ -61,5 +64,6 @@ class NeuralSystemTest {
         assertThat(neuralSystem.getAgility()).isEqualTo(6);
         assertThat(neuralSystem.getPrecision()).isEqualTo(4);
         assertThat(neuralSystem.getNoeticPlexus()).isEqualTo(6);
+        assertThat(neuralSystem.getPhaxicCerebelum()).isEqualTo(7);
     }
 }

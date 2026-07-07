@@ -108,7 +108,7 @@ class PlayableCharacterTest {
     void getPushStrength_higherMuscleMassNeuromuscularOrFiberType_increasesEveryStrength() {
         Genetics genetics = new Genetics(5, 5, 5, 7, 3);
         BodyComposition composition = new BodyComposition(3, 9, 9, 9, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(genetics, composition), bodySystems, PhysicalTraits.defaults());
@@ -264,7 +264,7 @@ class PlayableCharacterTest {
     void getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor() {
         Genetics worstCase = new Genetics(5, 5, 5, 15, 3);
         BodyComposition composition = new BodyComposition(10, 1, 1, 5, 5, 9, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems, PhysicalTraits.defaults());
@@ -387,7 +387,7 @@ class PlayableCharacterTest {
     void getFatigueResistance_worstCaseSliderCombination_isStillPositiveButFlooredIfPushedFurther() {
         Genetics worstCase = new Genetics(5, 5, 5, 15, 3);
         BodyComposition composition = new BodyComposition(10, 15, 5, 5, 5, 9, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1, 0),
                 new PulmonarySystem(1), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems, PhysicalTraits.defaults());
@@ -950,7 +950,7 @@ class PlayableCharacterTest {
     @Test
     void getPoisonResistance_atExtremes_reflectsTheAddedCellularHealthTerm() {
         // Cellular health (added rpg-14) widens the old exact [20,100] bounds by +-8.
-        NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 0); // immunity=9
+        NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 0, 0); // immunity=9
         BodyStructure maxStructure = new BodyStructure(3, 5, 9); // cellularHealth=9
         BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1, 0), PulmonarySystem.defaults(),
                 maxNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
@@ -958,7 +958,7 @@ class PlayableCharacterTest {
         PlayableCharacter max = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), maxSystems, maxTraits));
 
-        NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5, 0); // immunity=1
+        NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5, 0, 0); // immunity=1
         BodyStructure minStructure = new BodyStructure(3, 5, 1); // cellularHealth=1
         BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9, 0), PulmonarySystem.defaults(),
                 minNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
@@ -1052,7 +1052,7 @@ class PlayableCharacterTest {
     void getThermalResistance_humanUiCeiling_isEightyThree() {
         // SkinThickness UI-locked to 4 for humans; BodyFat and Hypothalamus at their true max
         BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure humanMaxSkin = new BodyStructure(4, 5, 5);
@@ -1066,7 +1066,7 @@ class PlayableCharacterTest {
     @Test
     void getThermalResistance_trueRaceCeiling_neverExceedsOneHundred() {
         BodyComposition composition = new BodyComposition(10, 5, 5, 5, 5, 5, 5);
-        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0);
+        NeuralSystem neuralSystem = new NeuralSystem(5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure raceMaxSkin = new BodyStructure(7, 5, 5);
@@ -1371,12 +1371,14 @@ class PlayableCharacterTest {
         Values values = Values.defaults();
         customize.accept(values);
         return new PlayableCharacter("test", Body.humanTemplate(),
-                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
+                        GeneralPersonality.defaults()));
     }
 
     private static PlayableCharacter withTrait(Values values, Trait trait) {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(),
-                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
+                        GeneralPersonality.defaults()));
         character.getMind().getPersonality().select(trait, character);
         return character;
     }
@@ -1482,9 +1484,11 @@ class PlayableCharacterTest {
     @Test
     void getSurvivalSkills_withEcologyKnowledgeLevel_scalesPerPoint() {
         Mind mindLevelOne = Mind.previewTemplate(Values.defaults(),
-                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1)), Personality.defaults(), Labours.defaults());
+                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1)), Personality.defaults(), Labours.defaults(),
+                GeneralPersonality.defaults());
         Mind mindLevelTwo = Mind.previewTemplate(Values.defaults(),
-                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 2)), Personality.defaults(), Labours.defaults());
+                new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 2)), Personality.defaults(), Labours.defaults(),
+                GeneralPersonality.defaults());
         PlayableCharacter levelOne = new PlayableCharacter("test", Body.humanTemplate(), mindLevelOne);
         PlayableCharacter levelTwo = new PlayableCharacter("test", Body.humanTemplate(), mindLevelTwo);
 
@@ -1496,7 +1500,7 @@ class PlayableCharacterTest {
     void getAnimalCaring_withEcologyAndBiologyKnowledgeLevels_scalesPerPoint() {
         Mind mind = Mind.previewTemplate(Values.defaults(),
                 new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1, Knowledge.BIOLOGY, 1)), Personality.defaults(),
-                Labours.defaults());
+                Labours.defaults(), GeneralPersonality.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
 
         assertThat(character.getAnimalCaring()).isCloseTo(64.0, within(TOLERANCE));
@@ -1679,5 +1683,246 @@ class PlayableCharacterTest {
         character.getMind().getPersonality().select(Trait.LUDDITE, character);
 
         assertThat(character.getMind().getLabours().getEffectivePoints(character)).isEqualTo(Labours.BASE_POINTS + 2);
+    }
+
+    // -------------------------------------------------------------------------
+    // Psyquism Output / Defense, Charm Resistance, Concentration, Purity — new attributes
+    // alongside GeneralPersonality (Vanity/Focus) and NeuralSystem.phaxicCerebelum.
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getPsyquismOutputAndDefense_onHumanDefaults_equalTwelve() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        // PhaxicCerebelum absent (0) on the human template: 60 + 8*(0-6) = 12
+        assertThat(character.getPsyquismOutput()).isCloseTo(12.0, within(TOLERANCE));
+        assertThat(character.getPsyquismDefense()).isCloseTo(12.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getPsyquismOutput_higherPhaxicCerebelumOrCerebralCapacity_increasesOutput() {
+        NeuralSystem gifted = new NeuralSystem(5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 0, 9);
+        BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
+                PulmonarySystem.defaults(), gifted, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
+        PlayableCharacter character = new PlayableCharacter("test",
+                Body.previewTemplate(Biomechanics.defaults(), bodySystems, PhysicalTraits.defaults()));
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getPsyquismOutput()).isGreaterThan(defaults.getPsyquismOutput());
+        assertThat(character.getPsyquismDefense()).isGreaterThan(defaults.getPsyquismDefense());
+    }
+
+    @Test
+    void getCharmResistance_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getCharmResistance()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getCharmResistance_higherVanity_decreasesResistance() {
+        Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
+                Labours.defaults(), new GeneralPersonality(9, 5));
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getCharmResistance()).isLessThan(defaults.getCharmResistance());
+    }
+
+    @Test
+    void getCharmResistance_protagonistTrait_furtherDecreasesResistance() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setEgo(4);
+        PlayableCharacter protagonist = withTrait(values, Trait.PROTAGONIST);
+
+        assertThat(protagonist.getCharmResistance()).isLessThan(defaults.getCharmResistance());
+    }
+
+    @Test
+    void getConcentration_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getConcentration()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getConcentration_higherFocus_increasesConcentration_higherCerebralCapacity_decreasesIt() {
+        Mind focusedMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
+                Labours.defaults(), new GeneralPersonality(5, 9));
+        PlayableCharacter focused = new PlayableCharacter("test", Body.humanTemplate(), focusedMind);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(focused.getConcentration()).isGreaterThan(defaults.getConcentration());
+
+        Body sharpBody = Body.humanTemplate();
+        sharpBody.getBodySystems().getNeuralSystem().setCerebralCapacity(9);
+        PlayableCharacter sharp = new PlayableCharacter("test", sharpBody, Mind.humanTemplate());
+
+        assertThat(sharp.getConcentration()).isLessThan(defaults.getConcentration());
+    }
+
+    @Test
+    void getPurity_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getPurity()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getPurity_cleanVesselTrait_increasesPurity() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setDivinity(4);
+        PlayableCharacter cleanVessel = withTrait(values, Trait.CLEAN_VESSEL);
+
+        assertThat(cleanVessel.getPurity()).isGreaterThan(defaults.getPurity());
+    }
+
+    // -------------------------------------------------------------------------
+    // Vanity modifiers on Enfactuation/Intimidation
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getEnfactuation_higherVanity_increasesEnfactuation() {
+        Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
+                Labours.defaults(), new GeneralPersonality(9, 5));
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
+    }
+
+    @Test
+    void getIntimidation_higherVanity_decreasesIntimidation() {
+        Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
+                Labours.defaults(), new GeneralPersonality(9, 5));
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getIntimidation()).isLessThan(defaults.getIntimidation());
+    }
+
+    // -------------------------------------------------------------------------
+    // 12 new concern-threshold Values-linked traits — standalone, gated by a concern
+    // sitting at/above a threshold rather than the base/advanced pair's exact-default check.
+    // -------------------------------------------------------------------------
+
+    @Test
+    void protagonistAndEgotist_prerequisitesGatedBySelfConcernThreshold() {
+        Values lowInvestment = Values.defaults();
+        lowInvestment.setEgo(2);
+        PlayableCharacter lowCharacter = characterWithMindValues(lowInvestment);
+        assertThat(Trait.EGOTIST.prerequisitesMet(lowCharacter)).isTrue();
+        assertThat(Trait.PROTAGONIST.prerequisitesMet(lowCharacter)).isFalse();
+
+        Values highInvestment = Values.defaults();
+        highInvestment.setEgo(4);
+        PlayableCharacter highCharacter = characterWithMindValues(highInvestment);
+        assertThat(Trait.PROTAGONIST.prerequisitesMet(highCharacter)).isTrue();
+        assertThat(Trait.EGOTIST.prerequisitesMet(highCharacter)).isTrue();
+    }
+
+    @Test
+    void reliableTrait_increasesEnfactuation() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setLoyalty(4);
+        PlayableCharacter reliable = withTrait(values, Trait.RELIABLE);
+
+        assertThat(reliable.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
+    }
+
+    @Test
+    void realiticTrait_increasesIllusionResistanceAndDecreasesBluffing() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setTruth(4);
+        PlayableCharacter realitic = withTrait(values, Trait.REALITIC);
+
+        assertThat(realitic.getIllusionResistance()).isGreaterThan(defaults.getIllusionResistance());
+        assertThat(realitic.getBluffing()).isLessThan(defaults.getBluffing());
+    }
+
+    @Test
+    void philosopherTrait_increasesReasoning() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setTruth(2);
+        PlayableCharacter philosopher = withTrait(values, Trait.PHILOSOPHER);
+
+        assertThat(philosopher.getReasoning()).isGreaterThan(defaults.getReasoning());
+    }
+
+    @Test
+    void outdoorLifestyleTrait_increasesSurvivalSkillsAndAnimalCaring() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setNature(4);
+        PlayableCharacter outdoorsy = withTrait(values, Trait.OUTDOOR_LIFESTYLE);
+
+        assertThat(outdoorsy.getSurvivalSkills()).isGreaterThan(defaults.getSurvivalSkills());
+        assertThat(outdoorsy.getAnimalCaring()).isGreaterThan(defaults.getAnimalCaring());
+    }
+
+    @Test
+    void retributionSeekerTrait_isGatedByJusticeConcern_notEnvironmentalismConcern() {
+        Values values = Values.defaults();
+        values.setJustice(4);
+        PlayableCharacter character = characterWithMindValues(values);
+
+        assertThat(Trait.RETRIBUTION_SEEKER.prerequisitesMet(character)).isTrue();
+    }
+
+    @Test
+    void inventorTrait_increasesCreativity() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setProgress(2);
+        PlayableCharacter inventor = withTrait(values, Trait.INVENTOR);
+
+        assertThat(inventor.getCreativity()).isGreaterThan(defaults.getCreativity());
+    }
+
+    @Test
+    void religionPractitionerTrait_increasesFaith() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setDivinity(2);
+        PlayableCharacter devout = withTrait(values, Trait.RELIGION_PRACTITIONER);
+
+        assertThat(devout.getFaith()).isGreaterThan(defaults.getFaith());
+    }
+
+    @Test
+    void peacekeeperTrait_decreasesIntimidationAndIncreasesEnfactuation() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Values values = Values.defaults();
+        values.setPeace(4);
+        PlayableCharacter peacekeeper = withTrait(values, Trait.PEACEKEEPER);
+
+        assertThat(peacekeeper.getIntimidation()).isLessThan(defaults.getIntimidation());
+        assertThat(peacekeeper.getEnfactuation()).isGreaterThan(defaults.getEnfactuation());
+    }
+
+    @Test
+    void loyalistAndEgotistAndRetributionSeeker_grantNoFormulaTerms_entirelySituational() {
+        // These three traits have no unconditional numeric effect — only narrative/situational
+        // text in getDescription(). Selecting Loyalist must not force any Values field or move
+        // any attribute that isn't a direct mirror of the Society value it was gated on.
+        Values values = Values.defaults();
+        values.setSociety(4);
+        PlayableCharacter loyalist = withTrait(values, Trait.LOYALIST);
+        PlayableCharacter unaffectedSameSociety = characterWithMindValues(values);
+
+        assertThat(loyalist.getMind().getValues().getSociety()).isEqualTo(4);
+        assertThat(loyalist.getCommand()).isEqualTo(unaffectedSameSociety.getCommand());
+        assertThat(loyalist.getEnfactuation()).isEqualTo(unaffectedSameSociety.getEnfactuation());
+    }
+
+    private static PlayableCharacter characterWithMindValues(Values values) {
+        return new PlayableCharacter("test", Body.humanTemplate(),
+                Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
+                        GeneralPersonality.defaults()));
     }
 }

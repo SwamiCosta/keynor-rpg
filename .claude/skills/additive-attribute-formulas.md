@@ -297,6 +297,49 @@ LongRangeCombat = 60                                              (no modifier y
 
 `Analysis` is the second formula in the codebase (after `Balance`'s `LegDrive` term) to read another *derived* attribute (`Reasoning`) as an additive term rather than a raw input — the `floor()` wrapper matches the ticket's literal `floor(0.5 × (Reasoning-60))` specification.
 
+## GeneralPersonality (Vanity/Focus), Phaxic Cerebelum, 5 new attributes, 12 new traits (2026-07-07)
+
+A fifth `Mind` data group, `GeneralPersonality` (`vanity`, `focus`, both 1-9 neutral 5, `EVENTFUL`), joins `Values`/`Erudition`/`Personality`/`Labours`. `NeuralSystem` gains a 13th field, `phaxicCerebelum` — absent (0) on the human template, same shape as the existing arcane organs (`noeticPlexus`, `astralVentriculum`, `subtleEpiphysealGland`): neutral point 6, not 5.
+
+### 5 new attributes
+
+```
+PsyquismOutput  (Supernatural) = 60 + 8×(PhaxicCerebelum-6) + 1×(CerebralCapacity-5)
+PsyquismDefense (Supernatural) = 60 + 8×(PhaxicCerebelum-6)
+CharmResistance (Social)       = 60 - 3×(Vanity-5) + floor(0.5×(Discretion-60)) - 3×hasProtagonist
+Concentration   (Cognitive)    = 60 + 4×(Focus-5) - 1×(CerebralCapacity-5)
+Purity          (Supernatural) = 60 + 6×hasCleanVessel
+```
+
+At the human-default absent value (`PhaxicCerebelum=0`), `PsyquismOutput`/`PsyquismDefense` both resolve to `60-48=12`, matching the arcane-organ precedent. `CharmResistance` reads `getDiscretion()` — an already-resolved derived attribute — as an ordinary term (third formula to do this, after `Balance`'s `LegDrive` term and `Analysis`'s `Reasoning` term), floored the same way `Analysis` floors its own fractional-weight term.
+
+**The ticket's formula text used a literal `-` before the Phaxic Cerebelum term** (`60 - (8×(PhaxicCerebelum-6))`) but its own worked arithmetic (`60 - 48 + 0 = 12`) only holds if the term is actually added, not subtracted (literal subtraction at the human default would give `60-(-48)=108`, not 12) — implemented to match the arithmetic the ticket itself demonstrated, i.e. the same `+8×(input-6)` shape as every other arcane-organ formula, not the literal `-` glyph. Treat this as resolved by the ticket's own worked example, not a guess.
+
+### Vanity modifiers on existing formulas
+
+```
+Enfactuation  += 2×(Vanity-5)
+Intimidation  -= 2×(Vanity-5)
+```
+
+### 12 new Values-trait bonus terms (added to existing formulas)
+
+These accompany 12 new standalone `Trait` constants — see `.claude/skills/mind-pillar-traits-and-values.md` for the domain-model side (a new "concern-threshold" prerequisite kind, distinct from the base/advanced pairs).
+
+```
+Enfactuation           += 6×hasReliable + 6×hasPeacekeeper
+Intimidation           -= 3×hasPeacekeeper
+Faith                  += 6×hasReligionPractitioner
+IllusionResistance     += 6×hasRealitic
+Bluffing               -= 3×hasRealitic
+Reasoning              += 6×hasPhilosopher
+SurvivalSkills         += 6×hasOutdoorLifestyle
+AnimalCaring           += 6×hasOutdoorLifestyle
+Creativity             += 6×hasInventor
+```
+
+`Egotist`, `Loyalist`, and `Retribution Seeker` grant **no formula term at all** — their effects (double stress relief, "Motivated" status, resisted-test bonuses against criminals) are entirely situational/narrative, same "no mechanic exists yet" rule as every other situational trait effect in this codebase. `Protagonist`'s `-3 CharmResistance` is folded into `CharmResistance`'s own formula above rather than listed here.
+
 ## Extending this pattern
 
 When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`.

@@ -280,6 +280,38 @@ public class BodyCoefficients {
     private double kCloseCombatBellicose = 4;
     private double kLowRangeCombatBellicose = 4;
 
+    // Psyquism Output / Psyquism Defense — Phaxic Cerebelum, another organ absent (0) for the
+    // human default template, neutral point 6 like the arcane organs above.
+    private double kPsyquismOutputPhaxicCerebelum = 8;
+    private double kPsyquismOutputCerebralCapacity = 1;
+    private double kPsyquismDefensePhaxicCerebelum = 8;
+
+    // Charm Resistance / Concentration / Purity — new attributes alongside GeneralPersonality
+    // (Vanity/Focus). CharmResistance reads Discretion (already-resolved attribute) as a term,
+    // same pattern as Balance's LegDrive term and Analysis's Reasoning term.
+    private double kCharmResistanceVanity = 3;
+    private double kCharmResistanceDiscretion = 0.5;
+    private double kCharmResistanceProtagonist = 3;
+    private double kConcentrationFocus = 4;
+    private double kConcentrationCerebralCapacity = 1;
+    private double kPurityCleanVessel = 6;
+
+    // Vanity modifiers on pre-existing social attributes
+    private double kEnfactuationVanity = 2;
+    private double kIntimidationVanity = 2;
+
+    // New Values-trait bonuses (12-trait follow-up to the rpg-19 catalog)
+    private double kEnfactuationReliable = 6;
+    private double kEnfactuationPeacekeeper = 6;
+    private double kIntimidationPeacekeeper = 3;
+    private double kFaithReligionPractitioner = 6;
+    private double kIllusionResistanceRealitic = 6;
+    private double kBluffingRealitic = 3;
+    private double kReasoningPhilosopher = 6;
+    private double kSurvivalSkillsOutdoorLifestyle = 6;
+    private double kAnimalCaringOutdoorLifestyle = 6;
+    private double kCreativityInventor = 6;
+
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
     // Evasion, MaxMovementSpeed
     private double attributeFloor = 5;
@@ -872,6 +904,69 @@ public class BodyCoefficients {
 
     public double getKLowRangeCombatBellicose() { return kLowRangeCombatBellicose; }
     public void setKLowRangeCombatBellicose(double v) { this.kLowRangeCombatBellicose = v; }
+
+    public double getKPsyquismOutputPhaxicCerebelum() { return kPsyquismOutputPhaxicCerebelum; }
+    public void setKPsyquismOutputPhaxicCerebelum(double v) { this.kPsyquismOutputPhaxicCerebelum = v; }
+
+    public double getKPsyquismOutputCerebralCapacity() { return kPsyquismOutputCerebralCapacity; }
+    public void setKPsyquismOutputCerebralCapacity(double v) { this.kPsyquismOutputCerebralCapacity = v; }
+
+    public double getKPsyquismDefensePhaxicCerebelum() { return kPsyquismDefensePhaxicCerebelum; }
+    public void setKPsyquismDefensePhaxicCerebelum(double v) { this.kPsyquismDefensePhaxicCerebelum = v; }
+
+    public double getKCharmResistanceVanity() { return kCharmResistanceVanity; }
+    public void setKCharmResistanceVanity(double v) { this.kCharmResistanceVanity = v; }
+
+    public double getKCharmResistanceDiscretion() { return kCharmResistanceDiscretion; }
+    public void setKCharmResistanceDiscretion(double v) { this.kCharmResistanceDiscretion = v; }
+
+    public double getKCharmResistanceProtagonist() { return kCharmResistanceProtagonist; }
+    public void setKCharmResistanceProtagonist(double v) { this.kCharmResistanceProtagonist = v; }
+
+    public double getKConcentrationFocus() { return kConcentrationFocus; }
+    public void setKConcentrationFocus(double v) { this.kConcentrationFocus = v; }
+
+    public double getKConcentrationCerebralCapacity() { return kConcentrationCerebralCapacity; }
+    public void setKConcentrationCerebralCapacity(double v) { this.kConcentrationCerebralCapacity = v; }
+
+    public double getKPurityCleanVessel() { return kPurityCleanVessel; }
+    public void setKPurityCleanVessel(double v) { this.kPurityCleanVessel = v; }
+
+    public double getKEnfactuationVanity() { return kEnfactuationVanity; }
+    public void setKEnfactuationVanity(double v) { this.kEnfactuationVanity = v; }
+
+    public double getKIntimidationVanity() { return kIntimidationVanity; }
+    public void setKIntimidationVanity(double v) { this.kIntimidationVanity = v; }
+
+    public double getKEnfactuationReliable() { return kEnfactuationReliable; }
+    public void setKEnfactuationReliable(double v) { this.kEnfactuationReliable = v; }
+
+    public double getKEnfactuationPeacekeeper() { return kEnfactuationPeacekeeper; }
+    public void setKEnfactuationPeacekeeper(double v) { this.kEnfactuationPeacekeeper = v; }
+
+    public double getKIntimidationPeacekeeper() { return kIntimidationPeacekeeper; }
+    public void setKIntimidationPeacekeeper(double v) { this.kIntimidationPeacekeeper = v; }
+
+    public double getKFaithReligionPractitioner() { return kFaithReligionPractitioner; }
+    public void setKFaithReligionPractitioner(double v) { this.kFaithReligionPractitioner = v; }
+
+    public double getKIllusionResistanceRealitic() { return kIllusionResistanceRealitic; }
+    public void setKIllusionResistanceRealitic(double v) { this.kIllusionResistanceRealitic = v; }
+
+    public double getKBluffingRealitic() { return kBluffingRealitic; }
+    public void setKBluffingRealitic(double v) { this.kBluffingRealitic = v; }
+
+    public double getKReasoningPhilosopher() { return kReasoningPhilosopher; }
+    public void setKReasoningPhilosopher(double v) { this.kReasoningPhilosopher = v; }
+
+    public double getKSurvivalSkillsOutdoorLifestyle() { return kSurvivalSkillsOutdoorLifestyle; }
+    public void setKSurvivalSkillsOutdoorLifestyle(double v) { this.kSurvivalSkillsOutdoorLifestyle = v; }
+
+    public double getKAnimalCaringOutdoorLifestyle() { return kAnimalCaringOutdoorLifestyle; }
+    public void setKAnimalCaringOutdoorLifestyle(double v) { this.kAnimalCaringOutdoorLifestyle = v; }
+
+    public double getKCreativityInventor() { return kCreativityInventor; }
+    public void setKCreativityInventor(double v) { this.kCreativityInventor = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

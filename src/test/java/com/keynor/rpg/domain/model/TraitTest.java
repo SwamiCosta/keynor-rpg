@@ -8,7 +8,7 @@ class TraitTest {
 
     private PlayableCharacter characterWithValues(Values values) {
         return new PlayableCharacter("test", Body.humanTemplate(), Mind.previewTemplate(values,
-                Erudition.defaults(), Personality.defaults(), Labours.defaults()));
+                Erudition.defaults(), Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults()));
     }
 
     @Test
@@ -19,11 +19,13 @@ class TraitTest {
     }
 
     @Test
-    void everyTrait_hasFourteenPairs_groupedByItsOwnConcern() {
-        assertThat(Trait.values()).hasSize(28);
+    void everyTrait_isGroupedByItsOwnConcern_everyGroupHasAtLeastTheBaseAdvancedPair() {
+        // 14 base/advanced pairs (28) + 12 standalone concern-threshold traits added later.
+        assertThat(Trait.values()).hasSize(40);
         for (TraitGroup group : TraitGroup.values()) {
             long count = java.util.Arrays.stream(Trait.values()).filter(trait -> trait.getGroup() == group).count();
-            assertThat(count).as("group %s should have exactly 2 traits", group).isEqualTo(2);
+            assertThat(count).as("group %s should have at least the original base/advanced pair", group)
+                    .isGreaterThanOrEqualTo(2);
         }
     }
 

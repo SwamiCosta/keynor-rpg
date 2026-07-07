@@ -90,6 +90,11 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("closeCombat", AttributeBreakdownResponse.from(character.getCloseCombatBreakdown()));
         map.put("lowRangeCombat", AttributeBreakdownResponse.from(character.getLowRangeCombatBreakdown()));
         map.put("longRangeCombat", AttributeBreakdownResponse.from(character.getLongRangeCombatBreakdown()));
+        map.put("psyquismOutput", AttributeBreakdownResponse.from(character.getPsyquismOutputBreakdown()));
+        map.put("psyquismDefense", AttributeBreakdownResponse.from(character.getPsyquismDefenseBreakdown()));
+        map.put("charmResistance", AttributeBreakdownResponse.from(character.getCharmResistanceBreakdown()));
+        map.put("concentration", AttributeBreakdownResponse.from(character.getConcentrationBreakdown()));
+        map.put("purity", AttributeBreakdownResponse.from(character.getPurityBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

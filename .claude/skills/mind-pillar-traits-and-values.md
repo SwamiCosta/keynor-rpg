@@ -63,9 +63,27 @@ The creation-time validation rule (at least two Values away from 1, unique un-ti
 
 `MindResponse` gained `personality` (`PersonalityResponse.selectedTraits`) and `labours` (`LaboursResponse` — same `{levels, points}` shape as the rewritten `EruditionResponse`). `EruditionResponse` changed from `{selectedTraits, freeTraitSlots}` to `{levels: Map<String,Integer>, points: PointBudgetResponse}`. `MindPreviewRequest`/`CharacterPreviewRequest` similarly gained `personality`/`labours` fields (`PersonalityInput`, `LaboursInput`), and `PreviewAttributesUseCase.calculate(...)` grew from 5 to 7 parameters — a breaking signature change, same precedent as rpg-18's own breaking change to this method.
 
+## GeneralPersonality — fifth Mind data group (2026-07-07)
+
+`Mind` gained a fifth data group, `GeneralPersonality` (`vanity`, `focus`, both 1-9 neutral 5, `EVENTFUL`) — despite the similar name, this is unrelated to `Personality` (the selected `Trait` catalog); they happen to share the word "personality" because the ticket introducing `GeneralPersonality` used it for a new Mind sub-tab/group label ("Personality Traits" tab, "General Personality" group). `Mind.previewTemplate(...)` grew from 4 to 5 parameters.
+
+## Concern-threshold traits — a second prerequisite kind (2026-07-07)
+
+12 new standalone `Trait` constants were added to 9 of the 14 existing `TraitGroup`s: `PROTAGONIST`/`EGOTIST` (SELF), `RELIABLE` (FRIENDSHIP), `LOYALIST` (PATRIOTISM), `CLEAN_VESSEL`/`RELIGION_PRACTITIONER` (SPIRITUAL), `REALITIC`/`PHILOSOPHER` (PHILOSOPHY), `OUTDOOR_LIFESTYLE` (ENVIRONMENTALISM), `RETRIBUTION_SEEKER` (JUSTICE), `INVENTOR` (PROGRESS), `PEACEKEEPER` (PEACE).
+
+These do **not** follow the base/advanced pair pattern — no `applyForcedValue`/`revertForcedValue` override (0-value forcing is exclusive to the original 14 base traits), and no pairing relationship with each other or with the group's existing base/advanced pair. Instead, each is gated by its own linked concern sitting **at or above** a threshold (2 or 4), representing genuine investment in that concern — the opposite direction from a base trait's "== 1, unremarkable" gate. A concern value can never satisfy both an "== 1" base-trait check and a ">= N" threshold-trait check at once, so no explicit mutual-exclusion rule was needed; `TraitGroup` can now legitimately hold more than 2 traits (`Trait.values()` grew from 28 to 40).
+
+`RETRIBUTION_SEEKER` is gated by **Justice Concern**, not Environmentalist Concern — the ticket's requirement text for it literally named Environmentalist Concern (copy-pasted from the `OUTDOOR_LIFESTYLE` line directly above it in the source ticket), confirmed with the user as a slip and corrected to match its own `JUSTICE` group before implementing, per this skill's own "ask before inferring" precedent from the rpg-19 changelog-vs-code incident.
+
+`EGOTIST`, `LOYALIST`, and `RETRIBUTION_SEEKER` grant no formula term at all (entirely situational — see `additive-attribute-formulas.md`'s new section for the exact per-trait bonus list of the other nine).
+
+## REST contract — Mind now carries five groups (2026-07-07, extends rpg-19)
+
+`MindResponse`/`MindPreviewRequest` gained `generalPersonality` (`GeneralPersonalityResponse`/`GeneralPersonalityInput`, `{vanity, focus}`). `NeuralSystemInput`/`NeuralSystemResponse` gained `phaxicCerebelum`. `PreviewAttributesUseCase.calculate(...)` grew from 7 to 8 parameters.
+
 ## Extending this pattern
 
-When adding a new `Trait` (personality): pick its linked `Values` concern, add the base/advanced pair to the matching `TraitGroup`, override `prerequisitesMet`/`applyForcedValue` on the base constant, and add real formula terms only for unconditional bonuses — situational effects go in `getDescription()` only.
+When adding a new `Trait` (personality): pick its linked `Values` concern, add the base/advanced pair to the matching `TraitGroup`, override `prerequisitesMet`/`applyForcedValue` on the base constant, and add real formula terms only for unconditional bonuses — situational effects go in `getDescription()` only. A concern-threshold trait (no forced value, gated by `>= N` instead of `== 1` or "base already selected") is also valid — see the section above.
 
 When adding a new `Knowledge` or `Job`: add the constant, declare `TRAINED`, and if it needs a real formula effect, read its level directly (`erudition().getLevel(Knowledge.XXX)` or `labours().getLevel(Job.XXX)`) as a multiplier — no flag/boolean pattern.
 

@@ -9,6 +9,7 @@ import com.keynor.rpg.application.dto.CardiacSystemInput;
 import com.keynor.rpg.application.dto.CharacterPreviewRequest;
 import com.keynor.rpg.application.dto.DigestiveSystemInput;
 import com.keynor.rpg.application.dto.EruditionInput;
+import com.keynor.rpg.application.dto.GeneralPersonalityInput;
 import com.keynor.rpg.application.dto.GeneticsInput;
 import com.keynor.rpg.application.dto.HormonalGlandularSystemInput;
 import com.keynor.rpg.application.dto.LaboursInput;
@@ -75,16 +76,17 @@ class WebConfigTest {
                         new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
                         new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0),
                                 new PulmonarySystemInput(5),
-                                new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0),
+                                new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0),
                                 new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
                         new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5))),
                 new MindPreviewRequest(
                         new ValuesInput(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
                         new EruditionInput(Map.of()),
                         new PersonalityInput(Set.of()),
-                        new LaboursInput(Map.of())));
+                        new LaboursInput(Map.of()),
+                        new GeneralPersonalityInput(5, 5)));
 
-        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any()))
+        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new PlayableCharacter("preview", Body.humanTemplate(), Mind.humanTemplate()));
 
         mockMvc.perform(post("/api/v1/character/preview")

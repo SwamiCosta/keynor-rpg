@@ -17,6 +17,15 @@ package com.keynor.rpg.domain.model;
  * it remains selected (corrected after an initial delta shipped the revert as a no-op, treating
  * the forced value as a one-way commitment — that was a bug, not the intended design).
  *
+ * <p><b>A follow-up delta added a second, simpler kind of trait</b> — 12 standalone "invested"
+ * traits (e.g. {@code PROTAGONIST}, {@code RELIABLE}, {@code REALITIC}) added to several existing
+ * groups, each gated by its own concern sitting at or above a threshold (2 or 4, e.g. "Self
+ * Concern >= 4") rather than the base/advanced pair's exact-default/already-selected checks.
+ * These never force a {@link Values} field and have no pair relationship with each other or with
+ * the group's existing base/advanced pair — each is independent. A concern can naturally never
+ * satisfy both a base trait's "== 1" and an invested trait's ">= N" requirement at once, so no
+ * explicit mutual-exclusion rule was needed.
+ *
  * <p><b>Effect split (explicit product decision):</b> every <i>passive, unconditional</i> bonus
  * a trait grants (e.g. Self Sacrifice's +4 Fear Resistance) is implemented as a real additive
  * term on the affected attribute's formula in {@link PlayableCharacter} — see that class's
@@ -60,6 +69,26 @@ public enum Trait {
         }
     },
 
+    PROTAGONIST(TraitGroup.SELF,
+            "The character craves recognition and feels most alive when praised, celebrated, or "
+                    + "rewarded — they relieve twice the usual stress from receiving "
+                    + "congratulations, flattery, or awards. This same hunger for approval makes "
+                    + "them easier to charm and flatter.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getEgo() >= 4;
+        }
+    },
+    EGOTIST(TraitGroup.SELF,
+            "The character measures their worth by victory — they relieve twice the usual "
+                    + "stress from defeating enemies or succeeding in competitive or high-risk "
+                    + "situations.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getEgo() >= 2;
+        }
+    },
+
     LONE_WOLF(TraitGroup.FRIENDSHIP,
             "Something in this character's past made them distrustful of allies. They take on no "
                     + "stress when an ally is wounded, and can neither receive nor grant social "
@@ -87,6 +116,15 @@ public enum Trait {
         @Override
         public boolean prerequisitesMet(PlayableCharacter character) {
             return character.getMind().getPersonality().hasTrait(LONE_WOLF);
+        }
+    },
+
+    RELIABLE(TraitGroup.FRIENDSHIP,
+            "The character has built a reputation as someone allies can always count on. They "
+                    + "receive and grant a 50% bonus on aid exchanged with allies.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getLoyalty() >= 4;
         }
     },
 
@@ -179,6 +217,15 @@ public enum Trait {
         }
     },
 
+    LOYALIST(TraitGroup.PATRIOTISM,
+            "The character is considered \"Motivated\" whenever they are on a mission in favor "
+                    + "of a social authority.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getSociety() >= 4;
+        }
+    },
+
     PAGAN(TraitGroup.SPIRITUAL,
             "Something in this character's past made them hate spiritual devotion. They take on "
                     + "no guilt stress from destroying temple property or attacking/arguing with "
@@ -213,6 +260,22 @@ public enum Trait {
         }
     },
 
+    CLEAN_VESSEL(TraitGroup.SPIRITUAL,
+            "The character has kept their soul untouched by corruption, preserved through "
+                    + "spiritual discipline.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getDivinity() >= 4;
+        }
+    },
+    RELIGION_PRACTITIONER(TraitGroup.SPIRITUAL,
+            "The character actively practices their faith through ritual and devotion.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getDivinity() >= 2;
+        }
+    },
+
     RELATIVIST(TraitGroup.PHILOSOPHY,
             "The character was taught that everything in the world is subjective and there is no "
                     + "absolute truth. They reject philosophy and theoretical discussion under "
@@ -238,6 +301,22 @@ public enum Trait {
         @Override
         public boolean prerequisitesMet(PlayableCharacter character) {
             return character.getMind().getPersonality().hasTrait(RELATIVIST);
+        }
+    },
+
+    REALITIC(TraitGroup.PHILOSOPHY,
+            "The character sees the world exactly as it is, refusing to be fooled by illusions "
+                    + "— though this same bluntness makes them a poor liar.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getTruth() >= 4;
+        }
+    },
+    PHILOSOPHER(TraitGroup.PHILOSOPHY,
+            "The character has trained their mind through rigorous philosophical study.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getTruth() >= 2;
         }
     },
 
@@ -301,6 +380,15 @@ public enum Trait {
         @Override
         public boolean prerequisitesMet(PlayableCharacter character) {
             return character.getMind().getPersonality().hasTrait(ANTI_NATURALIST);
+        }
+    },
+
+    OUTDOOR_LIFESTYLE(TraitGroup.ENVIRONMENTALISM,
+            "The character has spent most of their life outdoors, at home in the wild and among "
+                    + "animals.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getNature() >= 4;
         }
     },
 
@@ -395,6 +483,16 @@ public enum Trait {
         }
     },
 
+    RETRIBUTION_SEEKER(TraitGroup.JUSTICE,
+            "The character is driven to see wrongdoing punished. They gain a +5 bonus on "
+                    + "resisted tests against criminals, and relieve stress by capturing or "
+                    + "defeating them.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getJustice() >= 4;
+        }
+    },
+
     CONSERVATIVE(TraitGroup.PROGRESS,
             "Something in this character's past taught them not to value scientific or "
                     + "technological advancement. They take on no guilt stress from damaging "
@@ -436,6 +534,14 @@ public enum Trait {
         }
     },
 
+    INVENTOR(TraitGroup.PROGRESS,
+            "The character has a natural gift for invention and innovation.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getProgress() >= 2;
+        }
+    },
+
     BELLICOSE(TraitGroup.PEACE,
             "Something in this character's past made them aggressive and disillusioned with "
                     + "peace.") {
@@ -461,6 +567,16 @@ public enum Trait {
         @Override
         public boolean prerequisitesMet(PlayableCharacter character) {
             return character.getMind().getPersonality().hasTrait(BELLICOSE);
+        }
+    },
+
+    PEACEKEEPER(TraitGroup.PEACE,
+            "The character seeks harmony above all else, relieving stress by avoiding conflict "
+                    + "and resolving situations peacefully — though this gentleness makes them "
+                    + "less imposing.") {
+        @Override
+        public boolean prerequisitesMet(PlayableCharacter character) {
+            return character.getMind().getValues().getPeace() >= 4;
         }
     };
 

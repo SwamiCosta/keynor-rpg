@@ -5,6 +5,7 @@ import com.keynor.rpg.domain.model.BodyComposition;
 import com.keynor.rpg.domain.model.BodySystems;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.Erudition;
+import com.keynor.rpg.domain.model.GeneralPersonality;
 import com.keynor.rpg.domain.model.Genetics;
 import com.keynor.rpg.domain.model.Knowledge;
 import com.keynor.rpg.domain.model.Labours;
@@ -28,7 +29,7 @@ class PreviewAttributesServiceTest {
                                                       PhysicalTraits physicalTraits, Values values,
                                                       Erudition erudition) {
         return service.calculate(biomechanics, bodySystems, physicalTraits, values, erudition,
-                Personality.defaults(), Labours.defaults());
+                Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults());
     }
 
     @Test
@@ -78,7 +79,7 @@ class PreviewAttributesServiceTest {
         PlayableCharacter baseline = calculateWithDefaults(Biomechanics.defaults(), BodySystems.defaults(),
                 PhysicalTraits.defaults(), Values.defaults(), Erudition.defaults());
 
-        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 0);
+        NeuralSystem agileNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 0, 0);
         BodySystems bodySystems = new BodySystems(BodySystems.defaults().getBloodSystem(),
                 BodySystems.defaults().getCardiacSystem(), BodySystems.defaults().getPulmonarySystem(), agileNeural,
                 BodySystems.defaults().getHormonalGlandularSystem(), BodySystems.defaults().getDigestiveSystem());
