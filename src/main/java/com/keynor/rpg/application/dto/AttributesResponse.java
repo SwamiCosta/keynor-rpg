@@ -2,19 +2,24 @@ package com.keynor.rpg.application.dto;
 
 import com.keynor.rpg.domain.model.PlayableCharacter;
 
+/**
+ * Flat, non-pool attributes. Stamina Pool, Mental Health Pool, Memory Pool, Mana Pool, and Chi
+ * Pool moved out to {@link PoolAttributesResponse} — each now carries a separate total/current
+ * pair instead of a single flat value.
+ */
 public record AttributesResponse(double pushStrength, double legDrive, double gripStrength, double liftStrength,
                                   double swingPower, double grapplingSelfLifting, double speed,
-                                  double movementSpeed, double staminaPool, double fatigueResistance,
+                                  double movementSpeed, double fatigueResistance,
                                   double staminaRecovery, double durability, double sight, double hearing,
                                   double smell, double evasion, double acrobatics, double meleeAccuracy, double aim,
-                                  double memoryPool, double reasoning, double shortMemory, double mentalHealthPool,
+                                  double reasoning, double shortMemory,
                                   double will, double balance, double stressResistance, double angerResistance,
                                   double fearResistance, double painThreshold, double poisonResistance,
                                   double diseaseResistance, double bleedingResistance, double thermalResistance,
                                   double breathOutput, double dehydrationResistance, double starvationResistance,
                                   double foodPoisoningAlcoholResistance, double fatGainRate, double muscleGainRate,
                                   double intimidation, double diplomacy, double enfactuation, double command,
-                                  double manaPool, double arcaneOutput, double mediunity,
+                                  double arcaneOutput, double mediunity,
                                   double selfConcern, double friendshipConcern, double orderConcern,
                                   double freedomConcern, double patriotismConcern, double spiritualConcern,
                                   double philosophyConcern, double academicConcern, double environmentalismConcern,
@@ -25,7 +30,8 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double illusionResistance, double creativity, double analysis,
                                   double closeCombat, double lowRangeCombat, double longRangeCombat,
                                   double psyquismOutput, double psyquismDefense, double charmResistance,
-                                  double concentration, double purity) {
+                                  double concentration, double purity, double reactionSpeed, double hiding,
+                                  double sneaking) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -37,7 +43,6 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getGrapplingSelfLifting(),
                 character.getSpeed(),
                 character.getMovementSpeed(),
-                character.getStaminaPool(),
                 character.getFatigueResistance(),
                 character.getStaminaRecovery(),
                 character.getDurability(),
@@ -48,10 +53,8 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getAcrobatics(),
                 character.getMeleeAccuracy(),
                 character.getAim(),
-                character.getMemoryPool(),
                 character.getReasoning(),
                 character.getShortMemory(),
-                character.getMentalHealthPool(),
                 character.getWill(),
                 character.getBalance(),
                 character.getStressResistance(),
@@ -72,7 +75,6 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getDiplomacy(),
                 character.getEnfactuation(),
                 character.getCommand(),
-                character.getManaPool(),
                 character.getArcaneOutput(),
                 character.getMediunity(),
                 character.getSelfConcern(),
@@ -106,6 +108,9 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getPsyquismDefense(),
                 character.getCharmResistance(),
                 character.getConcentration(),
-                character.getPurity());
+                character.getPurity(),
+                character.getReactionSpeed(),
+                character.getHiding(),
+                character.getSneaking());
     }
 }

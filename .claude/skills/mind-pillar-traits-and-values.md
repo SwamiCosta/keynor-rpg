@@ -81,6 +81,12 @@ These do **not** follow the base/advanced pair pattern — no `applyForcedValue`
 
 `MindResponse`/`MindPreviewRequest` gained `generalPersonality` (`GeneralPersonalityResponse`/`GeneralPersonalityInput`, `{vanity, focus}`). `NeuralSystemInput`/`NeuralSystemResponse` gained `phaxicCerebelum`. `PreviewAttributesUseCase.calculate(...)` grew from 7 to 8 parameters.
 
+## WeaponProficiencies — sixth Mind data group, a leveled group with no point budget (2026-07-07, rpg-20)
+
+`Mind` gained a sixth data group, `WeaponProficiencies` — the sole content of a new "Physical Techniques" Mind tab, "Weapon Proficiencies" group. Structurally close to `Erudition`/`Labours` (an `EnumMap`-backed leveled map keyed by a new enum, `Weapon`, every entry defaulting to 0, always `InputNature.TRAINED`), but with **no shared point budget** — `WeaponProficiencies.canSetLevel(weapon, newLevel)` only bounds-checks `newLevel` against `Weapon.MIN_LEVEL`/`MAX_LEVEL` (0/3), never against a spent-points cap the way `Erudition.setLevel`/`Labours.setLevel` do. Every one of the 13 `Weapon` constants (Daggers, Short Swords, Long Swords, Rapiers, Sabers, Short Axes/Hammers, Long Axes/Hammers, Spears, Pole Weapons, Staffs, Bows, One Handed Trigger Weapons, Two Handed Trigger Weapons) can independently reach its own max — training one weapon to Master never constrains another. Carries no formula effect of its own yet. `Mind.previewTemplate(...)` grew from 5 to 6 parameters; `PreviewAttributesUseCase.calculate(...)` grew from 8 to 9.
+
+When adding a future leveled Mind group that should NOT share a point budget (unlike `Erudition`/`Labours`), follow `WeaponProficiencies`'s pattern: bounds-check only, no `getEffectivePoints`/`AttributePointBudget` involvement at all.
+
 ## Extending this pattern
 
 When adding a new `Trait` (personality): pick its linked `Values` concern, add the base/advanced pair to the matching `TraitGroup`, override `prerequisitesMet`/`applyForcedValue` on the base constant, and add real formula terms only for unconditional bonuses — situational effects go in `getDescription()` only. A concern-threshold trait (no forced value, gated by `>= N` instead of `== 1` or "base already selected") is also valid — see the section above.

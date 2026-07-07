@@ -344,6 +344,57 @@ Creativity             += 6×hasInventor
 
 Pure rename, no formula/weight change — `getMaxMovementSpeed()`/`getMaxMovementSpeedBreakdown()` → `getMovementSpeed()`/`getMovementSpeedBreakdown()`, `AttributesResponse.maxMovementSpeed` → `movementSpeed`, and the three coefficients `kMaxMovementSpeedLimbRatio`/`kMaxMovementSpeedMuscleDistribution`/`kMaxMovementSpeedHeight` → `kMovementSpeedLimbRatio`/`kMovementSpeedMuscleDistribution`/`kMovementSpeedHeight`. Every mention throughout this file (including inside the dated `rpg-11`/Delta V4 sections above, which still describe currently-true formula shapes in present tense, not frozen historical snapshots) was updated to the new name in the same delta.
 
+## Astral Atrium/Chi Pool, Pool Attributes, Training and Conditioning, 4 new attributes, Weapon Proficiencies (2026-07-07, rpg-20)
+
+### Astral Atrium — a second, distinct arcane heart organ
+
+`CardiacSystem` gains a fourth field, `astralAtrium` ("a supernatural organ capable of pumping organic energy into the body") — absent (0) on the human template, same disabled-slider treatment as `astralVentriculum`/`noeticPlexus`/`subtleEpiphysealGland`. It anchors a new arcane-organ attribute, `ChiPool`, following the exact same neutral-6/weight-8 shape as the other three:
+
+```
+ChiPool = 60 + 8×(AstralAtrium-6)
+```
+
+At the human-default absent value (0), `ChiPool` resolves to `60-48=12`, matching every other arcane-organ attribute.
+
+**Unlike the other three arcane organs, `AstralAtrium` also contributes to `StaminaPool` — as its own raw value, not a neutral-6 deviation:**
+
+```
+StaminaPool += 4 × AstralAtrium
+```
+
+This is a **third documented input-contribution shape**, alongside the standard neutral-5 deviation and the neutral-6 arcane-organ deviation: a **raw-value, zero-at-default** term. The ticket's own formula text (`+ (4 × (Astral Atrium))`, no neutral subtraction) is deliberate, not an oversight — `AstralAtrium` defaults to 0 for ordinary humans (the organ doesn't exist in the standard race), so the term must contribute exactly 0 at that default. Subtracting a neutral-6 here (matching `ChiPool`'s own shape) would instead contribute `-24` to `StaminaPool` for every ordinary human, which is wrong — humans without the organ should see no `StaminaPool` change at all. Apply this same raw-value shape to any future input that (a) defaults to 0 because the underlying trait/organ is absent in the standard race or template, and (b) must contribute nothing at that absent default.
+
+### Training and Conditioning — Vigor/Reflexes (raw-value shape again)
+
+A third `PhysicalTraits` sub-group, `TrainingAndConditioning`, joins `SensorialOrgans`/`BodyStructure`: `vigor`/`reflexes`, both 0-8, **default 0** (unlike almost every other Body trait, which defaults to its scale's midpoint) — a fresh character starts with no training investment here. Both use the same raw-value shape as `AstralAtrium` above, for the same reason (zero investment must contribute exactly zero):
+
+```
+StaminaPool    += 5 × Vigor
+ReactionSpeed  += 5 × Reflexes    (see below)
+```
+
+### Pool Attributes — total/current, a new domain concept
+
+Five existing attributes — `StaminaPool`, `MentalHealthPool`, `MemoryPool`, `ManaPool`, `ChiPool` — become **Pool Attributes**: each now carries a `total` (the attribute's own unchanged additive-standard formula result) and a `current` (the remaining amount), tracked as two genuinely separate numbers rather than one computed value. `current` always equals `total` today — no spend/damage/rest mechanic exists yet to deplete or restore a pool — but the two are kept distinct in both the domain (`PoolAttribute` record, `PoolAttribute.atFull(total)`) and the REST contract specifically so a future mechanic can make them diverge later without another breaking contract change. Same "document intent, not yet implemented" precedent as `BodyComponent`'s reversible-damage regeneration.
+
+**These five attributes moved OUT of the flat `attributes`/`AttributesResponse` map into a new sibling `poolAttributes`/`PoolAttributesResponse` field**, each entry shaped `{total, current}`. Their `getXxxBreakdown()` methods and `AttributeBreakdownsResponse` entries are unchanged — the breakdown still describes the `total` computation only, since `current` has no formula of its own yet.
+
+### Reaction Speed, Hiding, Sneaking — 3 new attributes
+
+```
+ReactionSpeed = 60 + 6×(NeuralDrive-5) + 5×Reflexes                    (Reflexes: raw-value term, see above)
+Hiding        = 60 - 1×|ShapeAesthetics-5|                              (inverted-V around neutral, same shape as Discretion/Command)
+Sneaking      = 60 + 1×(Agility-5)
+```
+
+`Sneaking`'s ticket formula was given as `60 + (Agility - 60)` — internally inconsistent, since `Agility` is a raw 1-9 input (subtracting 60 would always yield a large negative, e.g. -54 at neutral). Confirmed with the user via `AskUserQuestion`: `Sneaking` reads `Agility` using **its own scale's neutral (5)**, the same deviation shape as every other raw 1-9 input in this codebase — not a typo'd reference to some derived "Speed"-like attribute. `Hiding`'s weight (1) and `Sneaking`'s weight (1) were not otherwise specified by the ticket beyond the corrected formula shape.
+
+### Weapon Proficiencies — a leveled Mind group with no point budget
+
+`Mind` gains a sixth data group, `WeaponProficiencies` — the sole content of a new "Physical Techniques" Mind tab, "Weapon Proficiencies" group. A new `Weapon` enum (13 constants: `DAGGERS`, `SHORT_SWORDS`, `LONG_SWORDS`, `RAPIERS`, `SABERS`, `SHORT_AXES_HAMMERS`, `LONG_AXES_HAMMERS`, `SPEARS`, `POLE_WEAPONS`, `STAFFS`, `BOWS`, `ONE_HANDED_TRIGGER_WEAPONS`, `TWO_HANDED_TRIGGER_WEAPONS`), always `InputNature.TRAINED`, each independently a 0-3 slider (labels Unknown/Trained/Specialist/Master) with **no shared point budget** — unlike `Knowledge`/`Job`, `WeaponProficiencies.canSetLevel` only bounds-checks against `Weapon.MIN_LEVEL`/`MAX_LEVEL`, never against a spent-points cap. This is a new sub-pattern for leveled Mind groups: structurally close to `Erudition`/`Labours` (an `EnumMap`-backed leveled map, every entry defaulting to 0), but budget-free. Carries no formula effect of its own yet.
+
+`PreviewAttributesUseCase.calculate(...)` grew from 8 to 9 parameters (`WeaponProficiencies` added).
+
 ## Extending this pattern
 
 When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`.

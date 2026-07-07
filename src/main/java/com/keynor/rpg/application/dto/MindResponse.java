@@ -5,7 +5,7 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
 
 public record MindResponse(ValuesResponse values, EruditionResponse erudition, PersonalityResponse personality,
                             LaboursResponse labours, GeneralPersonalityResponse generalPersonality,
-                            PointBudgetResponse eventPoints) {
+                            WeaponProficienciesResponse weaponProficiencies, PointBudgetResponse eventPoints) {
 
     public static MindResponse from(Mind mind, PlayableCharacter character) {
         return new MindResponse(
@@ -14,6 +14,7 @@ public record MindResponse(ValuesResponse values, EruditionResponse erudition, P
                 PersonalityResponse.from(mind.getPersonality()),
                 LaboursResponse.from(mind.getLabours(), character),
                 GeneralPersonalityResponse.from(mind.getGeneralPersonality()),
+                WeaponProficienciesResponse.from(mind.getWeaponProficiencies()),
                 PointBudgetResponse.from(mind.getEventPoints()));
     }
 }
