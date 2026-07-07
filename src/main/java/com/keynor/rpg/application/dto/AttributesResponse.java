@@ -4,7 +4,7 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
 
 public record AttributesResponse(double pushStrength, double legDrive, double gripStrength, double liftStrength,
                                   double swingPower, double grapplingSelfLifting, double speed,
-                                  double maxMovementSpeed, double staminaPool, double fatigueResistance,
+                                  double movementSpeed, double staminaPool, double fatigueResistance,
                                   double staminaRecovery, double durability, double sight, double hearing,
                                   double smell, double evasion, double acrobatics, double meleeAccuracy, double aim,
                                   double memoryPool, double reasoning, double shortMemory, double mentalHealthPool,
@@ -36,7 +36,7 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getSwingPower(),
                 character.getGrapplingSelfLifting(),
                 character.getSpeed(),
-                character.getMaxMovementSpeed(),
+                character.getMovementSpeed(),
                 character.getStaminaPool(),
                 character.getFatigueResistance(),
                 character.getStaminaRecovery(),

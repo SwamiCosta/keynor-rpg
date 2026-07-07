@@ -21,10 +21,10 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 ### The exceptions
 
 - **`Speed`** does not add a `(input - neutral)` term for mass — it *subtracts* a mass **penalty**: `floor((SymbolicTotalMass - kSpeedMassNeutral) / kSpeedMassDivisor)`. This is what keeps Speed's worst case positive (see Safety floors below) instead of needing a hard floor like the Strength-family does.
-- **`Evasion`** and **`MaxMovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
+- **`Evasion`** and **`MovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
 - **`FatGainRate`** and **`MuscleGainRate`** (rpg-14) do not add `baseline` at all — they are zero-baseline **rate** attributes (positive = gaining faster, negative = losing/gaining slower, zero = stable at every input's neutral value), not absolute stat values. See the rpg-14 section below.
-- **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MaxMovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
-- **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MaxMovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
+- **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
+- **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
 - **The 14 Concern attributes** (rpg-18, Mind pillar) are direct mirrors of their matching `Values` field — `baseline = 0`, single term = the raw value, not a deviation from a neutral point. No `BodyCoefficients` field backs the mirror itself (there is nothing to tune in a strict 1:1 mirror) — see `.claude/skills/mind-pillar-traits-and-values.md`.
 
 ## Two mass numbers, not one
@@ -34,7 +34,7 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 
 ## Safety floors
 
-Eight attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): the four specialized strengths (**PushStrength**, **LegDrive**, **GripStrength**, **LiftStrength** — Delta V4, replacing the old floored **Strength**), **SwingPower**/**GrapplingSelfLifting** (Delta V4, floored on their own averaged result), **FatigueResistance**, **Evasion**, **MaxMovementSpeed**. These were identified by computing the actual worst-case slider combination (see `PlayableCharacterTest`'s floor tests) — every other derived attribute has a natural worst-case comfortably above the floor and does not need one.
+Eight attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): the four specialized strengths (**PushStrength**, **LegDrive**, **GripStrength**, **LiftStrength** — Delta V4, replacing the old floored **Strength**), **SwingPower**/**GrapplingSelfLifting** (Delta V4, floored on their own averaged result), **FatigueResistance**, **Evasion**, **MovementSpeed**. These were identified by computing the actual worst-case slider combination (see `PlayableCharacterTest`'s floor tests) — every other derived attribute has a natural worst-case comfortably above the floor and does not need one.
 
 At `baseline = 35` (the design document's original value before the user raised it to 60), the four floored attributes' worst-case combos landed at -1, -17, -14, and -6 respectively — genuinely reachable through slider extremes. At `baseline = 60`, the same worst-case combos land at 24, 8, 11, and 19 — all positive on their own. **The floors are kept anyway**, as defense-in-depth against future coefficient tuning or scale changes, not because today's ranges require them. `Speed` never needed a floor at either baseline (its mass-penalty divisor keeps the worst case at 2 / 27 respectively) — see `PlayableCharacterTest.getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor`.
 
@@ -128,7 +128,7 @@ The old global `Strength` (and its Load Capacity group) is **deleted outright**,
 meanStrength() = 60 + kMeanStrengthMuscleMass×(MuscleMass-5) + kMeanStrengthNeuromuscular×(NeuromuscularEfficiency-5) + kMeanStrengthFiberType×(FiberType-5)
 ```
 
-Private, never exposed via any getter or DTO — the design document explicitly forbids rendering it in the UI, and nothing outside `PlayableCharacter` needs it. It plays the role of `baseline` for the four specialized strengths below (their own dynamic anchor, the same way `Speed` anchors `Evasion`/`MaxMovementSpeed`).
+Private, never exposed via any getter or DTO — the design document explicitly forbids rendering it in the UI, and nothing outside `PlayableCharacter` needs it. It plays the role of `baseline` for the four specialized strengths below (their own dynamic anchor, the same way `Speed` anchors `Evasion`/`MovementSpeed`).
 
 ### 4 specialized strengths + 2 derived combat attributes
 
@@ -142,7 +142,7 @@ SwingPower           = floor((PushStrength + GripStrength) / 2)
 GrapplingSelfLifting = floor((GripStrength + LiftStrength) / 2)
 ```
 
-All six floored (continuing the old `Strength`'s floor convention). `LegDrive`'s `MuscleDistribution` term is inverted relative to `PushStrength` (leg-bias helps `LegDrive`, hurts `PushStrength`, and vice versa for arm-bias) — same asymmetric-but-related pattern as the pre-existing `Strength`/`MaxMovementSpeed` `MuscleDistribution` terms. `SwingPower`/`GrapplingSelfLifting` are plain averages of two already-resolved attributes, not additive-standard formulas in their own right — they get no `AttributeBreakdown` (see below).
+All six floored (continuing the old `Strength`'s floor convention). `LegDrive`'s `MuscleDistribution` term is inverted relative to `PushStrength` (leg-bias helps `LegDrive`, hurts `PushStrength`, and vice versa for arm-bias) — same asymmetric-but-related pattern as the pre-existing `Strength`/`MovementSpeed` `MuscleDistribution` terms. `SwingPower`/`GrapplingSelfLifting` are plain averages of two already-resolved attributes, not additive-standard formulas in their own right — they get no `AttributeBreakdown` (see below).
 
 ### 3 new resistance/threshold attributes
 
@@ -339,6 +339,10 @@ Creativity             += 6×hasInventor
 ```
 
 `Egotist`, `Loyalist`, and `Retribution Seeker` grant **no formula term at all** — their effects (double stress relief, "Motivated" status, resisted-test bonuses against criminals) are entirely situational/narrative, same "no mechanic exists yet" rule as every other situational trait effect in this codebase. `Protagonist`'s `-3 CharmResistance` is folded into `CharmResistance`'s own formula above rather than listed here.
+
+## Rename: MaxMovementSpeed → MovementSpeed (2026-07-07)
+
+Pure rename, no formula/weight change — `getMaxMovementSpeed()`/`getMaxMovementSpeedBreakdown()` → `getMovementSpeed()`/`getMovementSpeedBreakdown()`, `AttributesResponse.maxMovementSpeed` → `movementSpeed`, and the three coefficients `kMaxMovementSpeedLimbRatio`/`kMaxMovementSpeedMuscleDistribution`/`kMaxMovementSpeedHeight` → `kMovementSpeedLimbRatio`/`kMovementSpeedMuscleDistribution`/`kMovementSpeedHeight`. Every mention throughout this file (including inside the dated `rpg-11`/Delta V4 sections above, which still describe currently-true formula shapes in present tense, not frozen historical snapshots) was updated to the new name in the same delta.
 
 ## Extending this pattern
 

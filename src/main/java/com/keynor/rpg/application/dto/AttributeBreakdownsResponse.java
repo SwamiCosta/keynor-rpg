@@ -20,7 +20,7 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("gripStrength", AttributeBreakdownResponse.from(character.getGripStrengthBreakdown()));
         map.put("liftStrength", AttributeBreakdownResponse.from(character.getLiftStrengthBreakdown()));
         map.put("speed", AttributeBreakdownResponse.from(character.getSpeedBreakdown()));
-        map.put("maxMovementSpeed", AttributeBreakdownResponse.from(character.getMaxMovementSpeedBreakdown()));
+        map.put("movementSpeed", AttributeBreakdownResponse.from(character.getMovementSpeedBreakdown()));
         map.put("staminaPool", AttributeBreakdownResponse.from(character.getStaminaPoolBreakdown()));
         map.put("fatigueResistance", AttributeBreakdownResponse.from(character.getFatigueResistanceBreakdown()));
         map.put("staminaRecovery", AttributeBreakdownResponse.from(character.getStaminaRecoveryBreakdown()));

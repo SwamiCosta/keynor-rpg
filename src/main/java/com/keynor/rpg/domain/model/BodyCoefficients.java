@@ -141,10 +141,10 @@ public class BodyCoefficients {
     private double kEvasionNeuralDrive = 1;
     private double kEvasionFlexibility = 1;
 
-    // MaxMovementSpeed (extends Speed)
-    private double kMaxMovementSpeedLimbRatio = 2;
-    private double kMaxMovementSpeedMuscleDistribution = 1;
-    private double kMaxMovementSpeedHeight = 0.5; // added Delta V4
+    // MovementSpeed (extends Speed)
+    private double kMovementSpeedLimbRatio = 2;
+    private double kMovementSpeedMuscleDistribution = 1;
+    private double kMovementSpeedHeight = 0.5; // added Delta V4
 
     // Mass model
     private double kSymbolicMassBase = 10;
@@ -313,7 +313,7 @@ public class BodyCoefficients {
     private double kCreativityInventor = 6;
 
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
-    // Evasion, MaxMovementSpeed
+    // Evasion, MovementSpeed
     private double attributeFloor = 5;
 
     public static BodyCoefficients defaults() {
@@ -569,14 +569,14 @@ public class BodyCoefficients {
     public double getKEvasionFlexibility() { return kEvasionFlexibility; }
     public void setKEvasionFlexibility(double v) { this.kEvasionFlexibility = v; }
 
-    public double getKMaxMovementSpeedLimbRatio() { return kMaxMovementSpeedLimbRatio; }
-    public void setKMaxMovementSpeedLimbRatio(double v) { this.kMaxMovementSpeedLimbRatio = v; }
+    public double getKMovementSpeedLimbRatio() { return kMovementSpeedLimbRatio; }
+    public void setKMovementSpeedLimbRatio(double v) { this.kMovementSpeedLimbRatio = v; }
 
-    public double getKMaxMovementSpeedMuscleDistribution() { return kMaxMovementSpeedMuscleDistribution; }
-    public void setKMaxMovementSpeedMuscleDistribution(double v) { this.kMaxMovementSpeedMuscleDistribution = v; }
+    public double getKMovementSpeedMuscleDistribution() { return kMovementSpeedMuscleDistribution; }
+    public void setKMovementSpeedMuscleDistribution(double v) { this.kMovementSpeedMuscleDistribution = v; }
 
-    public double getKMaxMovementSpeedHeight() { return kMaxMovementSpeedHeight; }
-    public void setKMaxMovementSpeedHeight(double v) { this.kMaxMovementSpeedHeight = v; }
+    public double getKMovementSpeedHeight() { return kMovementSpeedHeight; }
+    public void setKMovementSpeedHeight(double v) { this.kMovementSpeedHeight = v; }
 
     public double getKSymbolicMassBase() { return kSymbolicMassBase; }
     public void setKSymbolicMassBase(double v) { this.kSymbolicMassBase = v; }

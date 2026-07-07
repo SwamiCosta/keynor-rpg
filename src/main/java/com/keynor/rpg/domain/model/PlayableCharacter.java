@@ -231,21 +231,21 @@ public class PlayableCharacter {
     }
 
     /**
-     * MaxMovementSpeed = Speed + kMaxMovementSpeedLimbRatio x (LimbRatio-3) -
-     * kMaxMovementSpeedMuscleDistribution x (MuscleDistribution-5) + kMaxMovementSpeedHeight x
+     * MovementSpeed = Speed + kMovementSpeedLimbRatio x (LimbRatio-3) -
+     * kMovementSpeedMuscleDistribution x (MuscleDistribution-5) + kMovementSpeedHeight x
      * (Height-7) (height term added Delta V4). Displacement/travel speed, anchored on Speed.
      * Floored.
      */
-    public AttributeBreakdown getMaxMovementSpeedBreakdown() {
+    public AttributeBreakdown getMovementSpeedBreakdown() {
         return new AttributeBreakdown(getSpeed(), List.of(
-                coeff().getKMaxMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3),
-                -coeff().getKMaxMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5),
-                coeff().getKMaxMovementSpeedHeight() * (genetics().getHeight() - 7)
+                coeff().getKMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3),
+                -coeff().getKMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5),
+                coeff().getKMovementSpeedHeight() * (genetics().getHeight() - 7)
         ));
     }
 
-    public double getMaxMovementSpeed() {
-        return floor(getMaxMovementSpeedBreakdown().total());
+    public double getMovementSpeed() {
+        return floor(getMovementSpeedBreakdown().total());
     }
 
     /**
@@ -584,7 +584,7 @@ public class PlayableCharacter {
      * {@code NeuralDrive} was kept per explicit user instruction rather than being replaced by
      * Agility. This is the first formula in the codebase to use another derived attribute as an
      * additive *term* (deviation from its own baseline, 60) rather than as a base like
-     * {@link #getEvasion()}/{@link #getMaxMovementSpeed()} do with Speed.
+     * {@link #getEvasion()}/{@link #getMovementSpeed()} do with Speed.
      */
     public AttributeBreakdown getBalanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
@@ -866,7 +866,7 @@ public class PlayableCharacter {
     // Body-growth rates (rpg-14) — zero-baseline, unlike every other derived attribute above.
     // These express a rate of change (can be negative), not an absolute stat value, so they
     // deliberately do NOT add BodyCoefficients.getBaseline(). A documented exception to the
-    // additive standard, alongside Speed's mass penalty and Evasion/MaxMovementSpeed/Balance's
+    // additive standard, alongside Speed's mass penalty and Evasion/MovementSpeed/Balance's
     // anchoring on another derived attribute — see .claude/skills/additive-attribute-formulas.md.
     // -------------------------------------------------------------------------
 
@@ -1439,7 +1439,7 @@ public class PlayableCharacter {
 
     /**
      * Applies the shared safety floor used by the Strength-family (Push/Leg/Grip/Lift Strength,
-     * SwingPower, GrapplingSelfLifting), FatigueResistance, Evasion, and MaxMovementSpeed.
+     * SwingPower, GrapplingSelfLifting), FatigueResistance, Evasion, and MovementSpeed.
      */
     private double floor(double value) {
         return Math.max(coeff().getAttributeFloor(), value);

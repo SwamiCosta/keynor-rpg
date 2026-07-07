@@ -239,7 +239,7 @@ class PlayableCharacterTest {
     }
 
     // -------------------------------------------------------------------------
-    // Speed and MaxMovementSpeed
+    // Speed and MovementSpeed
     // -------------------------------------------------------------------------
 
     @Test
@@ -277,71 +277,71 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getMaxMovementSpeed_onBalancedMuscleDistributionAndNeutralLimbRatioAndHeight_equalsSpeed() {
+    void getMovementSpeed_onBalancedMuscleDistributionAndNeutralLimbRatioAndHeight_equalsSpeed() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getMaxMovementSpeed()).isCloseTo(character.getSpeed(), within(TOLERANCE));
+        assertThat(character.getMovementSpeed()).isCloseTo(character.getSpeed(), within(TOLERANCE));
     }
 
     @Test
-    void getMaxMovementSpeed_legBiasedMuscleDistribution_isHigherThanSpeed() {
+    void getMovementSpeed_legBiasedMuscleDistribution_isHigherThanSpeed() {
         Body body = Body.humanTemplate();
         body.getBiomechanics().getBodyComposition().setMuscleDistribution(1);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        assertThat(character.getMaxMovementSpeed()).isGreaterThan(character.getSpeed());
+        assertThat(character.getMovementSpeed()).isGreaterThan(character.getSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_armBiasedMuscleDistribution_isLowerThanSpeed() {
+    void getMovementSpeed_armBiasedMuscleDistribution_isLowerThanSpeed() {
         Body body = Body.humanTemplate();
         body.getBiomechanics().getBodyComposition().setMuscleDistribution(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        assertThat(character.getMaxMovementSpeed()).isLessThan(character.getSpeed());
+        assertThat(character.getMovementSpeed()).isLessThan(character.getSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_longerLimbRatio_increasesMaxMovementSpeed() {
+    void getMovementSpeed_longerLimbRatio_increasesMovementSpeed() {
         Genetics longLimbs = new Genetics(5, 5, 5, 7, 5);
         PlayableCharacter longLimbed = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(longLimbs, BodyComposition.defaults()), BodySystems.defaults(),
                         PhysicalTraits.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(longLimbed.getMaxMovementSpeed()).isGreaterThan(defaults.getMaxMovementSpeed());
+        assertThat(longLimbed.getMovementSpeed()).isGreaterThan(defaults.getMovementSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_shorterLimbRatio_reducesMaxMovementSpeed() {
+    void getMovementSpeed_shorterLimbRatio_reducesMovementSpeed() {
         Genetics shortLimbs = new Genetics(5, 5, 5, 7, 1);
         PlayableCharacter shortLimbed = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(shortLimbs, BodyComposition.defaults()), BodySystems.defaults(),
                         PhysicalTraits.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(shortLimbed.getMaxMovementSpeed()).isLessThan(defaults.getMaxMovementSpeed());
+        assertThat(shortLimbed.getMovementSpeed()).isLessThan(defaults.getMovementSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_tallerHeight_increasesMaxMovementSpeed() {
+    void getMovementSpeed_tallerHeight_increasesMovementSpeed() {
         Genetics tall = new Genetics(5, 5, 5, 15, 3);
         PlayableCharacter taller = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(tall, BodyComposition.defaults()), BodySystems.defaults(),
                         PhysicalTraits.defaults()));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(taller.getMaxMovementSpeed()).isGreaterThan(defaults.getMaxMovementSpeed());
+        assertThat(taller.getMovementSpeed()).isGreaterThan(defaults.getMovementSpeed());
     }
 
     @Test
-    void getMaxMovementSpeed_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
+    void getMovementSpeed_isFlooredWhenAnExtremeCoefficientDrivesItBelowTheFloor() {
         Body body = Body.humanTemplate();
         body.getBiomechanics().getBodyComposition().setMuscleDistribution(9);
-        body.getCoefficients().setKMaxMovementSpeedMuscleDistribution(1000);
+        body.getCoefficients().setKMovementSpeedMuscleDistribution(1000);
         PlayableCharacter character = new PlayableCharacter("test", body);
 
-        assertThat(character.getMaxMovementSpeed()).isEqualTo(body.getCoefficients().getAttributeFloor());
+        assertThat(character.getMovementSpeed()).isEqualTo(body.getCoefficients().getAttributeFloor());
     }
 
     // -------------------------------------------------------------------------

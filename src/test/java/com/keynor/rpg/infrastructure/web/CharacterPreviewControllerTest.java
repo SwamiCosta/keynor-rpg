@@ -84,7 +84,7 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.liftStrength").exists())
                 .andExpect(jsonPath("$.attributeBreakdowns.breakdowns.pushStrength").exists())
                 .andExpect(jsonPath("$.attributes.speed").exists())
-                .andExpect(jsonPath("$.attributes.maxMovementSpeed").exists())
+                .andExpect(jsonPath("$.attributes.movementSpeed").exists())
                 .andExpect(jsonPath("$.attributes.staminaPool").exists())
                 .andExpect(jsonPath("$.attributes.fatigueResistance").exists())
                 .andExpect(jsonPath("$.attributes.staminaRecovery").exists())

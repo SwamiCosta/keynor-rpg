@@ -47,7 +47,7 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKSpeedFiberType()).isEqualTo(2);
         assertThat(coeff.getKSpeedMassNeutral()).isEqualTo(25);
         assertThat(coeff.getKSpeedMassDivisor()).isEqualTo(3);
-        assertThat(coeff.getKMaxMovementSpeedHeight()).isEqualTo(0.5);
+        assertThat(coeff.getKMovementSpeedHeight()).isEqualTo(0.5);
     }
 
     @Test
