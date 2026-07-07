@@ -1,14 +1,16 @@
 package com.keynor.rpg.application.dto;
 
 import com.keynor.rpg.domain.model.Erudition;
-import com.keynor.rpg.domain.model.Trait;
-import java.util.Set;
+import com.keynor.rpg.domain.model.Knowledge;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public record EruditionInput(Set<String> selectedTraits) {
+/** Rewritten in rpg-19: {@code Erudition} now holds a 0-4 level per {@link Knowledge}. */
+public record EruditionInput(Map<String, Integer> levels) {
 
     public Erudition toDomain() {
-        Set<Trait> traits = selectedTraits.stream().map(Trait::valueOf).collect(Collectors.toSet());
-        return new Erudition(traits);
+        Map<Knowledge, Integer> parsed = levels.entrySet().stream()
+                .collect(Collectors.toMap(entry -> Knowledge.valueOf(entry.getKey()), Map.Entry::getValue));
+        return new Erudition(parsed);
     }
 }

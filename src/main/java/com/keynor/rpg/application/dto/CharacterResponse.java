@@ -15,7 +15,7 @@ public record CharacterResponse(String id, String name, BodyResponse body, MindR
     public static CharacterResponse from(String id, PlayableCharacter character) {
         return new CharacterResponse(id, character.getName(),
                 BodyResponse.from(character.getBody()),
-                MindResponse.from(character.getMind()),
+                MindResponse.from(character.getMind(), character),
                 AttributesResponse.from(character),
                 AttributeBreakdownsResponse.from(character),
                 CalculatedValuesResponse.from(character),

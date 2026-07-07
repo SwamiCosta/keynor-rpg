@@ -21,10 +21,10 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 ### The exceptions
 
 - **`Speed`** does not add a `(input - neutral)` term for mass — it *subtracts* a mass **penalty**: `floor((SymbolicTotalMass - kSpeedMassNeutral) / kSpeedMassDivisor)`. This is what keeps Speed's worst case positive (see Safety floors below) instead of needing a hard floor like the Strength-family does.
-- **`Evasion`** and **`MaxMovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
+- **`Evasion`** and **`MovementSpeed`** are anchored on `Speed`, not on `baseline` directly — they add their own deviation terms on top of whatever `Speed` already computed, rather than starting fresh from 60.
 - **`FatGainRate`** and **`MuscleGainRate`** (rpg-14) do not add `baseline` at all — they are zero-baseline **rate** attributes (positive = gaining faster, negative = losing/gaining slower, zero = stable at every input's neutral value), not absolute stat values. See the rpg-14 section below.
-- **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MaxMovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
-- **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MaxMovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
+- **`PushStrength`/`LegDrive`/`GripStrength`/`LiftStrength`** (Delta V4) are anchored on the hidden `meanStrength()` engine, not on `baseline` directly — same pattern as Evasion/MovementSpeed anchoring on Speed, just with a different anchor attribute. See the Delta V4 section below.
+- **`Balance`** (rebuilt Delta V4) uses another *already-resolved* attribute, `LegDrive`, as an additive **term** (`kBalanceLegDrive × (LegDrive - 60)`) rather than as a base — the first formula in the codebase to do this. Unlike Evasion/MovementSpeed/the four strengths (which replace `baseline` with another attribute's *value*), Balance keeps its own `baseline` (60) and treats `LegDrive`'s deviation from 60 as just another weighted term alongside `Thalamus` and `NeuralDrive`.
 - **The 14 Concern attributes** (rpg-18, Mind pillar) are direct mirrors of their matching `Values` field — `baseline = 0`, single term = the raw value, not a deviation from a neutral point. No `BodyCoefficients` field backs the mirror itself (there is nothing to tune in a strict 1:1 mirror) — see `.claude/skills/mind-pillar-traits-and-values.md`.
 
 ## Two mass numbers, not one
@@ -34,7 +34,7 @@ Attribute = baseline + Σ (weight_i × (input_i - neutral_i))
 
 ## Safety floors
 
-Eight attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): the four specialized strengths (**PushStrength**, **LegDrive**, **GripStrength**, **LiftStrength** — Delta V4, replacing the old floored **Strength**), **SwingPower**/**GrapplingSelfLifting** (Delta V4, floored on their own averaged result), **FatigueResistance**, **Evasion**, **MaxMovementSpeed**. These were identified by computing the actual worst-case slider combination (see `PlayableCharacterTest`'s floor tests) — every other derived attribute has a natural worst-case comfortably above the floor and does not need one.
+Eight attributes apply `Math.max(BodyCoefficients.getAttributeFloor(), raw)` (floor defaults to 5): the four specialized strengths (**PushStrength**, **LegDrive**, **GripStrength**, **LiftStrength** — Delta V4, replacing the old floored **Strength**), **SwingPower**/**GrapplingSelfLifting** (Delta V4, floored on their own averaged result), **FatigueResistance**, **Evasion**, **MovementSpeed**. These were identified by computing the actual worst-case slider combination (see `PlayableCharacterTest`'s floor tests) — every other derived attribute has a natural worst-case comfortably above the floor and does not need one.
 
 At `baseline = 35` (the design document's original value before the user raised it to 60), the four floored attributes' worst-case combos landed at -1, -17, -14, and -6 respectively — genuinely reachable through slider extremes. At `baseline = 60`, the same worst-case combos land at 24, 8, 11, and 19 — all positive on their own. **The floors are kept anyway**, as defense-in-depth against future coefficient tuning or scale changes, not because today's ranges require them. `Speed` never needed a floor at either baseline (its mass-penalty divisor keeps the worst case at 2 / 27 respectively) — see `PlayableCharacterTest.getSpeed_worstCaseSliderCombination_staysPositiveWithoutAFloor`.
 
@@ -128,7 +128,7 @@ The old global `Strength` (and its Load Capacity group) is **deleted outright**,
 meanStrength() = 60 + kMeanStrengthMuscleMass×(MuscleMass-5) + kMeanStrengthNeuromuscular×(NeuromuscularEfficiency-5) + kMeanStrengthFiberType×(FiberType-5)
 ```
 
-Private, never exposed via any getter or DTO — the design document explicitly forbids rendering it in the UI, and nothing outside `PlayableCharacter` needs it. It plays the role of `baseline` for the four specialized strengths below (their own dynamic anchor, the same way `Speed` anchors `Evasion`/`MaxMovementSpeed`).
+Private, never exposed via any getter or DTO — the design document explicitly forbids rendering it in the UI, and nothing outside `PlayableCharacter` needs it. It plays the role of `baseline` for the four specialized strengths below (their own dynamic anchor, the same way `Speed` anchors `Evasion`/`MovementSpeed`).
 
 ### 4 specialized strengths + 2 derived combat attributes
 
@@ -142,7 +142,7 @@ SwingPower           = floor((PushStrength + GripStrength) / 2)
 GrapplingSelfLifting = floor((GripStrength + LiftStrength) / 2)
 ```
 
-All six floored (continuing the old `Strength`'s floor convention). `LegDrive`'s `MuscleDistribution` term is inverted relative to `PushStrength` (leg-bias helps `LegDrive`, hurts `PushStrength`, and vice versa for arm-bias) — same asymmetric-but-related pattern as the pre-existing `Strength`/`MaxMovementSpeed` `MuscleDistribution` terms. `SwingPower`/`GrapplingSelfLifting` are plain averages of two already-resolved attributes, not additive-standard formulas in their own right — they get no `AttributeBreakdown` (see below).
+All six floored (continuing the old `Strength`'s floor convention). `LegDrive`'s `MuscleDistribution` term is inverted relative to `PushStrength` (leg-bias helps `LegDrive`, hurts `PushStrength`, and vice versa for arm-bias) — same asymmetric-but-related pattern as the pre-existing `Strength`/`MovementSpeed` `MuscleDistribution` terms. `SwingPower`/`GrapplingSelfLifting` are plain averages of two already-resolved attributes, not additive-standard formulas in their own right — they get no `AttributeBreakdown` (see below).
 
 ### 3 new resistance/threshold attributes
 
@@ -230,6 +230,119 @@ IllusionResistanceSanity  = 60 + 3×(Truth-1)
 Creativity                = 60 + 3×(Progress-1)
 ```
 `Discretion`'s weight (10) was not specified by the ticket — picked to match `Command`'s existing `kCommandShapeAesthetics` magnitude on the same input/deviation, per this file's own "default coefficients are not balanced game data" convention. Tune through play like every other coefficient in this class.
+
+## rpg-19 — cross-pillar terms reverted, Knowledge levels replace boolean traits, 28 Values-trait bonus terms, 4 new attributes
+
+Full domain-model rationale for `Knowledge`/`Personality`/`Labours`/the rewritten `Trait` catalog lives in `.claude/skills/mind-pillar-traits-and-values.md` — this section covers only the formula-level changes. **Verify against `PlayableCharacter.java` itself before trusting any older section of this file (including the rpg-18 section above) about which cross-pillar terms currently exist** — this delta reverted several of them, and a stale changelog read is exactly how that mistake was nearly repeated while implementing rpg-19.
+
+### 8 cross-pillar `Values` terms reverted outright
+
+`ShortMemory`, `Reasoning`, `Enfactuation`, `Will`, `Bluffing` (both its `Truth` and `Morality` terms), `Faith`, `IllusionResistanceSanity`, and `Creativity` all lost their rpg-18 `Values`-reading term, per explicit user instruction. `ShortMemory`/`Reasoning`/`Enfactuation`/`Will` return to their pre-rpg-18 shape (see the rpg-13/Delta-V4 sections above). `Bluffing`/`Faith`/`IllusionResistanceSanity`/`Creativity` (all rpg-18-only attributes) temporarily became flat `baseline`-only formulas — most immediately gained a `Trait`-driven replacement term in the same delta (see below), so "flat 60" was never actually shipped as their final rpg-19 state, just an intermediate one during the revert.
+
+### Ecology/Biology terms: flag → per-level multiplier
+
+`SurvivalSkills`/`AnimalCaring`'s `Trait.ECOLOGY`/`Trait.BIOLOGY` terms became `Knowledge.ECOLOGY`/`Knowledge.BIOLOGY` level reads — same `BodyCoefficients` field and magnitude, now multiplied by the 0-4 level instead of gated by a 0/1 flag:
+```
+SurvivalSkills += kSurvivalSkillsEcology × EcologyLevel                              (was: × hasEcology)
+AnimalCaring   += kAnimalCaringEcology × EcologyLevel + kAnimalCaringBiology × BiologyLevel
+```
+
+### IllusionResistanceSanity renamed IllusionResistance
+
+Pure rename (ticket-requested), landing in the same delta as its formula rewrite (see below).
+
+### Values-trait bonus terms (the new 28-trait catalog)
+
+Every *passive, unconditional* bonus a Values-trait grants is a real additive term, added directly to the affected attribute(s) — never inferred, always exactly the flat number the ticket specified per trait. *Situational* effects (conditional on a specific opponent type or narrative action) are not formulas at all — see the Personality skill's "Effect split" section. The full per-trait bonus list:
+
+```
+FearResistance  += kFearResistanceSelfSacrifice×hasSelfSacrifice + kFearResistanceSuicidal×hasSuicidal   (4, 4)
+PainThreshold   += kPainThresholdSelfSacrifice×hasSelfSacrifice                                          (8)
+Discretion      += kDiscretionLoneWolf×hasLoneWolf + kDiscretionBackstabber×hasBackstabber                (8, 8)
+Command         += kCommandDominant×hasDominant + kCommandPossessive×hasPossessive                        (4, 4)
+Manipulation    += kManipulationDominant×hasDominant + kManipulationPossessive×hasPossessive + kManipulationRelativist×hasRelativist  (4, 4, 4)
+SurvivalSkills  += kSurvivalSkillsExpatriated×hasExpatriated + kSurvivalSkillsAnarchist×hasAnarchist       (10, 10)
+Mediunity       -= kMediunityPagan×hasPagan                                                                (5)
+Faith           = 60 - kFaithPagan×hasPagan + kFaithRelativist×hasRelativist - kFaithProfane×hasProfane    (10, 4, 5)
+Intimidation    += kIntimidationProfane×hasProfane + kIntimidationBellicose×hasBellicose                   (4, 6)
+Will            = mentalHealthCoreTerms() + kWillRelativist×hasRelativist + kWillPracticalist×hasPracticalist - kWillNihilist×hasNihilist   (4, 4, 10)
+Enfactuation    += kEnfactuationRelativist×hasRelativist - kEnfactuationBellicose×hasBellicose             (4, 4)
+Reasoning       -= kReasoningRelativist×hasRelativist + kReasoningIliterate×hasIliterate                   (5, 5)
+IllusionResistance = 60 - kIllusionResistanceRelativist×hasRelativist + kIllusionResistancePracticalist×hasPracticalist  (5, 5 — cancel out if both selected)
+AngerResistance += kAngerResistancePracticalist×hasPracticalist - kAngerResistanceBellicose×hasBellicose   (4, 3)
+MentalHealthPool += kMentalHealthPracticalist×hasPracticalist - kMentalHealthNihilist×hasNihilist          (4, 15)
+MemoryPool      += kMemoryPoolIliterate×hasIliterate + kMemoryPoolPastEraser×hasPastEraser                 (20, 5)
+AnimalCaring    -= kAnimalCaringAntiNaturalist×hasAntiNaturalist                                            (5)
+PoisonResistance += kPoisonResistanceAntiNaturalist×hasAntiNaturalist                                       (2)
+FoodPoisoningAlcoholResistance += kFoodPoisoningAntiNaturalist×hasAntiNaturalist                            (2)
+DiseaseResistance += kDiseaseResistanceAntiNaturalist×hasAntiNaturalist                                     (6)
+Creativity      = 60 + kCreativityOrphanMind×hasOrphanMind + kCreativityPastEraser×hasPastEraser            (5, 5)
+BehaviorReading += kBehaviorReadingDogEatDog×hasDogEatDog                                                   (5)
+MeleeAccuracy   += kMeleeAccuracyDogEatDog×hasDogEatDog                                                     (5)
+Aim             += kAimDogEatDog×hasDogEatDog                                                               (5)
+ArcaneOutput    += kArcaneOutputConservative×hasConservative                                                (5)
+ManaPool        += kManaPoolConservative×hasConservative                                                    (5)
+```
+
+**`Will`/`MentalHealthPool` and Nihilist — why the shared core was factored out.** Nihilist penalizes `MentalHealthPool` by 15 but `Will` by only 10 — two different magnitudes on the same trait. Since `getWillBreakdown()` used to copy `getMentalHealthPoolBreakdown()`'s terms wholesale (see the rpg-18 section above), adding Nihilist/Practicalist directly to `MentalHealthPool`'s term list would have made `Will` inherit the *same* magnitude via the copy — wrong for Nihilist specifically. `mentalHealthCoreTerms()` (a new private helper) now returns only the three original physiological terms (Amygdala/Tmod/Pmod); both `getMentalHealthPoolBreakdown()` and `getWillBreakdown()` start from that shared core and then each add their *own* independent Values-trait terms with their own magnitudes. Follow this pattern — do not add a new shared trait term back into `MentalHealthPool`'s own list expecting `Will` to inherit it correctly, unless the two really do share the exact same magnitude.
+
+### 4 new attributes
+
+```
+Analysis        = 60 + floor(kAnalysisReasoning × (Reasoning-60)) + kAnalysisDogEatDog×hasDogEatDog   (kAnalysisReasoning = 0.5, kAnalysisDogEatDog = 5)
+CloseCombat     = 60 + kCloseCombatBellicose×hasBellicose        (4)
+LowRangeCombat  = 60 + kLowRangeCombatBellicose×hasBellicose     (4)
+LongRangeCombat = 60                                              (no modifier yet)
+```
+
+`Analysis` is the second formula in the codebase (after `Balance`'s `LegDrive` term) to read another *derived* attribute (`Reasoning`) as an additive term rather than a raw input — the `floor()` wrapper matches the ticket's literal `floor(0.5 × (Reasoning-60))` specification.
+
+## GeneralPersonality (Vanity/Focus), Phaxic Cerebelum, 5 new attributes, 12 new traits (2026-07-07)
+
+A fifth `Mind` data group, `GeneralPersonality` (`vanity`, `focus`, both 1-9 neutral 5, `EVENTFUL`), joins `Values`/`Erudition`/`Personality`/`Labours`. `NeuralSystem` gains a 13th field, `phaxicCerebelum` — absent (0) on the human template, same shape as the existing arcane organs (`noeticPlexus`, `astralVentriculum`, `subtleEpiphysealGland`): neutral point 6, not 5.
+
+### 5 new attributes
+
+```
+PsyquismOutput  (Supernatural) = 60 + 8×(PhaxicCerebelum-6) + 1×(CerebralCapacity-5)
+PsyquismDefense (Supernatural) = 60 + 8×(PhaxicCerebelum-6)
+CharmResistance (Social)       = 60 - 3×(Vanity-5) + floor(0.5×(Discretion-60)) - 3×hasProtagonist
+Concentration   (Cognitive)    = 60 + 4×(Focus-5) - 1×(CerebralCapacity-5)
+Purity          (Supernatural) = 60 + 6×hasCleanVessel
+```
+
+At the human-default absent value (`PhaxicCerebelum=0`), `PsyquismOutput`/`PsyquismDefense` both resolve to `60-48=12`, matching the arcane-organ precedent. `CharmResistance` reads `getDiscretion()` — an already-resolved derived attribute — as an ordinary term (third formula to do this, after `Balance`'s `LegDrive` term and `Analysis`'s `Reasoning` term), floored the same way `Analysis` floors its own fractional-weight term.
+
+**The ticket's formula text used a literal `-` before the Phaxic Cerebelum term** (`60 - (8×(PhaxicCerebelum-6))`) but its own worked arithmetic (`60 - 48 + 0 = 12`) only holds if the term is actually added, not subtracted (literal subtraction at the human default would give `60-(-48)=108`, not 12) — implemented to match the arithmetic the ticket itself demonstrated, i.e. the same `+8×(input-6)` shape as every other arcane-organ formula, not the literal `-` glyph. Treat this as resolved by the ticket's own worked example, not a guess.
+
+### Vanity modifiers on existing formulas
+
+```
+Enfactuation  += 2×(Vanity-5)
+Intimidation  -= 2×(Vanity-5)
+```
+
+### 12 new Values-trait bonus terms (added to existing formulas)
+
+These accompany 12 new standalone `Trait` constants — see `.claude/skills/mind-pillar-traits-and-values.md` for the domain-model side (a new "concern-threshold" prerequisite kind, distinct from the base/advanced pairs).
+
+```
+Enfactuation           += 6×hasReliable + 6×hasPeacekeeper
+Intimidation           -= 3×hasPeacekeeper
+Faith                  += 6×hasReligionPractitioner
+IllusionResistance     += 6×hasRealitic
+Bluffing               -= 3×hasRealitic
+Reasoning              += 6×hasPhilosopher
+SurvivalSkills         += 6×hasOutdoorLifestyle
+AnimalCaring           += 6×hasOutdoorLifestyle
+Creativity             += 6×hasInventor
+```
+
+`Egotist`, `Loyalist`, and `Retribution Seeker` grant **no formula term at all** — their effects (double stress relief, "Motivated" status, resisted-test bonuses against criminals) are entirely situational/narrative, same "no mechanic exists yet" rule as every other situational trait effect in this codebase. `Protagonist`'s `-3 CharmResistance` is folded into `CharmResistance`'s own formula above rather than listed here.
+
+## Rename: MaxMovementSpeed → MovementSpeed (2026-07-07)
+
+Pure rename, no formula/weight change — `getMaxMovementSpeed()`/`getMaxMovementSpeedBreakdown()` → `getMovementSpeed()`/`getMovementSpeedBreakdown()`, `AttributesResponse.maxMovementSpeed` → `movementSpeed`, and the three coefficients `kMaxMovementSpeedLimbRatio`/`kMaxMovementSpeedMuscleDistribution`/`kMaxMovementSpeedHeight` → `kMovementSpeedLimbRatio`/`kMovementSpeedMuscleDistribution`/`kMovementSpeedHeight`. Every mention throughout this file (including inside the dated `rpg-11`/Delta V4 sections above, which still describe currently-true formula shapes in present tense, not frozen historical snapshots) was updated to the new name in the same delta.
 
 ## Extending this pattern
 

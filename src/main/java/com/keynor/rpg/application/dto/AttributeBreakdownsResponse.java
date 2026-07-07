@@ -20,7 +20,7 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("gripStrength", AttributeBreakdownResponse.from(character.getGripStrengthBreakdown()));
         map.put("liftStrength", AttributeBreakdownResponse.from(character.getLiftStrengthBreakdown()));
         map.put("speed", AttributeBreakdownResponse.from(character.getSpeedBreakdown()));
-        map.put("maxMovementSpeed", AttributeBreakdownResponse.from(character.getMaxMovementSpeedBreakdown()));
+        map.put("movementSpeed", AttributeBreakdownResponse.from(character.getMovementSpeedBreakdown()));
         map.put("staminaPool", AttributeBreakdownResponse.from(character.getStaminaPoolBreakdown()));
         map.put("fatigueResistance", AttributeBreakdownResponse.from(character.getFatigueResistanceBreakdown()));
         map.put("staminaRecovery", AttributeBreakdownResponse.from(character.getStaminaRecoveryBreakdown()));
@@ -84,9 +84,17 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("discretion", AttributeBreakdownResponse.from(character.getDiscretionBreakdown()));
         map.put("bluffing", AttributeBreakdownResponse.from(character.getBluffingBreakdown()));
         map.put("faith", AttributeBreakdownResponse.from(character.getFaithBreakdown()));
-        map.put("illusionResistanceSanity",
-                AttributeBreakdownResponse.from(character.getIllusionResistanceSanityBreakdown()));
+        map.put("illusionResistance", AttributeBreakdownResponse.from(character.getIllusionResistanceBreakdown()));
         map.put("creativity", AttributeBreakdownResponse.from(character.getCreativityBreakdown()));
+        map.put("analysis", AttributeBreakdownResponse.from(character.getAnalysisBreakdown()));
+        map.put("closeCombat", AttributeBreakdownResponse.from(character.getCloseCombatBreakdown()));
+        map.put("lowRangeCombat", AttributeBreakdownResponse.from(character.getLowRangeCombatBreakdown()));
+        map.put("longRangeCombat", AttributeBreakdownResponse.from(character.getLongRangeCombatBreakdown()));
+        map.put("psyquismOutput", AttributeBreakdownResponse.from(character.getPsyquismOutputBreakdown()));
+        map.put("psyquismDefense", AttributeBreakdownResponse.from(character.getPsyquismDefenseBreakdown()));
+        map.put("charmResistance", AttributeBreakdownResponse.from(character.getCharmResistanceBreakdown()));
+        map.put("concentration", AttributeBreakdownResponse.from(character.getConcentrationBreakdown()));
+        map.put("purity", AttributeBreakdownResponse.from(character.getPurityBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

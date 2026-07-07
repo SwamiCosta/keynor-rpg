@@ -32,6 +32,11 @@ package com.keynor.rpg.domain.model;
  * default template, which locks its slider disabled in the frontend. When present, its neutral
  * point is 6 (not 5) and it feeds {@link PlayableCharacter#getSixthSense()} exclusively, using a
  * wider weight (8) than the standard 1-9 traits.
+ *
+ * <p>{@code phaxicCerebelum} (added alongside the Psyquism attributes) is another organ absent
+ * in normal people — same shape as {@code noeticPlexus}: absent (0) on the human default
+ * template, neutral point 6, feeds {@link PlayableCharacter#getPsyquismOutput()} and
+ * {@link PlayableCharacter#getPsyquismDefense()} exclusively.
  */
 public class NeuralSystem {
 
@@ -47,10 +52,11 @@ public class NeuralSystem {
     private int agility;
     private int precision;
     private int noeticPlexus;
+    private int phaxicCerebelum;
 
     public NeuralSystem(int neuralDrive, int neuromuscularEfficiency, int cerebralCapacity, int synapsisQuality,
                          int hippocampus, int thalamus, int hypothalamus, int amygdalaAndCingulum, int immunity,
-                         int agility, int precision, int noeticPlexus) {
+                         int agility, int precision, int noeticPlexus, int phaxicCerebelum) {
         this.neuralDrive = neuralDrive;
         this.neuromuscularEfficiency = neuromuscularEfficiency;
         this.cerebralCapacity = cerebralCapacity;
@@ -63,10 +69,11 @@ public class NeuralSystem {
         this.agility = agility;
         this.precision = precision;
         this.noeticPlexus = noeticPlexus;
+        this.phaxicCerebelum = phaxicCerebelum;
     }
 
     public static NeuralSystem defaults() {
-        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0);
+        return new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0);
     }
 
     public int getNeuralDrive() {
@@ -163,5 +170,13 @@ public class NeuralSystem {
 
     public void setNoeticPlexus(int noeticPlexus) {
         this.noeticPlexus = noeticPlexus;
+    }
+
+    public int getPhaxicCerebelum() {
+        return phaxicCerebelum;
+    }
+
+    public void setPhaxicCerebelum(int phaxicCerebelum) {
+        this.phaxicCerebelum = phaxicCerebelum;
     }
 }

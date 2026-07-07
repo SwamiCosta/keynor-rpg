@@ -4,7 +4,7 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
 
 public record AttributesResponse(double pushStrength, double legDrive, double gripStrength, double liftStrength,
                                   double swingPower, double grapplingSelfLifting, double speed,
-                                  double maxMovementSpeed, double staminaPool, double fatigueResistance,
+                                  double movementSpeed, double staminaPool, double fatigueResistance,
                                   double staminaRecovery, double durability, double sight, double hearing,
                                   double smell, double evasion, double acrobatics, double meleeAccuracy, double aim,
                                   double memoryPool, double reasoning, double shortMemory, double mentalHealthPool,
@@ -22,7 +22,10 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double progressConcern, double peaceConcern,
                                   double survivalSkills, double animalCaring, double manipulation,
                                   double behaviorReading, double discretion, double bluffing, double faith,
-                                  double illusionResistanceSanity, double creativity) {
+                                  double illusionResistance, double creativity, double analysis,
+                                  double closeCombat, double lowRangeCombat, double longRangeCombat,
+                                  double psyquismOutput, double psyquismDefense, double charmResistance,
+                                  double concentration, double purity) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -33,7 +36,7 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getSwingPower(),
                 character.getGrapplingSelfLifting(),
                 character.getSpeed(),
-                character.getMaxMovementSpeed(),
+                character.getMovementSpeed(),
                 character.getStaminaPool(),
                 character.getFatigueResistance(),
                 character.getStaminaRecovery(),
@@ -93,7 +96,16 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getDiscretion(),
                 character.getBluffing(),
                 character.getFaith(),
-                character.getIllusionResistanceSanity(),
-                character.getCreativity());
+                character.getIllusionResistance(),
+                character.getCreativity(),
+                character.getAnalysis(),
+                character.getCloseCombat(),
+                character.getLowRangeCombat(),
+                character.getLongRangeCombat(),
+                character.getPsyquismOutput(),
+                character.getPsyquismDefense(),
+                character.getCharmResistance(),
+                character.getConcentration(),
+                character.getPurity());
     }
 }

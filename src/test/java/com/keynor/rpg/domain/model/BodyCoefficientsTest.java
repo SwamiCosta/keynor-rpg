@@ -47,7 +47,7 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKSpeedFiberType()).isEqualTo(2);
         assertThat(coeff.getKSpeedMassNeutral()).isEqualTo(25);
         assertThat(coeff.getKSpeedMassDivisor()).isEqualTo(3);
-        assertThat(coeff.getKMaxMovementSpeedHeight()).isEqualTo(0.5);
+        assertThat(coeff.getKMovementSpeedHeight()).isEqualTo(0.5);
     }
 
     @Test
@@ -183,18 +183,31 @@ class BodyCoefficientsTest {
     void defaults_mindPillarWeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKShortMemoryKnowledge()).isEqualTo(3);
-        assertThat(coeff.getKReasoningTruth()).isEqualTo(3);
-        assertThat(coeff.getKEnfactuationLoyalty()).isEqualTo(3);
-        assertThat(coeff.getKWillMorality()).isEqualTo(3);
         assertThat(coeff.getKSurvivalSkillsEcology()).isEqualTo(2);
         assertThat(coeff.getKAnimalCaringEcology()).isEqualTo(2);
         assertThat(coeff.getKAnimalCaringBiology()).isEqualTo(2);
-        assertThat(coeff.getKBluffingTruth()).isEqualTo(3);
-        assertThat(coeff.getKBluffingMorality()).isEqualTo(3);
-        assertThat(coeff.getKFaithDivinity()).isEqualTo(3);
-        assertThat(coeff.getKIllusionResistanceSanityTruth()).isEqualTo(3);
-        assertThat(coeff.getKCreativityProgress()).isEqualTo(3);
+    }
+
+    @Test
+    void defaults_valuesTraitWeightsMatchTheDesignDocument_rpg19() {
+        BodyCoefficients coeff = BodyCoefficients.defaults();
+
+        assertThat(coeff.getKFearResistanceSelfSacrifice()).isEqualTo(4);
+        assertThat(coeff.getKPainThresholdSelfSacrifice()).isEqualTo(8);
+        assertThat(coeff.getKDiscretionLoneWolf()).isEqualTo(8);
+        assertThat(coeff.getKDiscretionBackstabber()).isEqualTo(8);
+        assertThat(coeff.getKCommandDominant()).isEqualTo(4);
+        assertThat(coeff.getKManipulationRelativist()).isEqualTo(4);
+        assertThat(coeff.getKSurvivalSkillsExpatriated()).isEqualTo(10);
+        assertThat(coeff.getKMediunityPagan()).isEqualTo(5);
+        assertThat(coeff.getKFaithPagan()).isEqualTo(10);
+        assertThat(coeff.getKWillNihilist()).isEqualTo(10);
+        assertThat(coeff.getKMentalHealthNihilist()).isEqualTo(15);
+        assertThat(coeff.getKMemoryPoolIliterate()).isEqualTo(20);
+        assertThat(coeff.getKAnalysisReasoning()).isEqualTo(0.5);
+        assertThat(coeff.getKAnalysisDogEatDog()).isEqualTo(5);
+        assertThat(coeff.getKCloseCombatBellicose()).isEqualTo(4);
+        assertThat(coeff.getKLowRangeCombatBellicose()).isEqualTo(4);
     }
 
     @Test
