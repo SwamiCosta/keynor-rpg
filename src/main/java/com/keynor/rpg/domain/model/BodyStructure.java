@@ -8,7 +8,7 @@ package com.keynor.rpg.domain.model;
  * immutable/genetic nature, only its owning class changed) is 1-7, neutral 3; the domain
  * accepts the full range for future non-human races even though the frontend currently locks
  * the human character-creation slider to [2-4]. Feeds {@link PlayableCharacter#getThermalResistance()}
- * and (new in rpg-14) {@link PlayableCharacter#getDurability()}.
+ * and {@link PlayableCharacter#getSoftTissueDurability()} (renamed from Durability in rpg-21).
  *
  * <p>{@code shapeAesthetics} (new, trainable, 1-9 neutral 5) spans Repulsive(1) to
  * Attractive(9) — feeds the new social attributes ({@link PlayableCharacter#getIntimidation()},

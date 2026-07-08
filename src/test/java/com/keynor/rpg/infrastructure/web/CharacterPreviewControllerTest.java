@@ -66,7 +66,7 @@ class CharacterPreviewControllerTest {
                                 new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0),
                                 new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
                         new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5),
-                                new TrainingAndConditioningInput(0, 0))),
+                                new TrainingAndConditioningInput(0, 0, 0, 0, 0, 0, 0, 0))),
                 new MindPreviewRequest(
                         new ValuesInput(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
                         new EruditionInput(Map.of("ECOLOGY", 2)),
@@ -94,7 +94,9 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.poolAttributes.staminaPool.current").exists())
                 .andExpect(jsonPath("$.attributes.fatigueResistance").exists())
                 .andExpect(jsonPath("$.attributes.staminaRecovery").exists())
-                .andExpect(jsonPath("$.attributes.durability").exists())
+                .andExpect(jsonPath("$.attributes.durability").doesNotExist())
+                .andExpect(jsonPath("$.attributes.softTissueDurability").exists())
+                .andExpect(jsonPath("$.attributes.boneDurability").exists())
                 .andExpect(jsonPath("$.attributes.cardiovascularCapacity").doesNotExist())
                 .andExpect(jsonPath("$.attributes.fatigueRate").doesNotExist())
                 .andExpect(jsonPath("$.attributes.sight").exists())
@@ -170,6 +172,12 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.reactionSpeed").exists())
                 .andExpect(jsonPath("$.attributes.hiding").exists())
                 .andExpect(jsonPath("$.attributes.sneaking").exists())
+                .andExpect(jsonPath("$.attributes.alchemy").exists())
+                .andExpect(jsonPath("$.attributes.machineHandling").exists())
+                .andExpect(jsonPath("$.attributes.performance").exists())
+                .andExpect(jsonPath("$.attributes.sciencePractice").exists())
+                .andExpect(jsonPath("$.attributes.healing").exists())
+                .andExpect(jsonPath("$.attributes.hackingAndPrograming").exists())
                 .andExpect(jsonPath("$.calculatedValues.symbolicTotalMass").exists())
                 .andExpect(jsonPath("$.calculatedValues.totalMassKg").exists())
                 .andExpect(jsonPath("$.calculatedValues.displayMassKg").doesNotExist())

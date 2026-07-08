@@ -10,7 +10,8 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
 public record AttributesResponse(double pushStrength, double legDrive, double gripStrength, double liftStrength,
                                   double swingPower, double grapplingSelfLifting, double speed,
                                   double movementSpeed, double fatigueResistance,
-                                  double staminaRecovery, double durability, double sight, double hearing,
+                                  double staminaRecovery, double softTissueDurability, double boneDurability,
+                                  double sight, double hearing,
                                   double smell, double evasion, double acrobatics, double meleeAccuracy, double aim,
                                   double reasoning, double shortMemory,
                                   double will, double balance, double stressResistance, double angerResistance,
@@ -31,7 +32,8 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double closeCombat, double lowRangeCombat, double longRangeCombat,
                                   double psyquismOutput, double psyquismDefense, double charmResistance,
                                   double concentration, double purity, double reactionSpeed, double hiding,
-                                  double sneaking) {
+                                  double sneaking, double alchemy, double machineHandling, double performance,
+                                  double sciencePractice, double healing, double hackingAndPrograming) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -45,7 +47,8 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getMovementSpeed(),
                 character.getFatigueResistance(),
                 character.getStaminaRecovery(),
-                character.getDurability(),
+                character.getSoftTissueDurability(),
+                character.getBoneDurability(),
                 character.getSight(),
                 character.getHearing(),
                 character.getSmell(),
@@ -111,6 +114,12 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getPurity(),
                 character.getReactionSpeed(),
                 character.getHiding(),
-                character.getSneaking());
+                character.getSneaking(),
+                character.getAlchemy(),
+                character.getMachineHandling(),
+                character.getPerformance(),
+                character.getSciencePractice(),
+                character.getHealing(),
+                character.getHackingAndPrograming());
     }
 }

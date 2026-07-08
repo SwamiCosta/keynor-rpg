@@ -24,7 +24,8 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("staminaPool", AttributeBreakdownResponse.from(character.getStaminaPoolBreakdown()));
         map.put("fatigueResistance", AttributeBreakdownResponse.from(character.getFatigueResistanceBreakdown()));
         map.put("staminaRecovery", AttributeBreakdownResponse.from(character.getStaminaRecoveryBreakdown()));
-        map.put("durability", AttributeBreakdownResponse.from(character.getDurabilityBreakdown()));
+        map.put("softTissueDurability", AttributeBreakdownResponse.from(character.getSoftTissueDurabilityBreakdown()));
+        map.put("boneDurability", AttributeBreakdownResponse.from(character.getBoneDurabilityBreakdown()));
         map.put("sight", AttributeBreakdownResponse.from(character.getSightBreakdown()));
         map.put("hearing", AttributeBreakdownResponse.from(character.getHearingBreakdown()));
         map.put("smell", AttributeBreakdownResponse.from(character.getSmellBreakdown()));
@@ -99,6 +100,12 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("reactionSpeed", AttributeBreakdownResponse.from(character.getReactionSpeedBreakdown()));
         map.put("hiding", AttributeBreakdownResponse.from(character.getHidingBreakdown()));
         map.put("sneaking", AttributeBreakdownResponse.from(character.getSneakingBreakdown()));
+        map.put("alchemy", AttributeBreakdownResponse.from(character.getAlchemyBreakdown()));
+        map.put("machineHandling", AttributeBreakdownResponse.from(character.getMachineHandlingBreakdown()));
+        map.put("performance", AttributeBreakdownResponse.from(character.getPerformanceBreakdown()));
+        map.put("sciencePractice", AttributeBreakdownResponse.from(character.getSciencePracticeBreakdown()));
+        map.put("healing", AttributeBreakdownResponse.from(character.getHealingBreakdown()));
+        map.put("hackingAndPrograming", AttributeBreakdownResponse.from(character.getHackingAndProgramingBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

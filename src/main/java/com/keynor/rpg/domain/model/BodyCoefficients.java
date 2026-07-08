@@ -102,12 +102,14 @@ public class BodyCoefficients {
     private double kStaminaRecoveryCardiac = 1;
     private double kStaminaRecoveryFiberType = 1;
 
-    // Durability
-    private double kDurabilityBoneDensity = 2;
-    private double kDurabilityMesomorphy = 1;
-    private double kDurabilityBodyFat = 1;
-    private double kDurabilityFlexibility = 1;
-    private double kDurabilitySkin = 1; // added rpg-14
+    // Soft Tissue Durability / Bone Durability (rpg-21, replaces the unified Durability outright)
+    private double softTissueDurabilityBaseline = 10; // unlike every other attribute, not the shared 60
+    private double kSoftTissueDurabilityMesomorphy = 1;
+    private double kSoftTissueDurabilityBodyFat = 1;
+    private double kSoftTissueDurabilityFlexibility = 1;
+    private double kSoftTissueDurabilitySkin = 1;
+    private double kSoftTissueDurabilityResilience = 2;
+    private double kBoneDurabilityBoneDensity = 2;
 
     // Sight / Hearing / Smell (rpg-14: diverged from one shared formula to one per sense;
     // Delta V4: Hippocampus term swapped for Thalamus on all three, same weights)
@@ -324,8 +326,47 @@ public class BodyCoefficients {
     private double kHidingShapeAesthetics = 1;
     private double kSneakingAgility = 1;
 
+    // Training and Conditioning (rpg-21) — Intensity/Coordination/Resilience/Fighting/
+    // WeaponPracticing/Shooting join Vigor/Reflexes, same raw-value shape (zero at the
+    // training-absent default of 0).
+    private double kMeanStrengthIntensity = 2;
+    private double kSpeedIntensity = 2;
+    private double kAcrobaticsCoordination = 2;
+    private double kEvasionCoordination = 1;
+    private double kBalanceCoordination = 2;
+    private double kPainThresholdResilience = 2;
+    private double kCloseCombatFighting = 5;
+    private double kLowRangeCombatWeaponPracticing = 5;
+    private double kLongRangeCombatShooting = 4;
+    private double kAimShooting = 3;
+
+    // Athletism and Martial Arts (rpg-21) — Dancing/Fencing are new Knowledge constants (level
+    // 0-4), same "level x weight" shape as Ecology/Biology/Archery.
+    private double kAcrobaticsDancing = 2;
+    private double kEvasionDancing = 1;
+    private double kBalanceDancing = 2;
+    private double kLowRangeCombatFencing = 3;
+
+    // Archery (rpg-21) — first real formula effect for this pre-existing Knowledge constant.
+    private double kLongRangeCombatArchery = 4;
+    private double kAimArchery = 3;
+
+    // Skills (rpg-21) — new craft/practice attributes, all baseline 60, Knowledge-level-driven.
+    private double kAlchemyChemistry = 8;
+    private double kAlchemyWizardry = 8;
+    private double kMachineHandlingEngineering = 8;
+    private double kPerformanceCoordination = 1;
+    private double kPerformanceDancing = 8;
+    private double kPerformanceShapeAesthetics = 2;
+    private double kPerformanceArt = 8;
+    private double kSciencePracticeBiology = 8;
+    private double kSciencePracticeChemistry = 8;
+    private double kHealingMedicine = 8;
+    private double kHealingBiology = 4;
+    private double kHackingAndProgramingComputerScience = 8;
+
     // Safety floor shared by Strength-family (now Push/Leg/Grip/Lift Strength), FatigueResistance,
-    // Evasion, MovementSpeed
+    // Evasion, MovementSpeed, SoftTissueDurability (rpg-21)
     private double attributeFloor = 5;
 
     public static BodyCoefficients defaults() {
@@ -503,20 +544,26 @@ public class BodyCoefficients {
     public double getKStaminaRecoveryFiberType() { return kStaminaRecoveryFiberType; }
     public void setKStaminaRecoveryFiberType(double v) { this.kStaminaRecoveryFiberType = v; }
 
-    public double getKDurabilityBoneDensity() { return kDurabilityBoneDensity; }
-    public void setKDurabilityBoneDensity(double v) { this.kDurabilityBoneDensity = v; }
+    public double getSoftTissueDurabilityBaseline() { return softTissueDurabilityBaseline; }
+    public void setSoftTissueDurabilityBaseline(double v) { this.softTissueDurabilityBaseline = v; }
 
-    public double getKDurabilityMesomorphy() { return kDurabilityMesomorphy; }
-    public void setKDurabilityMesomorphy(double v) { this.kDurabilityMesomorphy = v; }
+    public double getKSoftTissueDurabilityMesomorphy() { return kSoftTissueDurabilityMesomorphy; }
+    public void setKSoftTissueDurabilityMesomorphy(double v) { this.kSoftTissueDurabilityMesomorphy = v; }
 
-    public double getKDurabilityBodyFat() { return kDurabilityBodyFat; }
-    public void setKDurabilityBodyFat(double v) { this.kDurabilityBodyFat = v; }
+    public double getKSoftTissueDurabilityBodyFat() { return kSoftTissueDurabilityBodyFat; }
+    public void setKSoftTissueDurabilityBodyFat(double v) { this.kSoftTissueDurabilityBodyFat = v; }
 
-    public double getKDurabilityFlexibility() { return kDurabilityFlexibility; }
-    public void setKDurabilityFlexibility(double v) { this.kDurabilityFlexibility = v; }
+    public double getKSoftTissueDurabilityFlexibility() { return kSoftTissueDurabilityFlexibility; }
+    public void setKSoftTissueDurabilityFlexibility(double v) { this.kSoftTissueDurabilityFlexibility = v; }
 
-    public double getKDurabilitySkin() { return kDurabilitySkin; }
-    public void setKDurabilitySkin(double v) { this.kDurabilitySkin = v; }
+    public double getKSoftTissueDurabilitySkin() { return kSoftTissueDurabilitySkin; }
+    public void setKSoftTissueDurabilitySkin(double v) { this.kSoftTissueDurabilitySkin = v; }
+
+    public double getKSoftTissueDurabilityResilience() { return kSoftTissueDurabilityResilience; }
+    public void setKSoftTissueDurabilityResilience(double v) { this.kSoftTissueDurabilityResilience = v; }
+
+    public double getKBoneDurabilityBoneDensity() { return kBoneDurabilityBoneDensity; }
+    public void setKBoneDurabilityBoneDensity(double v) { this.kBoneDurabilityBoneDensity = v; }
 
     public double getKSightEyesSensitivity() { return kSightEyesSensitivity; }
     public void setKSightEyesSensitivity(double v) { this.kSightEyesSensitivity = v; }
@@ -1000,6 +1047,90 @@ public class BodyCoefficients {
 
     public double getKSneakingAgility() { return kSneakingAgility; }
     public void setKSneakingAgility(double v) { this.kSneakingAgility = v; }
+
+    public double getKMeanStrengthIntensity() { return kMeanStrengthIntensity; }
+    public void setKMeanStrengthIntensity(double v) { this.kMeanStrengthIntensity = v; }
+
+    public double getKSpeedIntensity() { return kSpeedIntensity; }
+    public void setKSpeedIntensity(double v) { this.kSpeedIntensity = v; }
+
+    public double getKAcrobaticsCoordination() { return kAcrobaticsCoordination; }
+    public void setKAcrobaticsCoordination(double v) { this.kAcrobaticsCoordination = v; }
+
+    public double getKEvasionCoordination() { return kEvasionCoordination; }
+    public void setKEvasionCoordination(double v) { this.kEvasionCoordination = v; }
+
+    public double getKBalanceCoordination() { return kBalanceCoordination; }
+    public void setKBalanceCoordination(double v) { this.kBalanceCoordination = v; }
+
+    public double getKPainThresholdResilience() { return kPainThresholdResilience; }
+    public void setKPainThresholdResilience(double v) { this.kPainThresholdResilience = v; }
+
+    public double getKCloseCombatFighting() { return kCloseCombatFighting; }
+    public void setKCloseCombatFighting(double v) { this.kCloseCombatFighting = v; }
+
+    public double getKLowRangeCombatWeaponPracticing() { return kLowRangeCombatWeaponPracticing; }
+    public void setKLowRangeCombatWeaponPracticing(double v) { this.kLowRangeCombatWeaponPracticing = v; }
+
+    public double getKLongRangeCombatShooting() { return kLongRangeCombatShooting; }
+    public void setKLongRangeCombatShooting(double v) { this.kLongRangeCombatShooting = v; }
+
+    public double getKAimShooting() { return kAimShooting; }
+    public void setKAimShooting(double v) { this.kAimShooting = v; }
+
+    public double getKAcrobaticsDancing() { return kAcrobaticsDancing; }
+    public void setKAcrobaticsDancing(double v) { this.kAcrobaticsDancing = v; }
+
+    public double getKEvasionDancing() { return kEvasionDancing; }
+    public void setKEvasionDancing(double v) { this.kEvasionDancing = v; }
+
+    public double getKBalanceDancing() { return kBalanceDancing; }
+    public void setKBalanceDancing(double v) { this.kBalanceDancing = v; }
+
+    public double getKLowRangeCombatFencing() { return kLowRangeCombatFencing; }
+    public void setKLowRangeCombatFencing(double v) { this.kLowRangeCombatFencing = v; }
+
+    public double getKLongRangeCombatArchery() { return kLongRangeCombatArchery; }
+    public void setKLongRangeCombatArchery(double v) { this.kLongRangeCombatArchery = v; }
+
+    public double getKAimArchery() { return kAimArchery; }
+    public void setKAimArchery(double v) { this.kAimArchery = v; }
+
+    public double getKAlchemyChemistry() { return kAlchemyChemistry; }
+    public void setKAlchemyChemistry(double v) { this.kAlchemyChemistry = v; }
+
+    public double getKAlchemyWizardry() { return kAlchemyWizardry; }
+    public void setKAlchemyWizardry(double v) { this.kAlchemyWizardry = v; }
+
+    public double getKMachineHandlingEngineering() { return kMachineHandlingEngineering; }
+    public void setKMachineHandlingEngineering(double v) { this.kMachineHandlingEngineering = v; }
+
+    public double getKPerformanceCoordination() { return kPerformanceCoordination; }
+    public void setKPerformanceCoordination(double v) { this.kPerformanceCoordination = v; }
+
+    public double getKPerformanceDancing() { return kPerformanceDancing; }
+    public void setKPerformanceDancing(double v) { this.kPerformanceDancing = v; }
+
+    public double getKPerformanceShapeAesthetics() { return kPerformanceShapeAesthetics; }
+    public void setKPerformanceShapeAesthetics(double v) { this.kPerformanceShapeAesthetics = v; }
+
+    public double getKPerformanceArt() { return kPerformanceArt; }
+    public void setKPerformanceArt(double v) { this.kPerformanceArt = v; }
+
+    public double getKSciencePracticeBiology() { return kSciencePracticeBiology; }
+    public void setKSciencePracticeBiology(double v) { this.kSciencePracticeBiology = v; }
+
+    public double getKSciencePracticeChemistry() { return kSciencePracticeChemistry; }
+    public void setKSciencePracticeChemistry(double v) { this.kSciencePracticeChemistry = v; }
+
+    public double getKHealingMedicine() { return kHealingMedicine; }
+    public void setKHealingMedicine(double v) { this.kHealingMedicine = v; }
+
+    public double getKHealingBiology() { return kHealingBiology; }
+    public void setKHealingBiology(double v) { this.kHealingBiology = v; }
+
+    public double getKHackingAndProgramingComputerScience() { return kHackingAndProgramingComputerScience; }
+    public void setKHackingAndProgramingComputerScience(double v) { this.kHackingAndProgramingComputerScience = v; }
 
     public double getAttributeFloor() { return attributeFloor; }
     public void setAttributeFloor(double attributeFloor) { this.attributeFloor = attributeFloor; }

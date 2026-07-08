@@ -81,7 +81,7 @@ class WebConfigTest {
                                 new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0),
                                 new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
                         new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5),
-                                new TrainingAndConditioningInput(0, 0))),
+                                new TrainingAndConditioningInput(0, 0, 0, 0, 0, 0, 0, 0))),
                 new MindPreviewRequest(
                         new ValuesInput(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
                         new EruditionInput(Map.of()),
