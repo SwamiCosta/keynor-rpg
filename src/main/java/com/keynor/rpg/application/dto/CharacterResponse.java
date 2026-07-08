@@ -10,7 +10,8 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
  */
 public record CharacterResponse(String id, String name, BodyResponse body, MindResponse mind,
                                  AttributesResponse attributes, AttributeBreakdownsResponse attributeBreakdowns,
-                                 CalculatedValuesResponse calculatedValues, LoadCapacityResponse loadCapacity) {
+                                 PoolAttributesResponse poolAttributes, CalculatedValuesResponse calculatedValues,
+                                 LoadCapacityResponse loadCapacity) {
 
     public static CharacterResponse from(String id, PlayableCharacter character) {
         return new CharacterResponse(id, character.getName(),
@@ -18,6 +19,7 @@ public record CharacterResponse(String id, String name, BodyResponse body, MindR
                 MindResponse.from(character.getMind(), character),
                 AttributesResponse.from(character),
                 AttributeBreakdownsResponse.from(character),
+                PoolAttributesResponse.from(character),
                 CalculatedValuesResponse.from(character),
                 LoadCapacityResponse.from(character));
     }

@@ -8,7 +8,7 @@ class TraitTest {
 
     private PlayableCharacter characterWithValues(Values values) {
         return new PlayableCharacter("test", Body.humanTemplate(), Mind.previewTemplate(values,
-                Erudition.defaults(), Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults()));
+                Erudition.defaults(), Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults(), WeaponProficiencies.defaults()));
     }
 
     @Test

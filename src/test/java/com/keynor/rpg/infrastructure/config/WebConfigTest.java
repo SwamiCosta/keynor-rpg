@@ -20,7 +20,9 @@ import com.keynor.rpg.application.dto.PhysicalTraitsInput;
 import com.keynor.rpg.application.dto.PulmonarySystemInput;
 import com.keynor.rpg.application.dto.BodyStructureInput;
 import com.keynor.rpg.application.dto.SensorialOrgansInput;
+import com.keynor.rpg.application.dto.TrainingAndConditioningInput;
 import com.keynor.rpg.application.dto.ValuesInput;
+import com.keynor.rpg.application.dto.WeaponProficienciesInput;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.Mind;
 import com.keynor.rpg.domain.model.PlayableCharacter;
@@ -74,19 +76,21 @@ class WebConfigTest {
                 new BodyPreviewRequest(
                         new GeneticsInput(5, 5, 5, 7, 3),
                         new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
-                        new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0),
+                        new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0, 0),
                                 new PulmonarySystemInput(5),
                                 new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0),
                                 new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
-                        new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5))),
+                        new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5),
+                                new TrainingAndConditioningInput(0, 0))),
                 new MindPreviewRequest(
                         new ValuesInput(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
                         new EruditionInput(Map.of()),
                         new PersonalityInput(Set.of()),
                         new LaboursInput(Map.of()),
-                        new GeneralPersonalityInput(5, 5)));
+                        new GeneralPersonalityInput(5, 5),
+                        new WeaponProficienciesInput(Map.of())));
 
-        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new PlayableCharacter("preview", Body.humanTemplate(), Mind.humanTemplate()));
 
         mockMvc.perform(post("/api/v1/character/preview")

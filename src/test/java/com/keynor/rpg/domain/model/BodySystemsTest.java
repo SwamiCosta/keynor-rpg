@@ -27,7 +27,7 @@ class BodySystemsTest {
     @Test
     void constructor_storesEachSystemAsProvided() {
         BloodSystem blood = new BloodSystem(7, 4);
-        CardiacSystem cardiac = new CardiacSystem(8, 0);
+        CardiacSystem cardiac = new CardiacSystem(8, 0, 0);
         PulmonarySystem pulmonary = new PulmonarySystem(6);
         NeuralSystem neural = new NeuralSystem(9, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0);
         HormonalGlandularSystem hormonal = new HormonalGlandularSystem(6, 7, 9, 0);

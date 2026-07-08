@@ -20,7 +20,9 @@ import com.keynor.rpg.application.dto.PhysicalTraitsInput;
 import com.keynor.rpg.application.dto.PulmonarySystemInput;
 import com.keynor.rpg.application.dto.BodyStructureInput;
 import com.keynor.rpg.application.dto.SensorialOrgansInput;
+import com.keynor.rpg.application.dto.TrainingAndConditioningInput;
 import com.keynor.rpg.application.dto.ValuesInput;
+import com.keynor.rpg.application.dto.WeaponProficienciesInput;
 import com.keynor.rpg.domain.model.Body;
 import com.keynor.rpg.domain.model.Mind;
 import com.keynor.rpg.domain.model.PlayableCharacter;
@@ -59,19 +61,21 @@ class CharacterPreviewControllerTest {
                 new BodyPreviewRequest(
                         new GeneticsInput(5, 5, 5, 7, 3),
                         new BodyCompositionInput(3, 5, 5, 5, 5, 5, 5),
-                        new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0),
+                        new BodySystemsInput(new BloodSystemInput(5, 3), new CardiacSystemInput(5, 0, 0),
                                 new PulmonarySystemInput(5),
                                 new NeuralSystemInput(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0),
                                 new HormonalGlandularSystemInput(5, 5, 5, 0), new DigestiveSystemInput(5, 5, 5)),
-                        new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5))),
+                        new PhysicalTraitsInput(new SensorialOrgansInput(5, 5, 5), new BodyStructureInput(3, 5, 5),
+                                new TrainingAndConditioningInput(0, 0))),
                 new MindPreviewRequest(
                         new ValuesInput(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
                         new EruditionInput(Map.of("ECOLOGY", 2)),
                         new PersonalityInput(Set.of()),
                         new LaboursInput(Map.of()),
-                        new GeneralPersonalityInput(5, 5)));
+                        new GeneralPersonalityInput(5, 5),
+                        new WeaponProficienciesInput(Map.of())));
 
-        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(previewAttributesUseCase.calculate(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new PlayableCharacter("preview", Body.humanTemplate(), Mind.humanTemplate()));
 
         mockMvc.perform(post("/api/v1/character/preview")
@@ -85,7 +89,9 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributeBreakdowns.breakdowns.pushStrength").exists())
                 .andExpect(jsonPath("$.attributes.speed").exists())
                 .andExpect(jsonPath("$.attributes.movementSpeed").exists())
-                .andExpect(jsonPath("$.attributes.staminaPool").exists())
+                .andExpect(jsonPath("$.attributes.staminaPool").doesNotExist())
+                .andExpect(jsonPath("$.poolAttributes.staminaPool.total").exists())
+                .andExpect(jsonPath("$.poolAttributes.staminaPool.current").exists())
                 .andExpect(jsonPath("$.attributes.fatigueResistance").exists())
                 .andExpect(jsonPath("$.attributes.staminaRecovery").exists())
                 .andExpect(jsonPath("$.attributes.durability").exists())
@@ -98,10 +104,12 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.acrobatics").exists())
                 .andExpect(jsonPath("$.attributes.meleeAccuracy").exists())
                 .andExpect(jsonPath("$.attributes.aim").exists())
-                .andExpect(jsonPath("$.attributes.memoryPool").exists())
+                .andExpect(jsonPath("$.attributes.memoryPool").doesNotExist())
+                .andExpect(jsonPath("$.poolAttributes.memoryPool.total").exists())
                 .andExpect(jsonPath("$.attributes.reasoning").exists())
                 .andExpect(jsonPath("$.attributes.shortMemory").exists())
-                .andExpect(jsonPath("$.attributes.mentalHealthPool").exists())
+                .andExpect(jsonPath("$.attributes.mentalHealthPool").doesNotExist())
+                .andExpect(jsonPath("$.poolAttributes.mentalHealthPool.total").exists())
                 .andExpect(jsonPath("$.attributes.will").exists())
                 .andExpect(jsonPath("$.attributes.balance").exists())
                 .andExpect(jsonPath("$.attributes.stressResistance").exists())
@@ -119,7 +127,10 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.diplomacy").exists())
                 .andExpect(jsonPath("$.attributes.enfactuation").exists())
                 .andExpect(jsonPath("$.attributes.command").exists())
-                .andExpect(jsonPath("$.attributes.manaPool").exists())
+                .andExpect(jsonPath("$.attributes.manaPool").doesNotExist())
+                .andExpect(jsonPath("$.poolAttributes.manaPool.total").exists())
+                .andExpect(jsonPath("$.poolAttributes.chiPool.total").exists())
+                .andExpect(jsonPath("$.poolAttributes.chiPool.current").exists())
                 .andExpect(jsonPath("$.attributes.arcaneOutput").exists())
                 .andExpect(jsonPath("$.attributes.mediunity").exists())
                 .andExpect(jsonPath("$.attributes.sixthSense").doesNotExist())
@@ -156,6 +167,9 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.charmResistance").exists())
                 .andExpect(jsonPath("$.attributes.concentration").exists())
                 .andExpect(jsonPath("$.attributes.purity").exists())
+                .andExpect(jsonPath("$.attributes.reactionSpeed").exists())
+                .andExpect(jsonPath("$.attributes.hiding").exists())
+                .andExpect(jsonPath("$.attributes.sneaking").exists())
                 .andExpect(jsonPath("$.calculatedValues.symbolicTotalMass").exists())
                 .andExpect(jsonPath("$.calculatedValues.totalMassKg").exists())
                 .andExpect(jsonPath("$.calculatedValues.displayMassKg").doesNotExist())

@@ -15,6 +15,7 @@ import com.keynor.rpg.domain.model.Personality;
 import com.keynor.rpg.domain.model.PhysicalTraits;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 import com.keynor.rpg.domain.model.Values;
+import com.keynor.rpg.domain.model.WeaponProficiencies;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -29,7 +30,8 @@ class PreviewAttributesServiceTest {
                                                       PhysicalTraits physicalTraits, Values values,
                                                       Erudition erudition) {
         return service.calculate(biomechanics, bodySystems, physicalTraits, values, erudition,
-                Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults());
+                Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults(),
+                WeaponProficiencies.defaults());
     }
 
     @Test

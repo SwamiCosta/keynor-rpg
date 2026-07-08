@@ -12,17 +12,21 @@ class PhysicalTraitsTest {
 
         assertThat(physicalTraits.getSensorialOrgans()).isNotNull();
         assertThat(physicalTraits.getBodyStructure()).isNotNull();
+        assertThat(physicalTraits.getTrainingAndConditioning()).isNotNull();
         assertThat(physicalTraits.getSensorialOrgans().getEyesSensitivity()).isEqualTo(5);
         assertThat(physicalTraits.getBodyStructure().getSkinThickness()).isEqualTo(3);
+        assertThat(physicalTraits.getTrainingAndConditioning().getVigor()).isZero();
     }
 
     @Test
     void constructor_storesEachGroupAsProvided() {
         SensorialOrgans sensorialOrgans = new SensorialOrgans(6, 7, 8);
         BodyStructure bodyStructure = new BodyStructure(4, 9, 2);
-        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, bodyStructure);
+        TrainingAndConditioning trainingAndConditioning = new TrainingAndConditioning(3, 4);
+        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, bodyStructure, trainingAndConditioning);
 
         assertThat(physicalTraits.getSensorialOrgans()).isSameAs(sensorialOrgans);
         assertThat(physicalTraits.getBodyStructure()).isSameAs(bodyStructure);
+        assertThat(physicalTraits.getTrainingAndConditioning()).isSameAs(trainingAndConditioning);
     }
 }

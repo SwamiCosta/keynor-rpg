@@ -9,12 +9,14 @@ import com.keynor.rpg.domain.model.PlayableCharacter;
  */
 public record CharacterPreviewResponse(AttributesResponse attributes,
                                         AttributeBreakdownsResponse attributeBreakdowns,
+                                        PoolAttributesResponse poolAttributes,
                                         CalculatedValuesResponse calculatedValues,
                                         LoadCapacityResponse loadCapacity) {
 
     public static CharacterPreviewResponse from(PlayableCharacter character) {
         return new CharacterPreviewResponse(AttributesResponse.from(character),
-                AttributeBreakdownsResponse.from(character), CalculatedValuesResponse.from(character),
+                AttributeBreakdownsResponse.from(character), PoolAttributesResponse.from(character),
+                CalculatedValuesResponse.from(character),
                 LoadCapacityResponse.from(character));
     }
 }

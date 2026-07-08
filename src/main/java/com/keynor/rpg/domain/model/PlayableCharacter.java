@@ -253,7 +253,10 @@ public class PlayableCharacter {
      * kStaminaPoolCardiac x (CardiacOutput-5) + kStaminaPoolOxygen x
      * (OxygenCarryingCapacity-5) - kStaminaPoolFiberType x (FiberType-5) +
      * kStaminaPoolDigestiveAbsorption x (DigestiveAbsorption-5) (renamed from
-     * NutrientAbsorption, Delta V4).
+     * NutrientAbsorption, Delta V4) + kStaminaPoolAstralAtrium x AstralAtrium +
+     * kStaminaPoolVigor x Vigor. The AstralAtrium/Vigor terms read the raw input value directly,
+     * not a deviation from a neutral point — both default to 0 (organ absent / no training
+     * investment), so a fresh character's Stamina Pool is unaffected until either is raised.
      */
     public AttributeBreakdown getStaminaPoolBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
@@ -262,12 +265,19 @@ public class PlayableCharacter {
                 coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
                 -coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5),
                 coeff().getKStaminaPoolDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
+                coeff().getKStaminaPoolAstralAtrium() * bodySystems().getCardiacSystem().getAstralAtrium(),
+                coeff().getKStaminaPoolVigor() * trainingAndConditioning().getVigor()
         ));
     }
 
     public double getStaminaPool() {
         return getStaminaPoolBreakdown().total();
+    }
+
+    /** Pool Attribute view of Stamina Pool — see {@link PoolAttribute}. Current always equals Total for now. */
+    public PoolAttribute getStaminaPoolAttribute() {
+        return PoolAttribute.atFull(getStaminaPool());
     }
 
     /**
@@ -483,6 +493,11 @@ public class PlayableCharacter {
         return getMemoryPoolBreakdown().total();
     }
 
+    /** Pool Attribute view of Memory Pool — see {@link PoolAttribute}. Current always equals Total for now. */
+    public PoolAttribute getMemoryPoolAttribute() {
+        return PoolAttribute.atFull(getMemoryPool());
+    }
+
     /**
      * Reasoning = baseline + kReasoningSynapsis x (SynapsisQuality-5) - kReasoningRelativist x
      * hasRelativist - kReasoningIliterate x hasIliterate + kReasoningPhilosopher x hasPhilosopher.
@@ -549,6 +564,11 @@ public class PlayableCharacter {
 
     public double getMentalHealthPool() {
         return getMentalHealthPoolBreakdown().total();
+    }
+
+    /** Pool Attribute view of Mental Health Pool — see {@link PoolAttribute}. Current always equals Total for now. */
+    public PoolAttribute getMentalHealthPoolAttribute() {
+        return PoolAttribute.atFull(getMentalHealthPool());
     }
 
     /**
@@ -1016,6 +1036,31 @@ public class PlayableCharacter {
         return getManaPoolBreakdown().total();
     }
 
+    /** Pool Attribute view of Mana Pool — see {@link PoolAttribute}. Current always equals Total for now. */
+    public PoolAttribute getManaPoolAttribute() {
+        return PoolAttribute.atFull(getManaPool());
+    }
+
+    /**
+     * ChiPool = baseline + kChiPoolAstralAtrium x (AstralAtrium-6). Same neutral-6 arcane-organ
+     * shape as ManaPool/ArcaneOutput/Mediunity/PsyquismOutput/PsyquismDefense — resolves to
+     * exactly 12 at the human-default absent value (AstralAtrium=0).
+     */
+    public AttributeBreakdown getChiPoolBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKChiPoolAstralAtrium() * (bodySystems().getCardiacSystem().getAstralAtrium() - 6)
+        ));
+    }
+
+    public double getChiPool() {
+        return getChiPoolBreakdown().total();
+    }
+
+    /** Pool Attribute view of Chi Pool — see {@link PoolAttribute}. Current always equals Total for now. */
+    public PoolAttribute getChiPoolAttribute() {
+        return PoolAttribute.atFull(getChiPool());
+    }
+
     /** ArcaneOutput = baseline + kArcaneOutputVentriculum x (AstralVentriculum-6) + kArcaneOutputConservative x hasConservative. */
     public AttributeBreakdown getArcaneOutputBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
@@ -1260,6 +1305,31 @@ public class PlayableCharacter {
     }
 
     /**
+     * Hiding (Skills) = baseline - kHidingShapeAesthetics x |ShapeAesthetics-5|. Same
+     * inverted-V shape as Command/Discretion — only a neutral ShapeAesthetics is easy to hide.
+     */
+    public AttributeBreakdown getHidingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                -coeff().getKHidingShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)
+        ));
+    }
+
+    public double getHiding() {
+        return getHidingBreakdown().total();
+    }
+
+    /** Sneaking (Skills) = baseline + kSneakingAgility x (Agility-5). */
+    public AttributeBreakdown getSneakingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKSneakingAgility() * (neuralSystem().getAgility() - 5)
+        ));
+    }
+
+    public double getSneaking() {
+        return getSneakingBreakdown().total();
+    }
+
+    /**
      * Analysis (rpg-19, new) = baseline + floor(kAnalysisReasoning x (Reasoning-60)) +
      * kAnalysisDogEatDog x hasDogEatDog. The first Mind-pillar formula (after {@link #getBalance()})
      * to use another derived attribute — {@link #getReasoning()} — as an additive term.
@@ -1385,6 +1455,23 @@ public class PlayableCharacter {
     }
 
     /**
+     * ReactionSpeed (Cognitive) = baseline + kReactionSpeedNeuralDrive x (NeuralDrive-5) +
+     * kReactionSpeedReflexes x Reflexes. The Reflexes term reads the raw input value directly,
+     * not a deviation from a neutral point — it defaults to 0 (no training investment), so a
+     * fresh character's Reaction Speed is driven by Neural Drive alone until Reflexes is trained.
+     */
+    public AttributeBreakdown getReactionSpeedBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                coeff().getKReactionSpeedNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
+                coeff().getKReactionSpeedReflexes() * trainingAndConditioning().getReflexes()
+        ));
+    }
+
+    public double getReactionSpeed() {
+        return getReactionSpeedBreakdown().total();
+    }
+
+    /**
      * Purity (Supernatural) = baseline + kPurityCleanVessel x hasCleanVessel. No other
      * modifiers.
      */
@@ -1426,12 +1513,14 @@ public class PlayableCharacter {
     private PhysicalTraits physicalTraits() { return body.getPhysicalTraits(); }
     private SensorialOrgans sensorialOrgans() { return body.getPhysicalTraits().getSensorialOrgans(); }
     private BodyStructure bodyStructure() { return body.getPhysicalTraits().getBodyStructure(); }
+    private TrainingAndConditioning trainingAndConditioning() { return body.getPhysicalTraits().getTrainingAndConditioning(); }
     private BodyCoefficients coeff() { return body.getCoefficients(); }
     private Values values() { return mind.getValues(); }
     private Erudition erudition() { return mind.getErudition(); }
     private Personality personality() { return mind.getPersonality(); }
     private Labours labours() { return mind.getLabours(); }
     private GeneralPersonality generalPersonality() { return mind.getGeneralPersonality(); }
+    private WeaponProficiencies weaponProficiencies() { return mind.getWeaponProficiencies(); }
 
     private boolean hasTrait(Trait trait) { return personality().hasTrait(trait); }
 

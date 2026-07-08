@@ -388,7 +388,7 @@ class PlayableCharacterTest {
         Genetics worstCase = new Genetics(5, 5, 5, 15, 3);
         BodyComposition composition = new BodyComposition(10, 15, 5, 5, 5, 9, 5);
         NeuralSystem neuralSystem = new NeuralSystem(5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0);
-        BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1, 0),
+        BodySystems bodySystems = new BodySystems(new BloodSystem(1, 3), new CardiacSystem(1, 0, 0),
                 new PulmonarySystem(1), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         Body body = Body.previewTemplate(new Biomechanics(worstCase, composition), bodySystems, PhysicalTraits.defaults());
         PlayableCharacter character = new PlayableCharacter("test", body);
@@ -484,7 +484,7 @@ class PlayableCharacterTest {
     void getDurability_higherSkinThickness_increasesDurability() {
         // skinThickness is immutable, so a thicker-skinned character needs its own preview body.
         BodyStructure thickSkin = new BodyStructure(4, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), thickSkin);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), thickSkin, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -545,7 +545,7 @@ class PlayableCharacterTest {
     @Test
     void getSight_higherEyesSensitivity_increasesSightOnlyNotHearingOrSmell() {
         SensorialOrgans sensorialOrgans = new SensorialOrgans(9, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults());
+        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults(), TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -558,7 +558,7 @@ class PlayableCharacterTest {
     @Test
     void getHearing_higherEarsSensitivity_increasesHearingOnlyNotSightOrSmell() {
         SensorialOrgans sensorialOrgans = new SensorialOrgans(5, 9, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults());
+        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults(), TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -571,7 +571,7 @@ class PlayableCharacterTest {
     @Test
     void getSmell_higherNoseSensitivity_increasesSmellOnlyNotSightOrHearing() {
         SensorialOrgans sensorialOrgans = new SensorialOrgans(5, 5, 9);
-        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults());
+        PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, BodyStructure.defaults(), TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -690,7 +690,7 @@ class PlayableCharacterTest {
         PlayableCharacter viaHippocampus = new PlayableCharacter("test", body);
 
         SensorialOrgans keenEyes = new SensorialOrgans(9, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(keenEyes, BodyStructure.defaults());
+        PhysicalTraits physicalTraits = new PhysicalTraits(keenEyes, BodyStructure.defaults(), TrainingAndConditioning.defaults());
         PlayableCharacter viaEyes = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
 
@@ -918,7 +918,7 @@ class PlayableCharacterTest {
     @Test
     void getPainThreshold_higherSkinThickness_increasesThreshold() {
         BodyStructure thickSkin = new BodyStructure(4, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), thickSkin);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), thickSkin, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -952,17 +952,17 @@ class PlayableCharacterTest {
         // Cellular health (added rpg-14) widens the old exact [20,100] bounds by +-8.
         NeuralSystem maxNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 0, 0); // immunity=9
         BodyStructure maxStructure = new BodyStructure(3, 5, 9); // cellularHealth=9
-        BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1, 0), PulmonarySystem.defaults(),
+        BodySystems maxSystems = new BodySystems(new BloodSystem(5, 1), new CardiacSystem(1, 0, 0), PulmonarySystem.defaults(),
                 maxNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
-        PhysicalTraits maxTraits = new PhysicalTraits(SensorialOrgans.defaults(), maxStructure);
+        PhysicalTraits maxTraits = new PhysicalTraits(SensorialOrgans.defaults(), maxStructure, TrainingAndConditioning.defaults());
         PlayableCharacter max = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), maxSystems, maxTraits));
 
         NeuralSystem minNeural = new NeuralSystem(5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5, 0, 0); // immunity=1
         BodyStructure minStructure = new BodyStructure(3, 5, 1); // cellularHealth=1
-        BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9, 0), PulmonarySystem.defaults(),
+        BodySystems minSystems = new BodySystems(new BloodSystem(5, 5), new CardiacSystem(9, 0, 0), PulmonarySystem.defaults(),
                 minNeural, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
-        PhysicalTraits minTraits = new PhysicalTraits(SensorialOrgans.defaults(), minStructure);
+        PhysicalTraits minTraits = new PhysicalTraits(SensorialOrgans.defaults(), minStructure, TrainingAndConditioning.defaults());
         PlayableCharacter min = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), minSystems, minTraits));
 
@@ -973,7 +973,7 @@ class PlayableCharacterTest {
     @Test
     void getPoisonResistance_higherCellularHealth_increasesResistance() {
         BodyStructure healthy = new BodyStructure(3, 5, 9);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -992,13 +992,13 @@ class PlayableCharacterTest {
     void getDiseaseResistance_atExtremes_reflectsTheAddedCellularHealthTerm() {
         // Cellular health (added rpg-14) widens the old exact [20,100] bounds by +-8.
         BodyStructure maxStructure = new BodyStructure(3, 5, 9);
-        PhysicalTraits maxTraits = new PhysicalTraits(SensorialOrgans.defaults(), maxStructure);
+        PhysicalTraits maxTraits = new PhysicalTraits(SensorialOrgans.defaults(), maxStructure, TrainingAndConditioning.defaults());
         Body max = Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), maxTraits);
         max.getBodySystems().getNeuralSystem().setImmunity(9);
         max.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(9);
 
         BodyStructure minStructure = new BodyStructure(3, 5, 1);
-        PhysicalTraits minTraits = new PhysicalTraits(SensorialOrgans.defaults(), minStructure);
+        PhysicalTraits minTraits = new PhysicalTraits(SensorialOrgans.defaults(), minStructure, TrainingAndConditioning.defaults());
         Body min = Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), minTraits);
         min.getBodySystems().getNeuralSystem().setImmunity(1);
         min.getBodySystems().getNeuralSystem().setAmygdalaAndCingulum(1);
@@ -1010,7 +1010,7 @@ class PlayableCharacterTest {
     @Test
     void getDiseaseResistance_higherCellularHealth_increasesResistance() {
         BodyStructure healthy = new BodyStructure(3, 5, 9);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -1056,7 +1056,7 @@ class PlayableCharacterTest {
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure humanMaxSkin = new BodyStructure(4, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), humanMaxSkin);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), humanMaxSkin, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(Genetics.defaults(), composition), bodySystems, physicalTraits));
 
@@ -1070,7 +1070,7 @@ class PlayableCharacterTest {
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), neuralSystem, HormonalGlandularSystem.defaults(), DigestiveSystem.defaults());
         BodyStructure raceMaxSkin = new BodyStructure(7, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), raceMaxSkin);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), raceMaxSkin, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(new Biomechanics(Genetics.defaults(), composition), bodySystems, physicalTraits));
 
@@ -1141,7 +1141,7 @@ class PlayableCharacterTest {
     @Test
     void getFoodPoisoningAlcoholResistance_higherCellularHealth_increasesResistance() {
         BodyStructure healthy = new BodyStructure(3, 5, 9);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), healthy, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -1234,7 +1234,7 @@ class PlayableCharacterTest {
         HormonalGlandularSystem lowHormone = new HormonalGlandularSystem(5, 5, 1, 0); // Tmod = 4
         BodySystems bodySystems = new BodySystems(BloodSystem.defaults(), CardiacSystem.defaults(),
                 PulmonarySystem.defaults(), NeuralSystem.defaults(), lowHormone, DigestiveSystem.defaults());
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), repulsive);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), repulsive, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), bodySystems, physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -1252,7 +1252,7 @@ class PlayableCharacterTest {
     @Test
     void getDiplomacy_higherShapeAestheticsOrProgesterone_increasesDiplomacy() {
         BodyStructure attractive = new BodyStructure(3, 9, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), attractive);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), attractive, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
@@ -1270,7 +1270,7 @@ class PlayableCharacterTest {
     @Test
     void getEnfactuation_currentlyEqualsDiplomacy_sinceBothShareTheSameInputsToday() {
         BodyStructure attractive = new BodyStructure(3, 9, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), attractive);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), attractive, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
 
@@ -1290,10 +1290,10 @@ class PlayableCharacterTest {
         BodyStructure attractive = new BodyStructure(3, 9, 5);
         PlayableCharacter repulsiveCharacter = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(),
-                        new PhysicalTraits(SensorialOrgans.defaults(), repulsive)));
+                        new PhysicalTraits(SensorialOrgans.defaults(), repulsive, TrainingAndConditioning.defaults())));
         PlayableCharacter attractiveCharacter = new PlayableCharacter("test",
                 Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(),
-                        new PhysicalTraits(SensorialOrgans.defaults(), attractive)));
+                        new PhysicalTraits(SensorialOrgans.defaults(), attractive, TrainingAndConditioning.defaults())));
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
         assertThat(repulsiveCharacter.getCommand()).isCloseTo(attractiveCharacter.getCommand(), within(TOLERANCE));
@@ -1372,13 +1372,13 @@ class PlayableCharacterTest {
         customize.accept(values);
         return new PlayableCharacter("test", Body.humanTemplate(),
                 Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
-                        GeneralPersonality.defaults()));
+                        GeneralPersonality.defaults(), WeaponProficiencies.defaults()));
     }
 
     private static PlayableCharacter withTrait(Values values, Trait trait) {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(),
                 Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
-                        GeneralPersonality.defaults()));
+                        GeneralPersonality.defaults(), WeaponProficiencies.defaults()));
         character.getMind().getPersonality().select(trait, character);
         return character;
     }
@@ -1485,10 +1485,10 @@ class PlayableCharacterTest {
     void getSurvivalSkills_withEcologyKnowledgeLevel_scalesPerPoint() {
         Mind mindLevelOne = Mind.previewTemplate(Values.defaults(),
                 new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1)), Personality.defaults(), Labours.defaults(),
-                GeneralPersonality.defaults());
+                GeneralPersonality.defaults(), WeaponProficiencies.defaults());
         Mind mindLevelTwo = Mind.previewTemplate(Values.defaults(),
                 new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 2)), Personality.defaults(), Labours.defaults(),
-                GeneralPersonality.defaults());
+                GeneralPersonality.defaults(), WeaponProficiencies.defaults());
         PlayableCharacter levelOne = new PlayableCharacter("test", Body.humanTemplate(), mindLevelOne);
         PlayableCharacter levelTwo = new PlayableCharacter("test", Body.humanTemplate(), mindLevelTwo);
 
@@ -1500,7 +1500,7 @@ class PlayableCharacterTest {
     void getAnimalCaring_withEcologyAndBiologyKnowledgeLevels_scalesPerPoint() {
         Mind mind = Mind.previewTemplate(Values.defaults(),
                 new Erudition(java.util.Map.of(Knowledge.ECOLOGY, 1, Knowledge.BIOLOGY, 1)), Personality.defaults(),
-                Labours.defaults(), GeneralPersonality.defaults());
+                Labours.defaults(), GeneralPersonality.defaults(), WeaponProficiencies.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), mind);
 
         assertThat(character.getAnimalCaring()).isCloseTo(64.0, within(TOLERANCE));
@@ -1722,7 +1722,7 @@ class PlayableCharacterTest {
     @Test
     void getCharmResistance_higherVanity_decreasesResistance() {
         Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
-                Labours.defaults(), new GeneralPersonality(9, 5));
+                Labours.defaults(), new GeneralPersonality(9, 5), WeaponProficiencies.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
 
@@ -1749,7 +1749,7 @@ class PlayableCharacterTest {
     @Test
     void getConcentration_higherFocus_increasesConcentration_higherCerebralCapacity_decreasesIt() {
         Mind focusedMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
-                Labours.defaults(), new GeneralPersonality(5, 9));
+                Labours.defaults(), new GeneralPersonality(5, 9), WeaponProficiencies.defaults());
         PlayableCharacter focused = new PlayableCharacter("test", Body.humanTemplate(), focusedMind);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
 
@@ -1786,7 +1786,7 @@ class PlayableCharacterTest {
     @Test
     void getEnfactuation_higherVanity_increasesEnfactuation() {
         Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
-                Labours.defaults(), new GeneralPersonality(9, 5));
+                Labours.defaults(), new GeneralPersonality(9, 5), WeaponProficiencies.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
 
@@ -1796,7 +1796,7 @@ class PlayableCharacterTest {
     @Test
     void getIntimidation_higherVanity_decreasesIntimidation() {
         Mind vainMind = Mind.previewTemplate(Values.defaults(), Erudition.defaults(), Personality.defaults(),
-                Labours.defaults(), new GeneralPersonality(9, 5));
+                Labours.defaults(), new GeneralPersonality(9, 5), WeaponProficiencies.defaults());
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), vainMind);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
 
@@ -1923,6 +1923,6 @@ class PlayableCharacterTest {
     private static PlayableCharacter characterWithMindValues(Values values) {
         return new PlayableCharacter("test", Body.humanTemplate(),
                 Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
-                        GeneralPersonality.defaults()));
+                        GeneralPersonality.defaults(), WeaponProficiencies.defaults()));
     }
 }

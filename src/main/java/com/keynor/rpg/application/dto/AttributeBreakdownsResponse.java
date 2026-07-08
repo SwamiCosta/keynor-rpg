@@ -95,6 +95,10 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("charmResistance", AttributeBreakdownResponse.from(character.getCharmResistanceBreakdown()));
         map.put("concentration", AttributeBreakdownResponse.from(character.getConcentrationBreakdown()));
         map.put("purity", AttributeBreakdownResponse.from(character.getPurityBreakdown()));
+        map.put("chiPool", AttributeBreakdownResponse.from(character.getChiPoolBreakdown()));
+        map.put("reactionSpeed", AttributeBreakdownResponse.from(character.getReactionSpeedBreakdown()));
+        map.put("hiding", AttributeBreakdownResponse.from(character.getHidingBreakdown()));
+        map.put("sneaking", AttributeBreakdownResponse.from(character.getSneakingBreakdown()));
         return new AttributeBreakdownsResponse(map);
     }
 }

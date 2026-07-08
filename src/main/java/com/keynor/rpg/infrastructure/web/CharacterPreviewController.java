@@ -32,6 +32,7 @@ public class CharacterPreviewController {
                 previewAttributesUseCase.calculate(biomechanics, request.body().bodySystems().toDomain(),
                         request.body().physicalTraits().toDomain(), request.mind().values().toDomain(),
                         request.mind().erudition().toDomain(), request.mind().personality().toDomain(),
-                        request.mind().labours().toDomain(), request.mind().generalPersonality().toDomain()));
+                        request.mind().labours().toDomain(), request.mind().generalPersonality().toDomain(),
+                        request.mind().weaponProficiencies().toDomain()));
     }
 }
