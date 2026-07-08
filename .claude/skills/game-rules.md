@@ -16,9 +16,7 @@ Conditions can add bonuses or penalties to the roll. Difficulty can also add bon
 
 **Example:** A character with 60 points in Survival Skills tries to start a fire by rubbing sticks together. They add 60 to the random roll. If the wood is wet, they might take a -40 penalty. If they have flint and steel, they might get a +20 bonus. Because it's a difficult activity, a further -10 penalty might apply.
 
-> **OPEN QUESTION — exact-100 result.** The rule as written says the total must *exceed* 100 ("ultrapassar 100"), meaning exactly 100 reads as a failure by the literal wording. Confirm this is intentional (no "success on a tie" case) before treating it as settled.
->
-> **OPEN QUESTION — critical results.** No rule is given for a natural 1 or a natural 100 on the random roll (no critical-success/critical-failure mechanic). Confirm whether one exists before a Doraxes ruling assumes either way.
+**There is no critical success or critical failure mechanic.** The random roll's raw value is never special-cased — a character who rolls a natural 1 but has enough bonus to exceed 100 succeeds exactly like anyone else who exceeds 100; a character who rolls a natural 100 but carries enough penalty to fall at or below 100 fails exactly like anyone else who does. Only the final total (after every bonus and penalty) against the fixed ">100" threshold matters — confirmed by the user 2026-07-08, resolving the prior open question about whether exactly 100 succeeds: it does not (the threshold is strictly ">100", not "≥100"), and there is no alternate "tie" outcome to consider since nothing is ever compared to the roll itself, only to 100.
 
 ### Contested tests
 
@@ -26,19 +24,17 @@ Two characters test against each other; bonuses or penalties can favor either si
 
 **Example:** A character tries to bluff another during a card game. They roll Discretion; the other rolls Behavior Reading. Both add their attribute to their own random roll, and whoever gets the higher total wins. Being drunk might penalize a character; heavy noise or distraction might affect either side.
 
-> **OPEN QUESTION — ties.** No rule is given for what happens when both totals are exactly equal. Confirm the tie-breaking rule (defender wins, re-roll, attacker wins, etc.) before a Doraxes ruling assumes one.
+**Ties are circumstantial, but the character *resisting* an effect wins by default.** When a contested test produces a numeric outcome that matters even on a loss (e.g. a graze), a tie can be resolved as a halved result rather than an outright win/loss. As a general rule, though, whichever side of the contest is *resisting* something is considered the winner on a tie. Example: a character resisting a mind-control effect succeeds if their result ties the mage casting it — the resister wins ties, not the initiator.
 
 ### Combined tests
 
-Some tests require combining attributes. Moving without being noticed might need Hiding, Sneaking, and Discretion combined; attacking an enemy might need Swing Power combined with Close Combat. In these cases an average is calculated between the values, and different weights can be applied to each value.
-
-> **OPEN QUESTION — what gets averaged, and when.** It is not specified whether the *attribute values* are averaged first and then a single random roll is added against the combined value, or whether *each attribute rolls its own random number independently* and the final results are averaged. These produce different probability curves and must be resolved before Doraxes can adjudicate a combined test consistently.
+Some tests require combining attributes. Moving without being noticed might need Hiding, Sneaking, and Discretion combined; attacking an enemy might need Swing Power combined with Close Combat. **Each attribute rolls its own random number independently — its own d100 plus that attribute — and the resulting totals are then averaged** (with different weights per attribute where the situation calls for it), not the raw attribute values averaged before a single roll. Confirmed by the user 2026-07-08.
 
 ### Assistance
 
-A character can be assisted by another while attempting a test, when the situation allows it. Assistance requires its own test, either in the same attribute or in a complementary one. How the values are combined depends on the situation — it can be an exact average or use different weights depending on who is more involved in the task. Synergy bonuses can apply here if the characters share a bond.
+A character can be assisted by another while attempting a test, when the situation allows it. Assistance requires its own test, either in the same attribute or in a complementary one. Each side's test rolls independently (own d100 plus own attribute, same convention as Combined tests above) and the results are then combined — an exact average, or different weights depending on who is more involved in the task, depending on the situation. Synergy bonuses can apply here if the characters share a bond.
 
-> **OPEN QUESTION — same ambiguity as combined tests, plus one more.** (1) Same value-vs-result averaging ambiguity as above. (2) Does the helper's own test need to independently succeed (>100) for the assistance to count, or is only the combined total checked against the threshold? (3) Synergy bonuses depend on the still-`*TODO*` Bonds section — expected to stay open until that section exists.
+> **OPEN QUESTION — helper's own success, and synergy.** Does the helper's own test need to independently succeed (>100) for the assistance to count, or is only the combined total checked against the threshold? Separately, synergy bonuses depend on the still-`*TODO*` Bonds section — expected to stay open until that section exists.
 
 ---
 
@@ -89,9 +85,11 @@ Every `Material` (see `keynor-rpg`'s `Material`/`DamageType` domain catalog) has
 
 ### Resolving a hit's damage value
 
+**An attack resolves in two steps: a hit check, then a damage value.** Before any damage is rolled, there is always a separate accuracy check against the target's Evasion (a contested test, per the Contested tests rule above) — an attack that doesn't land deals no damage at all. Only once a hit is confirmed does the damage value get resolved. Confirmed by the user 2026-07-08; the exact accuracy-check mechanics (which attribute the attacker rolls, how any weapon/situational modifiers apply) are pending — see `*TODO*` below.
+
 A damage value comes from either a test or a fixed value. Example: an axe swing uses a test combining Swing Power + Close Combat; a falling rock or a fired bullet has a fixed damage value. Damage tests do **not** follow the "success or failure" (>100) rule of an ordinary test — only the final total is applied directly. A character who rolls 70 and has +60 Swing Power deals 130 points of damage.
 
-> **OPEN QUESTION — hit resolution vs. damage resolution.** It is unclear whether landing a hit at all requires its own check (e.g. a contested test against the target's Evasion) before the damage total above is even rolled, or whether the "roll + Swing Power" example *is* the entire attack resolution (auto-hit, magnitude-only). This is a foundational gap — it decides whether melee/ranged attacks are one roll or two, and must be resolved before Doraxes can run combat.
+> `*TODO*` — the exact accuracy-check mechanics (attacker's attribute(s), modifiers) are not yet specified beyond "a contested test against Evasion." Do not invent the specific attribute pairing or modifier rules; wait for the user.
 
 ### Damage vs. resistance — outcome categories
 
@@ -101,7 +99,7 @@ Once a raw damage value and a target material/damage-type pair are known, a calc
 2. **Significant damage** — the damage overcomes the material's resistance and causes deformation or alteration: cuts, burns, bends, cracks, etc. The amount of deformation depends on the damage dealt. This is where negative effects begin to apply — a cut arm applies less force, a bent sword deals less damage, a shattered shield has lower durability, etc. Significant damage **accumulates**: a new instance of significant damage is added to the prior total to check whether the object's limit is exceeded.
 3. **Irreversible damage** — the final damage value exceeds the target's limit and it is completely destroyed: broken weapon blades, destroyed shields, severed limbs, etc. Afterward the object is no longer functional, or at minimum imposes a severe penalty when used in tests.
 
-> **OPEN QUESTION — the actual formula.** The three-category *outcome* is described, but the calculation that turns `(raw damage, Material.baseDurability, Material.getMultiplier(damageType))` into one of the three categories — and into a specific deformation/accumulation number for the Significant case — is not given anywhere. This is the single largest gap in the damage system: nothing here can be adjudicated numerically without it. Needs an explicit formula from the user before Doraxes (or any implementation) can apply it.
+> `*TODO*` — the three-category *outcome* is described above, but the calculation that turns `(raw damage, Material.baseDurability, Material.getMultiplier(damageType))` into one of the three categories — and into a specific deformation/accumulation number for the Significant case — is explicitly deferred by the user (2026-07-08) to a future delta. Do not invent this formula in the meantime.
 
 **Combined damage types:** an attack can combine more than one damage type, but each type is calculated separately. Example: an explosion might deal 30 Blunt, 40 Burning, and 20 Piercing (from shrapnel) — each application goes through its own resistance calculation, and the amounts that get through are summed to determine whether the total damage is Irrelevant, Significant, or Irreversible.
 
@@ -127,9 +125,23 @@ A steel sword strikes a bronze breastplate, and the damage (before resistance is
 - Sum RB and RA to get the total system resistance (**RT**), which determines which object receives the larger share of the divided damage.
 - Damage to the breastplate = `100 × (RA / RT)`. Damage to the sword = `100 × (RB / RT)`.
 
-Chop, Piercing, and Blunt always recoil as Blunt. Slice recoils as Corrosive.
+Recoil-type mapping (extended by the user 2026-07-08):
 
-> **OPEN QUESTION — recoil type for the remaining 5 damage types.** Only 4 of the 9 damage types have a stated recoil-damage-type mapping (Chop→Blunt, Piercing→Blunt, Blunt→Blunt, Slice→Corrosive). Burning, Frost, Corrosive, Tear, and Compress have no defined recoil type — confirm whether they recoil at all, and if so, as what.
+| Attacking type | Recoils as |
+|---|---|
+| Chop | Blunt |
+| Piercing | Blunt |
+| Blunt | Blunt |
+| Slice | Corrosive |
+| Burning | Frost |
+| Frost | Burning |
+| Tear | Compress |
+| Compress | Tear |
+| Corrosive | *(not yet specified)* |
+
+> `*TODO*` — Corrosive's own recoil type is still unspecified. Given the "skip when no object involved" rule just below, this may end up moot in practice (acid attacks may rarely involve a damageable attacking object), but don't assume that — wait for the user to confirm rather than inferring it from the pattern of the other 8.
+
+**In practice, recoil is calculated in only a minority of cases — skip it entirely whenever it doesn't apply.** Recoil only exists for impact- or friction-based attacks, i.e. attacks delivered through a physical object that itself can take damage. If the attack has no such object, there is nothing to apply recoil to and the recoil step is skipped outright — it is not "zero damage," it simply never runs. Example: a fireball deals Burning damage but has no recoil, because fire itself has no matter to damage.
 
 ---
 
@@ -141,7 +153,7 @@ Combat proceeds as an increasing time count. There is a count for each character
 
 **Example:** general count = 10, Character A's count = 11, Character B's count = 16. Nothing happens; general count increments. General count = 11, matching Character A — they act, choosing to move; the move takes 6 time units, so their count becomes 17. Nothing happens for 5 more units. Now the count is 16, matching Character B — they act, choosing to fire an arrow at Character A. And so on.
 
-> **OPEN QUESTION — action time-cost table.** No table exists anywhere mapping an actual action (attack, move 1 meter, reload, block, cast, etc.) to a number of time units. The "6 units" figure above is illustrative, not a real value. Without this table the timing system cannot be run at all — this is a foundational gap, alongside the damage-formula one above.
+> `*TODO*` — no table exists yet mapping an actual action (attack, move 1 meter, reload, block, cast, etc.) to a number of time units; the "6 units" figure above is illustrative, not a real value. The user has confirmed (2026-07-08) that an action's time cost will be **derived from the character's Speed**, with the exact formula to follow in a future delta. Do not invent the formula or any per-action values in the meantime — this remains a foundational gap until it lands.
 
 **Shared actions:** if two or more characters are tied on count, all of them choose their action and submit it simultaneously. This can be done secretly, so as not to grant an advantage, if they are opponents.
 
@@ -149,7 +161,7 @@ Combat proceeds as an increasing time count. There is a count for each character
 
 **Concurrent actions:** some actions can be combined, like walking and attacking, or blocking and counter-attacking. These combined actions require Agility tests. If executed, the longer action's duration is used for the time count.
 
-> **OPEN QUESTION — Agility test target and failure consequence.** No difficulty/threshold is given for the Agility test that gates a concurrent action, and no consequence is stated for failing it (does the combined action simply fail and only one sub-action resolves? does it cost extra time? does it fail entirely?).
+> `*TODO*` — the Agility test's difficulty and its failure consequence depend on which pair of actions is being combined, and will be defined per action rather than as one universal rule (confirmed by the user 2026-07-08). Do not invent a single universal threshold or consequence in the meantime — wait for the per-action definitions.
 
 **Actions available to everyone:**
 - **Lunge Attack** — the character makes a short forward movement (up to 2 meters) and an attack at the same time.
@@ -161,17 +173,19 @@ Combat proceeds as an increasing time count. There is a count for each character
 
 **Surprise:** if one or more characters are surprising another, they may take any number of actions — including attacks — until detected. At the moment of detection, the count starts at 0 for every character.
 
-> **OPEN QUESTION — detection trigger.** No rule states what determines when a surprised party notices the ambush (presumably a contested test — Hiding/Sneaking/Discretion vs. some perception attribute — but this is not spelled out here).
+**Detection is a contested test between whichever attributes fit the situation** — e.g. Hiding vs. Sight, Sneaking vs. Hearing, or Bluffing vs. Behavior Reading. Any attribute pairing that could plausibly let one side surprise an unaware other side is valid; this is not a fixed pair, it's chosen per situation. As already stated above, the moment a surprised, unaware target is struck, their surprise ends. Any other nearby enemy who can see or hear the one who was just struck also stops being surprised at that point. Confirmed by the user 2026-07-08.
 
 **Fatigue:** every action a character takes in combat costs stamina, drawn from the Stamina Pool as combat unfolds. When a character reaches a quarter of their total stamina or less, they are considered tired: their speed and strength become compromised, and they can only take an action if they have enough stamina to pay at least half that action's cost.
 
 **Example:** a character with 7 stamina remaining can take an action that costs 14 stamina, but not one that costs 15.
 
+**Tired penalty (confirmed by the user 2026-07-08): -25% on any physical test, -10% on any non-physical test.** Being tired doesn't only compromise the body — reasoning gets foggy and even casting spells becomes harder, hence the smaller but real penalty on non-physical tests too.
+
 When a character's stamina is driven to 0 or below, they are considered exhausted and cannot take any further action until stamina is restored, except for actions that don't consume stamina. A character automatically restores stamina while standing still; the rate is determined by their Stamina Recovery and how long they rest. The maximum stamina recoverable this way is one third of the character's total pool — recovering beyond that requires several minutes of rest after combat ends.
 
 **Actions that don't consume stamina:** walking (not running), blocking (only raising or moving the arms for protection — anything beyond that requires stamina), dropping or picking up small objects, drinking potions, etc.
 
-> **OPEN QUESTION — stamina-cost table, and the "compromised" magnitude.** Same gap as the time-cost table: no action has a stated stamina cost (the "14 stamina" example is illustrative, not a real value). Separately, "tired" is said to compromise speed and strength but by an unspecified amount (flat penalty? percentage? which attributes exactly?). Also unspecified: the exact formula relating Stamina Recovery + rest duration to stamina restored.
+> `*TODO*` — no action has a stated stamina cost yet (the "14 stamina" example above is illustrative, not a real value). The user has confirmed (2026-07-08) that, like the time-cost table, an action's stamina cost will be **derived from the character's Fatigue Resistance**, with the exact formula to follow in a future delta. The exact formula relating Stamina Recovery + rest duration to stamina restored is likewise still pending. Do not invent either in the meantime.
 
 ---
 
