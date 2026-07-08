@@ -344,6 +344,23 @@ Creativity             += 6×hasInventor
 
 Pure rename, no formula/weight change — `getMaxMovementSpeed()`/`getMaxMovementSpeedBreakdown()` → `getMovementSpeed()`/`getMovementSpeedBreakdown()`, `AttributesResponse.maxMovementSpeed` → `movementSpeed`, and the three coefficients `kMaxMovementSpeedLimbRatio`/`kMaxMovementSpeedMuscleDistribution`/`kMaxMovementSpeedHeight` → `kMovementSpeedLimbRatio`/`kMovementSpeedMuscleDistribution`/`kMovementSpeedHeight`. Every mention throughout this file (including inside the dated `rpg-11`/Delta V4 sections above, which still describe currently-true formula shapes in present tense, not frozen historical snapshots) was updated to the new name in the same delta.
 
+## Testing scope for formulas (reduced 2026-07-08)
+
+Earlier sections of this file describe a heavier testing convention from rpg-11 through rpg-14 — every new attribute got its own worst-case-combination test, several got `*_atExtremes_staysWithinTwentyToOneHundred`-style tests, and every floor decision was backed by a dedicated test proving the exact worst case. **That level of coverage is no longer required going forward.** Those historical sections are kept as-is (they accurately describe what those deltas actually shipped and why), not as a template to keep repeating.
+
+For any new formula or `BodyCoefficients` change, write:
+
+- **One test at every input's neutral/default value**, confirming the formula resolves to `baseline` (or the documented exception's own baseline/anchor) — this is the test that actually catches a wrong weight, sign, or wiring mistake.
+- **One direction-sanity test per term** (or one combined test covering all terms at once), confirming the attribute moves the correct way when its input moves off neutral — mainly guards against a flipped sign or a term wired to the wrong field.
+
+Do **not** default to also writing:
+
+- A worst-case/best-case combination test, unless a floor is actually being introduced (i.e., the worst case genuinely needs to be computed to decide whether `attributeFloor` applies — see the paragraph above). If a floor isn't needed, don't compute or test the worst case just to confirm that.
+- An exhaustive sweep across every input's full range, or an "extremes" test asserting the result stays inside some bound, unless the ticket specifically calls out a boundary behavior that needs locking down (e.g. `ThermalResistance`'s documented human-UI ceiling).
+- A separate test per coefficient value — the neutral-value and direction-sanity tests above already exercise every coefficient that's wired correctly.
+
+This applies to `PlayableCharacter` formulas and `BodyCoefficients` specifically. Domain-rule tests (prerequisites, point budgets, validation) and use-case/application-layer tests are unaffected by this section — keep testing those the same way (happy path + the specific rule being enforced), see `mind-pillar-traits-and-values.md`'s own note on this.
+
 ## Astral Atrium/Chi Pool, Pool Attributes, Training and Conditioning, 4 new attributes, Weapon Proficiencies (2026-07-07, rpg-20)
 
 ### Astral Atrium — a second, distinct arcane heart organ
@@ -397,4 +414,4 @@ Sneaking      = 60 + 1×(Agility-5)
 
 ## Extending this pattern
 
-When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`.
+When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`. See "Testing scope for formulas" above for what to actually write tests for.
