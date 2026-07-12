@@ -90,6 +90,10 @@ Same reduced policy as `additive-attribute-formulas.md`'s "Testing scope for for
 
 When adding a future leveled Mind group that should NOT share a point budget (unlike `Erudition`/`Labours`), follow `WeaponProficiencies`'s pattern: bounds-check only, no `getEffectivePoints`/`AttributePointBudget` involvement at all.
 
+## Knowledge catalog changes (rpg-21, 2026-07-08)
+
+`Knowledge.ALCHEMY_CHEMISTRY` renamed `CHEMISTRY` (pure rename, same `MATTER_STUDIES` group). Two new `ATHLETISM_AND_MARTIAL_ARTS` constants, `DANCING` and `FENCING`, join the pre-existing `ARCHERY` — all three now have real formula effects (`ARCHERY` had none before this delta). See `additive-attribute-formulas.md`'s rpg-21 section for the formula terms. No domain-model changes to `Knowledge`/`Erudition`/`KnowledgeGroup` themselves were needed beyond the enum constants — both classes are already generic over `Knowledge.values()`.
+
 ## Extending this pattern
 
 When adding a new `Trait` (personality): pick its linked `Values` concern, add the base/advanced pair to the matching `TraitGroup`, override `prerequisitesMet`/`applyForcedValue` on the base constant, and add real formula terms only for unconditional bonuses — situational effects go in `getDescription()` only. A concern-threshold trait (no forced value, gated by `>= N` instead of `== 1` or "base already selected") is also valid — see the section above.

@@ -105,9 +105,10 @@ public class PlayableCharacter {
 
     private AttributeBreakdown meanStrengthBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKMeanStrengthMuscleMass() * (composition().getMuscleMass() - 5),
-                coeff().getKMeanStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
-                coeff().getKMeanStrengthFiberType() * (composition().getDominantFiberType() - 5)
+                new AttributeBreakdown.Term("Muscle Mass", coeff().getKMeanStrengthMuscleMass() * (composition().getMuscleMass() - 5)),
+                new AttributeBreakdown.Term("Neuromuscular Efficiency", coeff().getKMeanStrengthNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)),
+                new AttributeBreakdown.Term("Fiber Type", coeff().getKMeanStrengthFiberType() * (composition().getDominantFiberType() - 5)),
+                new AttributeBreakdown.Term("Intensity", coeff().getKMeanStrengthIntensity() * trainingAndConditioning().getIntensity())
         ));
     }
 
@@ -127,10 +128,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getPushStrengthBreakdown() {
         return new AttributeBreakdown(meanStrength(), List.of(
-                coeff().getKPushStrengthLimbRatio() * (genetics().getLimbRatio() - 3),
-                coeff().getKPushStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5),
-                coeff().getKPushStrengthTendons() * (composition().getTendonsAndLigaments() - 5),
-                coeff().getKPushStrengthHeight() * (genetics().getHeight() - 7)
+                new AttributeBreakdown.Term("Limb Ratio", coeff().getKPushStrengthLimbRatio() * (genetics().getLimbRatio() - 3)),
+                new AttributeBreakdown.Term("Muscle Distribution", coeff().getKPushStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5)),
+                new AttributeBreakdown.Term("Tendons and Ligaments", coeff().getKPushStrengthTendons() * (composition().getTendonsAndLigaments() - 5)),
+                new AttributeBreakdown.Term("Height", coeff().getKPushStrengthHeight() * (genetics().getHeight() - 7))
         ));
     }
 
@@ -146,10 +147,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getLegDriveBreakdown() {
         return new AttributeBreakdown(meanStrength(), List.of(
-                coeff().getKLegDriveLimbRatio() * (genetics().getLimbRatio() - 3),
-                coeff().getKLegDriveMuscleDistribution() * (5 - composition().getMuscleDistribution()),
-                coeff().getKLegDriveTendons() * (composition().getTendonsAndLigaments() - 5),
-                coeff().getKLegDriveHeight() * (genetics().getHeight() - 7)
+                new AttributeBreakdown.Term("Limb Ratio", coeff().getKLegDriveLimbRatio() * (genetics().getLimbRatio() - 3)),
+                new AttributeBreakdown.Term("Muscle Distribution", coeff().getKLegDriveMuscleDistribution() * (5 - composition().getMuscleDistribution())),
+                new AttributeBreakdown.Term("Tendons and Ligaments", coeff().getKLegDriveTendons() * (composition().getTendonsAndLigaments() - 5)),
+                new AttributeBreakdown.Term("Height", coeff().getKLegDriveHeight() * (genetics().getHeight() - 7))
         ));
     }
 
@@ -163,8 +164,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getGripStrengthBreakdown() {
         return new AttributeBreakdown(meanStrength(), List.of(
-                coeff().getKGripStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5),
-                coeff().getKGripStrengthTendons() * (composition().getTendonsAndLigaments() - 5)
+                new AttributeBreakdown.Term("Muscle Distribution", coeff().getKGripStrengthMuscleDistribution() * (composition().getMuscleDistribution() - 5)),
+                new AttributeBreakdown.Term("Tendons and Ligaments", coeff().getKGripStrengthTendons() * (composition().getTendonsAndLigaments() - 5))
         ));
     }
 
@@ -179,8 +180,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getLiftStrengthBreakdown() {
         return new AttributeBreakdown(meanStrength(), List.of(
-                -coeff().getKLiftStrengthLimbRatio() * (genetics().getLimbRatio() - 3),
-                coeff().getKLiftStrengthTendons() * (composition().getTendonsAndLigaments() - 5)
+                new AttributeBreakdown.Term("Limb Ratio", -coeff().getKLiftStrengthLimbRatio() * (genetics().getLimbRatio() - 3)),
+                new AttributeBreakdown.Term("Tendons and Ligaments", coeff().getKLiftStrengthTendons() * (composition().getTendonsAndLigaments() - 5))
         ));
     }
 
@@ -219,10 +220,11 @@ public class PlayableCharacter {
         double massPenalty = Math.floor(
                 (getSymbolicTotalMass() - coeff().getKSpeedMassNeutral()) / coeff().getKSpeedMassDivisor());
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSpeedNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
-                coeff().getKSpeedMuscleMass() * (composition().getMuscleMass() - 5),
-                coeff().getKSpeedFiberType() * (composition().getDominantFiberType() - 5),
-                -massPenalty
+                new AttributeBreakdown.Term("Neuromuscular Efficiency", coeff().getKSpeedNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)),
+                new AttributeBreakdown.Term("Muscle Mass", coeff().getKSpeedMuscleMass() * (composition().getMuscleMass() - 5)),
+                new AttributeBreakdown.Term("Fiber Type", coeff().getKSpeedFiberType() * (composition().getDominantFiberType() - 5)),
+                new AttributeBreakdown.Term("Mass Penalty", -massPenalty),
+                new AttributeBreakdown.Term("Intensity", coeff().getKSpeedIntensity() * trainingAndConditioning().getIntensity())
         ));
     }
 
@@ -238,9 +240,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getMovementSpeedBreakdown() {
         return new AttributeBreakdown(getSpeed(), List.of(
-                coeff().getKMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3),
-                -coeff().getKMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5),
-                coeff().getKMovementSpeedHeight() * (genetics().getHeight() - 7)
+                new AttributeBreakdown.Term("Limb Ratio", coeff().getKMovementSpeedLimbRatio() * (genetics().getLimbRatio() - 3)),
+                new AttributeBreakdown.Term("Muscle Distribution", -coeff().getKMovementSpeedMuscleDistribution() * (composition().getMuscleDistribution() - 5)),
+                new AttributeBreakdown.Term("Height", coeff().getKMovementSpeedHeight() * (genetics().getHeight() - 7))
         ));
     }
 
@@ -260,14 +262,14 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getStaminaPoolBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKStaminaPoolPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
-                coeff().getKStaminaPoolCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
-                coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
-                -coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5),
-                coeff().getKStaminaPoolDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                coeff().getKStaminaPoolAstralAtrium() * bodySystems().getCardiacSystem().getAstralAtrium(),
-                coeff().getKStaminaPoolVigor() * trainingAndConditioning().getVigor()
+                new AttributeBreakdown.Term("Pulmonary Capacity", coeff().getKStaminaPoolPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)),
+                new AttributeBreakdown.Term("Cardiac Output", coeff().getKStaminaPoolCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)),
+                new AttributeBreakdown.Term("Oxygen Carrying Capacity", coeff().getKStaminaPoolOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)),
+                new AttributeBreakdown.Term("Fiber Type", -coeff().getKStaminaPoolFiberType() * (composition().getDominantFiberType() - 5)),
+                new AttributeBreakdown.Term("Digestive Absorption", coeff().getKStaminaPoolDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)),
+                new AttributeBreakdown.Term("Astral Atrium", coeff().getKStaminaPoolAstralAtrium() * bodySystems().getCardiacSystem().getAstralAtrium()),
+                new AttributeBreakdown.Term("Vigor", coeff().getKStaminaPoolVigor() * trainingAndConditioning().getVigor())
         ));
     }
 
@@ -293,16 +295,16 @@ public class PlayableCharacter {
         double massPenalty = Math.floor((getSymbolicTotalMass() - coeff().getKFatigueResistanceMassNeutral())
                 / coeff().getKFatigueResistanceMassDivisor());
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKFatigueResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
-                coeff().getKFatigueResistancePulmonary()
-                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
-                coeff().getKFatigueResistanceOxygen()
-                        * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
-                -coeff().getKFatigueResistanceNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5),
-                -massPenalty,
-                -coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5),
-                coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
-                coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalGlandularSystem().getThyroid() - 5)
+                new AttributeBreakdown.Term("Cardiac Output", coeff().getKFatigueResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)),
+                new AttributeBreakdown.Term("Pulmonary Capacity", coeff().getKFatigueResistancePulmonary()
+                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)),
+                new AttributeBreakdown.Term("Oxygen Carrying Capacity", coeff().getKFatigueResistanceOxygen()
+                        * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)),
+                new AttributeBreakdown.Term("Neuromuscular Efficiency", -coeff().getKFatigueResistanceNeuromuscular() * (neuralSystem().getNeuromuscularEfficiency() - 5)),
+                new AttributeBreakdown.Term("Mass Penalty", -massPenalty),
+                new AttributeBreakdown.Term("Muscle Mass", -coeff().getKFatigueResistanceMuscleMass() * (composition().getMuscleMass() - 5)),
+                new AttributeBreakdown.Term("Hypothalamus", coeff().getKFatigueResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)),
+                new AttributeBreakdown.Term("Thyroid", coeff().getKFatigueResistanceThyroid() * (bodySystems().getHormonalGlandularSystem().getThyroid() - 5))
         ));
     }
 
@@ -317,11 +319,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getStaminaRecoveryBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKStaminaRecoveryOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5),
-                coeff().getKStaminaRecoveryPulmonary()
-                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5),
-                coeff().getKStaminaRecoveryCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
-                -coeff().getKStaminaRecoveryFiberType() * (composition().getDominantFiberType() - 5)
+                new AttributeBreakdown.Term("Oxygen Carrying Capacity", coeff().getKStaminaRecoveryOxygen() * (bodySystems().getBloodSystem().getOxygenCarryingCapacity() - 5)),
+                new AttributeBreakdown.Term("Pulmonary Capacity", coeff().getKStaminaRecoveryPulmonary()
+                        * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)),
+                new AttributeBreakdown.Term("Cardiac Output", coeff().getKStaminaRecoveryCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)),
+                new AttributeBreakdown.Term("Fiber Type", -coeff().getKStaminaRecoveryFiberType() * (composition().getDominantFiberType() - 5))
         ));
     }
 
@@ -330,23 +332,41 @@ public class PlayableCharacter {
     }
 
     /**
-     * Durability = baseline + kDurabilityBoneDensity x (BoneDensity-5) + kDurabilityMesomorphy
-     * x (Mesomorphy-5) + kDurabilityBodyFat x (BodyFat-3) - kDurabilityFlexibility x
-     * (Flexibility-5) + kDurabilitySkin x (SkinThickness-3). Note BodyFat's own neutral is 3,
-     * not 5, same as SkinThickness's.
+     * SoftTissueDurability (rpg-21, replaces the old unified Durability outright) = 10 +
+     * kSoftTissueDurabilityMesomorphy x (Mesomorphy-5) + kSoftTissueDurabilityBodyFat x
+     * (BodyFat-3) - kSoftTissueDurabilityFlexibility x (Flexibility-5) +
+     * kSoftTissueDurabilitySkin x (SkinThickness-3) + kSoftTissueDurabilityResilience x
+     * Resilience. Unlike every other additive-standard attribute, its baseline is 10, not 60 —
+     * per explicit user spec. Floored: the worst-case combination (Mesomorphy=1, BodyFat=1,
+     * Flexibility=9, SkinThickness=1, Resilience=0) lands at -2, below attributeFloor.
      */
-    public AttributeBreakdown getDurabilityBreakdown() {
-        return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKDurabilityBoneDensity() * (composition().getBoneDensity() - 5),
-                coeff().getKDurabilityMesomorphy() * (genetics().getMesomorphy() - 5),
-                coeff().getKDurabilityBodyFat() * (composition().getBodyFat() - 3),
-                -coeff().getKDurabilityFlexibility() * (composition().getFlexibility() - 5),
-                coeff().getKDurabilitySkin() * (bodyStructure().getSkinThickness() - 3)
+    public AttributeBreakdown getSoftTissueDurabilityBreakdown() {
+        return new AttributeBreakdown(coeff().getSoftTissueDurabilityBaseline(), List.of(
+                new AttributeBreakdown.Term("Mesomorphy", coeff().getKSoftTissueDurabilityMesomorphy() * (genetics().getMesomorphy() - 5)),
+                new AttributeBreakdown.Term("Body Fat", coeff().getKSoftTissueDurabilityBodyFat() * (composition().getBodyFat() - 3)),
+                new AttributeBreakdown.Term("Flexibility", -coeff().getKSoftTissueDurabilityFlexibility() * (composition().getFlexibility() - 5)),
+                new AttributeBreakdown.Term("Skin Thickness", coeff().getKSoftTissueDurabilitySkin() * (bodyStructure().getSkinThickness() - 3)),
+                new AttributeBreakdown.Term("Resilience", coeff().getKSoftTissueDurabilityResilience() * trainingAndConditioning().getResilience())
         ));
     }
 
-    public double getDurability() {
-        return getDurabilityBreakdown().total();
+    public double getSoftTissueDurability() {
+        return floor(getSoftTissueDurabilityBreakdown().total());
+    }
+
+    /**
+     * BoneDurability (rpg-21, replaces the old unified Durability outright) = baseline +
+     * kBoneDurabilityBoneDensity x (BoneDensity-5). No floor needed — matches the old
+     * Durability's own bone term, which never needed one at the same weight (2).
+     */
+    public AttributeBreakdown getBoneDurabilityBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Bone Density", coeff().getKBoneDurabilityBoneDensity() * (composition().getBoneDensity() - 5))
+        ));
+    }
+
+    public double getBoneDurability() {
+        return getBoneDurabilityBreakdown().total();
     }
 
     // -------------------------------------------------------------------------
@@ -361,10 +381,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getSightBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSightEyesSensitivity() * (sensorialOrgans().getEyesSensitivity() - 5),
-                coeff().getKSightThalamus() * (neuralSystem().getThalamus() - 5),
-                coeff().getKSightNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKSightPmod() * progesteroneModifier()
+                new AttributeBreakdown.Term("Eyes Sensitivity", coeff().getKSightEyesSensitivity() * (sensorialOrgans().getEyesSensitivity() - 5)),
+                new AttributeBreakdown.Term("Thalamus", coeff().getKSightThalamus() * (neuralSystem().getThalamus() - 5)),
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKSightNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKSightPmod() * progesteroneModifier())
         ));
     }
 
@@ -378,10 +398,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getHearingBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKHearingEarsSensitivity() * (sensorialOrgans().getEarsSensitivity() - 5),
-                coeff().getKHearingThalamus() * (neuralSystem().getThalamus() - 5),
-                coeff().getKHearingNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKHearingPmod() * progesteroneModifier()
+                new AttributeBreakdown.Term("Ears Sensitivity", coeff().getKHearingEarsSensitivity() * (sensorialOrgans().getEarsSensitivity() - 5)),
+                new AttributeBreakdown.Term("Thalamus", coeff().getKHearingThalamus() * (neuralSystem().getThalamus() - 5)),
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKHearingNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKHearingPmod() * progesteroneModifier())
         ));
     }
 
@@ -395,10 +415,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getSmellBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSmellNoseSensitivity() * (sensorialOrgans().getNoseSensitivity() - 5),
-                coeff().getKSmellThalamus() * (neuralSystem().getThalamus() - 5),
-                coeff().getKSmellNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKSmellPmod() * progesteroneModifier()
+                new AttributeBreakdown.Term("Nose Sensitivity", coeff().getKSmellNoseSensitivity() * (sensorialOrgans().getNoseSensitivity() - 5)),
+                new AttributeBreakdown.Term("Thalamus", coeff().getKSmellThalamus() * (neuralSystem().getThalamus() - 5)),
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKSmellNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKSmellPmod() * progesteroneModifier())
         ));
     }
 
@@ -413,9 +433,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getEvasionBreakdown() {
         return new AttributeBreakdown(getSpeed(), List.of(
-                coeff().getKEvasionAgility() * (neuralSystem().getAgility() - 5),
-                coeff().getKEvasionNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKEvasionFlexibility() * (composition().getFlexibility() - 5)
+                new AttributeBreakdown.Term("Agility", coeff().getKEvasionAgility() * (neuralSystem().getAgility() - 5)),
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKEvasionNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Flexibility", coeff().getKEvasionFlexibility() * (composition().getFlexibility() - 5)),
+                new AttributeBreakdown.Term("Coordination", coeff().getKEvasionCoordination() * trainingAndConditioning().getCoordination()),
+                new AttributeBreakdown.Term("Dancing", coeff().getKEvasionDancing() * erudition().getLevel(Knowledge.DANCING))
         ));
     }
 
@@ -429,8 +451,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getAcrobaticsBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKAcrobaticsAgility() * (neuralSystem().getAgility() - 5),
-                coeff().getKAcrobaticsFlexibility() * (composition().getFlexibility() - 5)
+                new AttributeBreakdown.Term("Agility", coeff().getKAcrobaticsAgility() * (neuralSystem().getAgility() - 5)),
+                new AttributeBreakdown.Term("Flexibility", coeff().getKAcrobaticsFlexibility() * (composition().getFlexibility() - 5)),
+                new AttributeBreakdown.Term("Coordination", coeff().getKAcrobaticsCoordination() * trainingAndConditioning().getCoordination()),
+                new AttributeBreakdown.Term("Dancing", coeff().getKAcrobaticsDancing() * erudition().getLevel(Knowledge.DANCING))
         ));
     }
 
@@ -444,9 +468,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getMeleeAccuracyBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5),
-                coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5),
-                coeff().getKMeleeAccuracyDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG))
+                new AttributeBreakdown.Term("Precision", coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5)),
+                new AttributeBreakdown.Term("Agility", coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5)),
+                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKMeleeAccuracyDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG)))
         ));
     }
 
@@ -461,9 +485,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getAimBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKAimPrecision() * (neuralSystem().getPrecision() - 5),
-                coeff().getKAimThalamus() * (neuralSystem().getThalamus() - 5),
-                coeff().getKAimDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG))
+                new AttributeBreakdown.Term("Precision", coeff().getKAimPrecision() * (neuralSystem().getPrecision() - 5)),
+                new AttributeBreakdown.Term("Thalamus", coeff().getKAimThalamus() * (neuralSystem().getThalamus() - 5)),
+                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKAimDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG))),
+                new AttributeBreakdown.Term("Archery", coeff().getKAimArchery() * erudition().getLevel(Knowledge.ARCHERY)),
+                new AttributeBreakdown.Term("Shooting", coeff().getKAimShooting() * trainingAndConditioning().getShooting())
         ));
     }
 
@@ -482,10 +508,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getMemoryPoolBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKMemoryPoolCerebral() * (neuralSystem().getCerebralCapacity() - 5),
-                coeff().getKMemoryPoolHippocampus() * (neuralSystem().getHippocampus() - 5),
-                coeff().getKMemoryPoolIliterate() * flag(hasTrait(Trait.ILLITERATE)),
-                coeff().getKMemoryPoolPastEraser() * flag(hasTrait(Trait.PAST_ERASER))
+                new AttributeBreakdown.Term("Cerebral Capacity", coeff().getKMemoryPoolCerebral() * (neuralSystem().getCerebralCapacity() - 5)),
+                new AttributeBreakdown.Term("Hippocampus", coeff().getKMemoryPoolHippocampus() * (neuralSystem().getHippocampus() - 5)),
+                new AttributeBreakdown.Term("Illiterate", coeff().getKMemoryPoolIliterate() * flag(hasTrait(Trait.ILLITERATE))),
+                new AttributeBreakdown.Term("Past Eraser", coeff().getKMemoryPoolPastEraser() * flag(hasTrait(Trait.PAST_ERASER)))
         ));
     }
 
@@ -506,10 +532,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getReasoningBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5),
-                -coeff().getKReasoningRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKReasoningIliterate() * flag(hasTrait(Trait.ILLITERATE)),
-                coeff().getKReasoningPhilosopher() * flag(hasTrait(Trait.PHILOSOPHER))
+                new AttributeBreakdown.Term("Synapsis Quality", coeff().getKReasoningSynapsis() * (neuralSystem().getSynapsisQuality() - 5)),
+                new AttributeBreakdown.Term("Relativist", -coeff().getKReasoningRelativist() * flag(hasTrait(Trait.RELATIVIST))),
+                new AttributeBreakdown.Term("Illiterate", -coeff().getKReasoningIliterate() * flag(hasTrait(Trait.ILLITERATE))),
+                new AttributeBreakdown.Term("Philosopher", coeff().getKReasoningPhilosopher() * flag(hasTrait(Trait.PHILOSOPHER)))
         ));
     }
 
@@ -526,9 +552,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getShortMemoryBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5),
-                coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5),
-                coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5)
+                new AttributeBreakdown.Term("Cerebral Capacity", coeff().getKShortMemoryCerebral() * (neuralSystem().getCerebralCapacity() - 5)),
+                new AttributeBreakdown.Term("Synapsis Quality", coeff().getKShortMemorySynapsis() * (neuralSystem().getSynapsisQuality() - 5)),
+                new AttributeBreakdown.Term("Hippocampus", coeff().getKShortMemoryHippocampus() * (neuralSystem().getHippocampus() - 5))
         ));
     }
 
@@ -542,11 +568,11 @@ public class PlayableCharacter {
      * Values-trait terms afterward without one polluting the other (Nihilist, for example,
      * penalizes the two attributes by different amounts, so it cannot be a single shared term).
      */
-    private List<Double> mentalHealthCoreTerms() {
-        List<Double> terms = new ArrayList<>();
-        terms.add(-coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5));
-        terms.add(-coeff().getKMentalHealthTmod() * testosteroneModifier());
-        terms.add(coeff().getKMentalHealthPmod() * progesteroneModifier());
+    private List<AttributeBreakdown.Term> mentalHealthCoreTerms() {
+        List<AttributeBreakdown.Term> terms = new ArrayList<>();
+        terms.add(new AttributeBreakdown.Term("Amygdala and Cingulum", -coeff().getKMentalHealthAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)));
+        terms.add(new AttributeBreakdown.Term("Testosterone Modifier", -coeff().getKMentalHealthTmod() * testosteroneModifier()));
+        terms.add(new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKMentalHealthPmod() * progesteroneModifier()));
         return terms;
     }
 
@@ -556,9 +582,9 @@ public class PlayableCharacter {
      * hasPracticalist - kMentalHealthNihilist x hasNihilist (rpg-19 Values-trait terms).
      */
     public AttributeBreakdown getMentalHealthPoolBreakdown() {
-        List<Double> terms = mentalHealthCoreTerms();
-        terms.add(coeff().getKMentalHealthPracticalist() * flag(hasTrait(Trait.PRACTICALIST)));
-        terms.add(-coeff().getKMentalHealthNihilist() * flag(hasTrait(Trait.NIHILIST)));
+        List<AttributeBreakdown.Term> terms = mentalHealthCoreTerms();
+        terms.add(new AttributeBreakdown.Term("Practicalist", coeff().getKMentalHealthPracticalist() * flag(hasTrait(Trait.PRACTICALIST))));
+        terms.add(new AttributeBreakdown.Term("Nihilist", -coeff().getKMentalHealthNihilist() * flag(hasTrait(Trait.NIHILIST))));
         return new AttributeBreakdown(coeff().getBaseline(), terms);
     }
 
@@ -581,10 +607,10 @@ public class PlayableCharacter {
      * {@link #mentalHealthCoreTerms()}) rather than shared wholesale.
      */
     public AttributeBreakdown getWillBreakdown() {
-        List<Double> terms = mentalHealthCoreTerms();
-        terms.add(coeff().getKWillRelativist() * flag(hasTrait(Trait.RELATIVIST)));
-        terms.add(coeff().getKWillPracticalist() * flag(hasTrait(Trait.PRACTICALIST)));
-        terms.add(-coeff().getKWillNihilist() * flag(hasTrait(Trait.NIHILIST)));
+        List<AttributeBreakdown.Term> terms = mentalHealthCoreTerms();
+        terms.add(new AttributeBreakdown.Term("Relativist", coeff().getKWillRelativist() * flag(hasTrait(Trait.RELATIVIST))));
+        terms.add(new AttributeBreakdown.Term("Practicalist", coeff().getKWillPracticalist() * flag(hasTrait(Trait.PRACTICALIST))));
+        terms.add(new AttributeBreakdown.Term("Nihilist", -coeff().getKWillNihilist() * flag(hasTrait(Trait.NIHILIST))));
         return new AttributeBreakdown(coeff().getBaseline(), terms);
     }
 
@@ -608,9 +634,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getBalanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKBalanceThalamus() * (neuralSystem().getThalamus() - 5),
-                coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKBalanceLegDrive() * (getLegDrive() - 60)
+                new AttributeBreakdown.Term("Thalamus", coeff().getKBalanceThalamus() * (neuralSystem().getThalamus() - 5)),
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKBalanceNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Leg Drive", coeff().getKBalanceLegDrive() * (getLegDrive() - 60)),
+                new AttributeBreakdown.Term("Coordination", coeff().getKBalanceCoordination() * trainingAndConditioning().getCoordination()),
+                new AttributeBreakdown.Term("Dancing", coeff().getKBalanceDancing() * erudition().getLevel(Knowledge.DANCING))
         ));
     }
 
@@ -624,8 +652,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getStressResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                -coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalGlandularSystem().getAdrenalGlands() - 5)
+                new AttributeBreakdown.Term("Amygdala and Cingulum", -coeff().getKStressResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)),
+                new AttributeBreakdown.Term("Adrenal Glands", -coeff().getKStressResistanceAdrenal() * (bodySystems().getHormonalGlandularSystem().getAdrenalGlands() - 5))
         ));
     }
 
@@ -644,9 +672,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getAngerResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKAngerResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                coeff().getKAngerResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST)),
-                -coeff().getKAngerResistanceBellicose() * flag(hasTrait(Trait.BELLICOSE))
+                new AttributeBreakdown.Term("Amygdala and Cingulum", -coeff().getKAngerResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)),
+                new AttributeBreakdown.Term("Practicalist", coeff().getKAngerResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST))),
+                new AttributeBreakdown.Term("Bellicose", -coeff().getKAngerResistanceBellicose() * flag(hasTrait(Trait.BELLICOSE)))
         ));
     }
 
@@ -663,9 +691,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getFearResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKFearResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                coeff().getKFearResistanceSelfSacrifice() * flag(hasTrait(Trait.SELF_SACRIFICE)),
-                coeff().getKFearResistanceSuicidal() * flag(hasTrait(Trait.SUICIDAL))
+                new AttributeBreakdown.Term("Amygdala and Cingulum", -coeff().getKFearResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)),
+                new AttributeBreakdown.Term("Self Sacrifice", coeff().getKFearResistanceSelfSacrifice() * flag(hasTrait(Trait.SELF_SACRIFICE))),
+                new AttributeBreakdown.Term("Suicidal", coeff().getKFearResistanceSuicidal() * flag(hasTrait(Trait.SUICIDAL)))
         ));
     }
 
@@ -676,17 +704,19 @@ public class PlayableCharacter {
     /**
      * PainThreshold = baseline + kPainThresholdBodyFat x (BodyFat-3) + kPainThresholdSkin x
      * (SkinThickness-3) - kPainThresholdAmygdala x (AmygdalaAndCingulum-5) +
-     * kPainThresholdSelfSacrifice x hasSelfSacrifice (rpg-19). The design document wrote the
-     * BodyFat term as a deviation from 5; confirmed with the user that BodyFat's neutral is 3
-     * everywhere else in this codebase (e.g. {@link #getDurability()}), so this formula uses -3
-     * for consistency.
+     * kPainThresholdSelfSacrifice x hasSelfSacrifice (rpg-19) + kPainThresholdResilience x
+     * Resilience (rpg-21, raw-value term). The design document wrote the BodyFat term as a
+     * deviation from 5; confirmed with the user that BodyFat's neutral is 3 everywhere else in
+     * this codebase (e.g. {@link #getSoftTissueDurability()}), so this formula uses -3 for
+     * consistency.
      */
     public AttributeBreakdown getPainThresholdBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKPainThresholdBodyFat() * (composition().getBodyFat() - 3),
-                coeff().getKPainThresholdSkin() * (bodyStructure().getSkinThickness() - 3),
-                -coeff().getKPainThresholdAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                coeff().getKPainThresholdSelfSacrifice() * flag(hasTrait(Trait.SELF_SACRIFICE))
+                new AttributeBreakdown.Term("Body Fat", coeff().getKPainThresholdBodyFat() * (composition().getBodyFat() - 3)),
+                new AttributeBreakdown.Term("Skin Thickness", coeff().getKPainThresholdSkin() * (bodyStructure().getSkinThickness() - 3)),
+                new AttributeBreakdown.Term("Amygdala and Cingulum", -coeff().getKPainThresholdAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)),
+                new AttributeBreakdown.Term("Self Sacrifice", coeff().getKPainThresholdSelfSacrifice() * flag(hasTrait(Trait.SELF_SACRIFICE))),
+                new AttributeBreakdown.Term("Resilience", coeff().getKPainThresholdResilience() * trainingAndConditioning().getResilience())
         ));
     }
 
@@ -705,12 +735,12 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getPoisonResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5),
-                -coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5),
-                -coeff().getKPoisonResistanceBloodThickness()
-                        * (bodySystems().getBloodSystem().getBloodThickness() - 3),
-                coeff().getKPoisonResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5),
-                coeff().getKPoisonResistanceAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST))
+                new AttributeBreakdown.Term("Immunity", coeff().getKPoisonResistanceImmunity() * (neuralSystem().getImmunity() - 5)),
+                new AttributeBreakdown.Term("Cardiac Output", -coeff().getKPoisonResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)),
+                new AttributeBreakdown.Term("Blood Thickness", -coeff().getKPoisonResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)),
+                new AttributeBreakdown.Term("Cellular Health", coeff().getKPoisonResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5)),
+                new AttributeBreakdown.Term("Anti Naturalist", coeff().getKPoisonResistanceAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST)))
         ));
     }
 
@@ -725,10 +755,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getDiseaseResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5),
-                coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5),
-                coeff().getKDiseaseResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5),
-                coeff().getKDiseaseResistanceAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST))
+                new AttributeBreakdown.Term("Immunity", coeff().getKDiseaseResistanceImmunity() * (neuralSystem().getImmunity() - 5)),
+                new AttributeBreakdown.Term("Amygdala and Cingulum", coeff().getKDiseaseResistanceAmygdala() * (neuralSystem().getAmygdalaAndCingulum() - 5)),
+                new AttributeBreakdown.Term("Cellular Health", coeff().getKDiseaseResistanceCellularHealth() * (bodyStructure().getCellularHealth() - 5)),
+                new AttributeBreakdown.Term("Anti Naturalist", coeff().getKDiseaseResistanceAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST)))
         ));
     }
 
@@ -742,9 +772,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getBleedingResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKBleedingResistanceBloodThickness()
-                        * (bodySystems().getBloodSystem().getBloodThickness() - 3),
-                -coeff().getKBleedingResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5)
+                new AttributeBreakdown.Term("Blood Thickness", coeff().getKBleedingResistanceBloodThickness()
+                        * (bodySystems().getBloodSystem().getBloodThickness() - 3)),
+                new AttributeBreakdown.Term("Cardiac Output", -coeff().getKBleedingResistanceCardiac() * (bodySystems().getCardiacSystem().getCardiacOutput() - 5))
         ));
     }
 
@@ -764,9 +794,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getThermalResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKThermalResistanceSkin() * (bodyStructure().getSkinThickness() - 3),
-                coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3),
-                coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)
+                new AttributeBreakdown.Term("Skin Thickness", coeff().getKThermalResistanceSkin() * (bodyStructure().getSkinThickness() - 3)),
+                new AttributeBreakdown.Term("Body Fat", coeff().getKThermalResistanceBodyFat() * (composition().getBodyFat() - 3)),
+                new AttributeBreakdown.Term("Hypothalamus", coeff().getKThermalResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5))
         ));
     }
 
@@ -777,7 +807,7 @@ public class PlayableCharacter {
     /** BreathOutput = baseline + kBreathOutputPulmonary x (PulmonaryCapacity-5). */
     public AttributeBreakdown getBreathOutputBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKBreathOutputPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5)
+                new AttributeBreakdown.Term("Pulmonary Capacity", coeff().getKBreathOutputPulmonary() * (bodySystems().getPulmonarySystem().getPulmonaryCapacity() - 5))
         ));
     }
 
@@ -791,9 +821,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getDehydrationResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
-                coeff().getKDehydrationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5)
+                new AttributeBreakdown.Term("Hypothalamus", coeff().getKDehydrationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)),
+                new AttributeBreakdown.Term("Ketosis Efficiency", coeff().getKDehydrationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5))
         ));
     }
 
@@ -808,11 +838,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getStarvationResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKStarvationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5),
-                coeff().getKStarvationResistanceDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                coeff().getKStarvationResistanceKetosis()
-                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5)
+                new AttributeBreakdown.Term("Hypothalamus", coeff().getKStarvationResistanceHypothalamus() * (neuralSystem().getHypothalamus() - 5)),
+                new AttributeBreakdown.Term("Digestive Absorption", coeff().getKStarvationResistanceDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)),
+                new AttributeBreakdown.Term("Ketosis Efficiency", coeff().getKStarvationResistanceKetosis()
+                        * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5))
         ));
     }
 
@@ -829,12 +859,12 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getFoodPoisoningAlcoholResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5),
-                coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5),
-                coeff().getKFoodPoisoningCellularHealth() * (bodyStructure().getCellularHealth() - 5),
-                -coeff().getKFoodPoisoningDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                coeff().getKFoodPoisoningAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST))
+                new AttributeBreakdown.Term("Impurity Cleaning", coeff().getKFoodPoisoningImpurity() * (bodySystems().getDigestiveSystem().getImpurityCleaning() - 5)),
+                new AttributeBreakdown.Term("Immunity", coeff().getKFoodPoisoningImmunity() * (neuralSystem().getImmunity() - 5)),
+                new AttributeBreakdown.Term("Cellular Health", coeff().getKFoodPoisoningCellularHealth() * (bodyStructure().getCellularHealth() - 5)),
+                new AttributeBreakdown.Term("Digestive Absorption", -coeff().getKFoodPoisoningDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)),
+                new AttributeBreakdown.Term("Anti Naturalist", coeff().getKFoodPoisoningAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST)))
         ));
     }
 
@@ -900,12 +930,12 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getFatGainRateBreakdown() {
         return new AttributeBreakdown(0, List.of(
-                coeff().getKFatGainRateEndomorphy() * (genetics().getEndomorphy() - 5),
-                -coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5),
-                coeff().getKFatGainRateDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                -coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5),
-                -coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5)
+                new AttributeBreakdown.Term("Endomorphy", coeff().getKFatGainRateEndomorphy() * (genetics().getEndomorphy() - 5)),
+                new AttributeBreakdown.Term("Ectomorphy", -coeff().getKFatGainRateEctomorphy() * (genetics().getEctomorphy() - 5)),
+                new AttributeBreakdown.Term("Digestive Absorption", coeff().getKFatGainRateDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)),
+                new AttributeBreakdown.Term("Ketosis Efficiency", -coeff().getKFatGainRateKetosis() * (bodySystems().getDigestiveSystem().getKetosisEfficiency() - 5)),
+                new AttributeBreakdown.Term("Cellular Health", -coeff().getKFatGainRateCellularHealth() * (bodyStructure().getCellularHealth() - 5))
         ));
     }
 
@@ -921,11 +951,11 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getMuscleGainRateBreakdown() {
         return new AttributeBreakdown(0, List.of(
-                coeff().getKMuscleGainRateMesomorphy() * (genetics().getMesomorphy() - 5),
-                -coeff().getKMuscleGainRateEctomorphy() * (genetics().getEctomorphy() - 5),
-                coeff().getKMuscleGainRateDigestiveAbsorption()
-                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5),
-                coeff().getKMuscleGainRateTmod() * testosteroneModifier()
+                new AttributeBreakdown.Term("Mesomorphy", coeff().getKMuscleGainRateMesomorphy() * (genetics().getMesomorphy() - 5)),
+                new AttributeBreakdown.Term("Ectomorphy", -coeff().getKMuscleGainRateEctomorphy() * (genetics().getEctomorphy() - 5)),
+                new AttributeBreakdown.Term("Digestive Absorption", coeff().getKMuscleGainRateDigestiveAbsorption()
+                        * (bodySystems().getDigestiveSystem().getDigestiveAbsorption() - 5)),
+                new AttributeBreakdown.Term("Testosterone Modifier", coeff().getKMuscleGainRateTmod() * testosteroneModifier())
         ));
     }
 
@@ -946,13 +976,13 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getIntimidationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKIntimidationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKIntimidationTmod() * testosteroneModifier(),
-                coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral()),
-                coeff().getKIntimidationProfane() * flag(hasTrait(Trait.PROFANE)),
-                coeff().getKIntimidationBellicose() * flag(hasTrait(Trait.BELLICOSE)),
-                -coeff().getKIntimidationVanity() * (generalPersonality().getVanity() - 5),
-                -coeff().getKIntimidationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER))
+                new AttributeBreakdown.Term("Shape Aesthetics", -coeff().getKIntimidationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Testosterone Modifier", coeff().getKIntimidationTmod() * testosteroneModifier()),
+                new AttributeBreakdown.Term("Mass", coeff().getKIntimidationMass() * (getSymbolicTotalMass() - coeff().getKIntimidationMassNeutral())),
+                new AttributeBreakdown.Term("Profane", coeff().getKIntimidationProfane() * flag(hasTrait(Trait.PROFANE))),
+                new AttributeBreakdown.Term("Bellicose", coeff().getKIntimidationBellicose() * flag(hasTrait(Trait.BELLICOSE))),
+                new AttributeBreakdown.Term("Vanity", -coeff().getKIntimidationVanity() * (generalPersonality().getVanity() - 5)),
+                new AttributeBreakdown.Term("Peacekeeper", -coeff().getKIntimidationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER)))
         ));
     }
 
@@ -966,8 +996,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getDiplomacyBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKDiplomacyShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKDiplomacyPmod() * progesteroneModifier()
+                new AttributeBreakdown.Term("Shape Aesthetics", coeff().getKDiplomacyShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKDiplomacyPmod() * progesteroneModifier())
         ));
     }
 
@@ -985,13 +1015,13 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getEnfactuationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKEnfactuationPmod() * progesteroneModifier(),
-                coeff().getKEnfactuationRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKEnfactuationBellicose() * flag(hasTrait(Trait.BELLICOSE)),
-                coeff().getKEnfactuationVanity() * (generalPersonality().getVanity() - 5),
-                coeff().getKEnfactuationReliable() * flag(hasTrait(Trait.RELIABLE)),
-                coeff().getKEnfactuationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER))
+                new AttributeBreakdown.Term("Shape Aesthetics", coeff().getKEnfactuationShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Progesterone Modifier", coeff().getKEnfactuationPmod() * progesteroneModifier()),
+                new AttributeBreakdown.Term("Relativist", coeff().getKEnfactuationRelativist() * flag(hasTrait(Trait.RELATIVIST))),
+                new AttributeBreakdown.Term("Bellicose", -coeff().getKEnfactuationBellicose() * flag(hasTrait(Trait.BELLICOSE))),
+                new AttributeBreakdown.Term("Vanity", coeff().getKEnfactuationVanity() * (generalPersonality().getVanity() - 5)),
+                new AttributeBreakdown.Term("Reliable", coeff().getKEnfactuationReliable() * flag(hasTrait(Trait.RELIABLE))),
+                new AttributeBreakdown.Term("Peacekeeper", coeff().getKEnfactuationPeacekeeper() * flag(hasTrait(Trait.PEACEKEEPER)))
         ));
     }
 
@@ -1006,9 +1036,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getCommandBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKCommandShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKCommandDominant() * flag(hasTrait(Trait.DOMINANT)),
-                coeff().getKCommandPossessive() * flag(hasTrait(Trait.POSSESSIVE))
+                new AttributeBreakdown.Term("Shape Aesthetics", coeff().getKCommandShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Dominant", coeff().getKCommandDominant() * flag(hasTrait(Trait.DOMINANT))),
+                new AttributeBreakdown.Term("Possessive", coeff().getKCommandPossessive() * flag(hasTrait(Trait.POSSESSIVE)))
         ));
     }
 
@@ -1027,8 +1057,8 @@ public class PlayableCharacter {
     /** ManaPool = baseline + kManaPoolEpiphyseal x (SubtleEpiphysealGland-6) + kManaPoolConservative x hasConservative. */
     public AttributeBreakdown getManaPoolBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKManaPoolEpiphyseal() * (bodySystems().getHormonalGlandularSystem().getSubtleEpiphysealGland() - 6),
-                coeff().getKManaPoolConservative() * flag(hasTrait(Trait.CONSERVATIVE))
+                new AttributeBreakdown.Term("Subtle Epiphyseal Gland", coeff().getKManaPoolEpiphyseal() * (bodySystems().getHormonalGlandularSystem().getSubtleEpiphysealGland() - 6)),
+                new AttributeBreakdown.Term("Conservative", coeff().getKManaPoolConservative() * flag(hasTrait(Trait.CONSERVATIVE)))
         ));
     }
 
@@ -1048,7 +1078,7 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getChiPoolBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKChiPoolAstralAtrium() * (bodySystems().getCardiacSystem().getAstralAtrium() - 6)
+                new AttributeBreakdown.Term("Astral Atrium", coeff().getKChiPoolAstralAtrium() * (bodySystems().getCardiacSystem().getAstralAtrium() - 6))
         ));
     }
 
@@ -1064,8 +1094,8 @@ public class PlayableCharacter {
     /** ArcaneOutput = baseline + kArcaneOutputVentriculum x (AstralVentriculum-6) + kArcaneOutputConservative x hasConservative. */
     public AttributeBreakdown getArcaneOutputBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKArcaneOutputVentriculum() * (bodySystems().getCardiacSystem().getAstralVentriculum() - 6),
-                coeff().getKArcaneOutputConservative() * flag(hasTrait(Trait.CONSERVATIVE))
+                new AttributeBreakdown.Term("Astral Ventriculum", coeff().getKArcaneOutputVentriculum() * (bodySystems().getCardiacSystem().getAstralVentriculum() - 6)),
+                new AttributeBreakdown.Term("Conservative", coeff().getKArcaneOutputConservative() * flag(hasTrait(Trait.CONSERVATIVE)))
         ));
     }
 
@@ -1079,8 +1109,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getMediunityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKMediunityNoeticPlexus() * (neuralSystem().getNoeticPlexus() - 6),
-                -coeff().getKMediunityPagan() * flag(hasTrait(Trait.PAGAN))
+                new AttributeBreakdown.Term("Noetic Plexus", coeff().getKMediunityNoeticPlexus() * (neuralSystem().getNoeticPlexus() - 6)),
+                new AttributeBreakdown.Term("Pagan", -coeff().getKMediunityPagan() * flag(hasTrait(Trait.PAGAN)))
         ));
     }
 
@@ -1096,46 +1126,46 @@ public class PlayableCharacter {
     // AcademicConcern character is rattled by a destroyed library).
     // -------------------------------------------------------------------------
 
-    public AttributeBreakdown getSelfConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getEgo())); }
+    public AttributeBreakdown getSelfConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Ego", (double) values().getEgo()))); }
     public double getSelfConcern() { return getSelfConcernBreakdown().total(); }
 
-    public AttributeBreakdown getFriendshipConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getLoyalty())); }
+    public AttributeBreakdown getFriendshipConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Loyalty", (double) values().getLoyalty()))); }
     public double getFriendshipConcern() { return getFriendshipConcernBreakdown().total(); }
 
-    public AttributeBreakdown getOrderConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getOrganization())); }
+    public AttributeBreakdown getOrderConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Organization", (double) values().getOrganization()))); }
     public double getOrderConcern() { return getOrderConcernBreakdown().total(); }
 
-    public AttributeBreakdown getFreedomConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getFreedom())); }
+    public AttributeBreakdown getFreedomConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Freedom", (double) values().getFreedom()))); }
     public double getFreedomConcern() { return getFreedomConcernBreakdown().total(); }
 
-    public AttributeBreakdown getPatriotismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getSociety())); }
+    public AttributeBreakdown getPatriotismConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Society", (double) values().getSociety()))); }
     public double getPatriotismConcern() { return getPatriotismConcernBreakdown().total(); }
 
-    public AttributeBreakdown getSpiritualConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getDivinity())); }
+    public AttributeBreakdown getSpiritualConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Divinity", (double) values().getDivinity()))); }
     public double getSpiritualConcern() { return getSpiritualConcernBreakdown().total(); }
 
-    public AttributeBreakdown getPhilosophyConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getTruth())); }
+    public AttributeBreakdown getPhilosophyConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Truth", (double) values().getTruth()))); }
     public double getPhilosophyConcern() { return getPhilosophyConcernBreakdown().total(); }
 
-    public AttributeBreakdown getAcademicConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getKnowledge())); }
+    public AttributeBreakdown getAcademicConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Knowledge", (double) values().getKnowledge()))); }
     public double getAcademicConcern() { return getAcademicConcernBreakdown().total(); }
 
-    public AttributeBreakdown getEnvironmentalismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getNature())); }
+    public AttributeBreakdown getEnvironmentalismConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Nature", (double) values().getNature()))); }
     public double getEnvironmentalismConcern() { return getEnvironmentalismConcernBreakdown().total(); }
 
-    public AttributeBreakdown getMoralityConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getMorality())); }
+    public AttributeBreakdown getMoralityConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Morality", (double) values().getMorality()))); }
     public double getMoralityConcern() { return getMoralityConcernBreakdown().total(); }
 
-    public AttributeBreakdown getTraditionalismConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getTradition())); }
+    public AttributeBreakdown getTraditionalismConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Tradition", (double) values().getTradition()))); }
     public double getTraditionalismConcern() { return getTraditionalismConcernBreakdown().total(); }
 
-    public AttributeBreakdown getJusticeConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getJustice())); }
+    public AttributeBreakdown getJusticeConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Justice", (double) values().getJustice()))); }
     public double getJusticeConcern() { return getJusticeConcernBreakdown().total(); }
 
-    public AttributeBreakdown getProgressConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getProgress())); }
+    public AttributeBreakdown getProgressConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Progress", (double) values().getProgress()))); }
     public double getProgressConcern() { return getProgressConcernBreakdown().total(); }
 
-    public AttributeBreakdown getPeaceConcernBreakdown() { return new AttributeBreakdown(0, List.of((double) values().getPeace())); }
+    public AttributeBreakdown getPeaceConcernBreakdown() { return new AttributeBreakdown(0, List.of(new AttributeBreakdown.Term("Peace", (double) values().getPeace()))); }
     public double getPeaceConcern() { return getPeaceConcernBreakdown().total(); }
 
     // -------------------------------------------------------------------------
@@ -1157,10 +1187,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getSurvivalSkillsBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSurvivalSkillsEcology() * erudition().getLevel(Knowledge.ECOLOGY),
-                coeff().getKSurvivalSkillsExpatriated() * flag(hasTrait(Trait.EXPATRIATED)),
-                coeff().getKSurvivalSkillsAnarchist() * flag(hasTrait(Trait.ANARCHIST)),
-                coeff().getKSurvivalSkillsOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE))
+                new AttributeBreakdown.Term("Ecology", coeff().getKSurvivalSkillsEcology() * erudition().getLevel(Knowledge.ECOLOGY)),
+                new AttributeBreakdown.Term("Expatriated", coeff().getKSurvivalSkillsExpatriated() * flag(hasTrait(Trait.EXPATRIATED))),
+                new AttributeBreakdown.Term("Anarchist", coeff().getKSurvivalSkillsAnarchist() * flag(hasTrait(Trait.ANARCHIST))),
+                new AttributeBreakdown.Term("Outdoor Lifestyle", coeff().getKSurvivalSkillsOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE)))
         ));
     }
 
@@ -1175,10 +1205,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getAnimalCaringBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKAnimalCaringEcology() * erudition().getLevel(Knowledge.ECOLOGY),
-                coeff().getKAnimalCaringBiology() * erudition().getLevel(Knowledge.BIOLOGY),
-                -coeff().getKAnimalCaringAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST)),
-                coeff().getKAnimalCaringOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE))
+                new AttributeBreakdown.Term("Ecology", coeff().getKAnimalCaringEcology() * erudition().getLevel(Knowledge.ECOLOGY)),
+                new AttributeBreakdown.Term("Biology", coeff().getKAnimalCaringBiology() * erudition().getLevel(Knowledge.BIOLOGY)),
+                new AttributeBreakdown.Term("Anti Naturalist", -coeff().getKAnimalCaringAntiNaturalist() * flag(hasTrait(Trait.ANTI_NATURALIST))),
+                new AttributeBreakdown.Term("Outdoor Lifestyle", coeff().getKAnimalCaringOutdoorLifestyle() * flag(hasTrait(Trait.OUTDOOR_LIFESTYLE)))
         ));
     }
 
@@ -1192,9 +1222,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getManipulationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKManipulationDominant() * flag(hasTrait(Trait.DOMINANT)),
-                coeff().getKManipulationPossessive() * flag(hasTrait(Trait.POSSESSIVE)),
-                coeff().getKManipulationRelativist() * flag(hasTrait(Trait.RELATIVIST))
+                new AttributeBreakdown.Term("Dominant", coeff().getKManipulationDominant() * flag(hasTrait(Trait.DOMINANT))),
+                new AttributeBreakdown.Term("Possessive", coeff().getKManipulationPossessive() * flag(hasTrait(Trait.POSSESSIVE))),
+                new AttributeBreakdown.Term("Relativist", coeff().getKManipulationRelativist() * flag(hasTrait(Trait.RELATIVIST)))
         ));
     }
 
@@ -1205,7 +1235,7 @@ public class PlayableCharacter {
     /** BehaviorReading = baseline + kBehaviorReadingDogEatDog x hasDogEatDog. */
     public AttributeBreakdown getBehaviorReadingBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKBehaviorReadingDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG))
+                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKBehaviorReadingDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG)))
         ));
     }
 
@@ -1222,9 +1252,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getDiscretionBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKDiscretionShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5),
-                coeff().getKDiscretionLoneWolf() * flag(hasTrait(Trait.LONE_WOLF)),
-                coeff().getKDiscretionBackstabber() * flag(hasTrait(Trait.BACKSTABBER))
+                new AttributeBreakdown.Term("Shape Aesthetics", -coeff().getKDiscretionShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Lone Wolf", coeff().getKDiscretionLoneWolf() * flag(hasTrait(Trait.LONE_WOLF))),
+                new AttributeBreakdown.Term("Backstabber", coeff().getKDiscretionBackstabber() * flag(hasTrait(Trait.BACKSTABBER)))
         ));
     }
 
@@ -1239,7 +1269,7 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getBluffingBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKBluffingRealitic() * flag(hasTrait(Trait.REALITIC))
+                new AttributeBreakdown.Term("Realitic", -coeff().getKBluffingRealitic() * flag(hasTrait(Trait.REALITIC)))
         ));
     }
 
@@ -1255,10 +1285,10 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getFaithBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKFaithPagan() * flag(hasTrait(Trait.PAGAN)),
-                coeff().getKFaithRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                -coeff().getKFaithProfane() * flag(hasTrait(Trait.PROFANE)),
-                coeff().getKFaithReligionPractitioner() * flag(hasTrait(Trait.RELIGION_PRACTITIONER))
+                new AttributeBreakdown.Term("Pagan", -coeff().getKFaithPagan() * flag(hasTrait(Trait.PAGAN))),
+                new AttributeBreakdown.Term("Relativist", coeff().getKFaithRelativist() * flag(hasTrait(Trait.RELATIVIST))),
+                new AttributeBreakdown.Term("Profane", -coeff().getKFaithProfane() * flag(hasTrait(Trait.PROFANE))),
+                new AttributeBreakdown.Term("Religion Practitioner", coeff().getKFaithReligionPractitioner() * flag(hasTrait(Trait.RELIGION_PRACTITIONER)))
         ));
     }
 
@@ -1276,9 +1306,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getIllusionResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKIllusionResistanceRelativist() * flag(hasTrait(Trait.RELATIVIST)),
-                coeff().getKIllusionResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST)),
-                coeff().getKIllusionResistanceRealitic() * flag(hasTrait(Trait.REALITIC))
+                new AttributeBreakdown.Term("Relativist", -coeff().getKIllusionResistanceRelativist() * flag(hasTrait(Trait.RELATIVIST))),
+                new AttributeBreakdown.Term("Practicalist", coeff().getKIllusionResistancePracticalist() * flag(hasTrait(Trait.PRACTICALIST))),
+                new AttributeBreakdown.Term("Realitic", coeff().getKIllusionResistanceRealitic() * flag(hasTrait(Trait.REALITIC)))
         ));
     }
 
@@ -1294,9 +1324,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getCreativityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKCreativityOrphanMind() * flag(hasTrait(Trait.ORPHAN_MIND)),
-                coeff().getKCreativityPastEraser() * flag(hasTrait(Trait.PAST_ERASER)),
-                coeff().getKCreativityInventor() * flag(hasTrait(Trait.INVENTOR))
+                new AttributeBreakdown.Term("Orphan Mind", coeff().getKCreativityOrphanMind() * flag(hasTrait(Trait.ORPHAN_MIND))),
+                new AttributeBreakdown.Term("Past Eraser", coeff().getKCreativityPastEraser() * flag(hasTrait(Trait.PAST_ERASER))),
+                new AttributeBreakdown.Term("Inventor", coeff().getKCreativityInventor() * flag(hasTrait(Trait.INVENTOR)))
         ));
     }
 
@@ -1310,7 +1340,7 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getHidingBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKHidingShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5)
+                new AttributeBreakdown.Term("Shape Aesthetics", -coeff().getKHidingShapeAesthetics() * Math.abs(bodyStructure().getShapeAesthetics() - 5))
         ));
     }
 
@@ -1321,7 +1351,7 @@ public class PlayableCharacter {
     /** Sneaking (Skills) = baseline + kSneakingAgility x (Agility-5). */
     public AttributeBreakdown getSneakingBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKSneakingAgility() * (neuralSystem().getAgility() - 5)
+                new AttributeBreakdown.Term("Agility", coeff().getKSneakingAgility() * (neuralSystem().getAgility() - 5))
         ));
     }
 
@@ -1336,8 +1366,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getAnalysisBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                Math.floor(coeff().getKAnalysisReasoning() * (getReasoning() - coeff().getBaseline())),
-                coeff().getKAnalysisDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG))
+                new AttributeBreakdown.Term("Reasoning", Math.floor(coeff().getKAnalysisReasoning() * (getReasoning() - coeff().getBaseline()))),
+                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKAnalysisDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG)))
         ));
     }
 
@@ -1346,12 +1376,13 @@ public class PlayableCharacter {
     }
 
     /**
-     * CloseCombat (rpg-19, new) = baseline + kCloseCombatBellicose x hasBellicose. No other
-     * modifiers yet.
+     * CloseCombat = baseline + kCloseCombatBellicose x hasBellicose + kCloseCombatFighting x
+     * Fighting (rpg-21).
      */
     public AttributeBreakdown getCloseCombatBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKCloseCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))
+                new AttributeBreakdown.Term("Bellicose", coeff().getKCloseCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))),
+                new AttributeBreakdown.Term("Fighting", coeff().getKCloseCombatFighting() * trainingAndConditioning().getFighting())
         ));
     }
 
@@ -1360,12 +1391,15 @@ public class PlayableCharacter {
     }
 
     /**
-     * LowRangeCombat (rpg-19, new) = baseline + kLowRangeCombatBellicose x hasBellicose. No
-     * other modifiers yet.
+     * LowRangeCombat = baseline + kLowRangeCombatBellicose x hasBellicose +
+     * kLowRangeCombatWeaponPracticing x WeaponPracticing + kLowRangeCombatFencing x Fencing
+     * (rpg-21).
      */
     public AttributeBreakdown getLowRangeCombatBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKLowRangeCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))
+                new AttributeBreakdown.Term("Bellicose", coeff().getKLowRangeCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))),
+                new AttributeBreakdown.Term("Weapon Practicing", coeff().getKLowRangeCombatWeaponPracticing() * trainingAndConditioning().getWeaponPracticing()),
+                new AttributeBreakdown.Term("Fencing", coeff().getKLowRangeCombatFencing() * erudition().getLevel(Knowledge.FENCING))
         ));
     }
 
@@ -1373,9 +1407,12 @@ public class PlayableCharacter {
         return getLowRangeCombatBreakdown().total();
     }
 
-    /** LongRangeCombat (rpg-19, new) = baseline. No modifiers yet. */
+    /** LongRangeCombat = baseline + kLongRangeCombatArchery x Archery + kLongRangeCombatShooting x Shooting (rpg-21). */
     public AttributeBreakdown getLongRangeCombatBreakdown() {
-        return new AttributeBreakdown(coeff().getBaseline(), List.of());
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Archery", coeff().getKLongRangeCombatArchery() * erudition().getLevel(Knowledge.ARCHERY)),
+                new AttributeBreakdown.Term("Shooting", coeff().getKLongRangeCombatShooting() * trainingAndConditioning().getShooting())
+        ));
     }
 
     public double getLongRangeCombat() {
@@ -1398,8 +1435,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getPsyquismOutputBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKPsyquismOutputPhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6),
-                coeff().getKPsyquismOutputCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5)
+                new AttributeBreakdown.Term("Phaxic Cerebelum", coeff().getKPsyquismOutputPhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6)),
+                new AttributeBreakdown.Term("Cerebral Capacity", coeff().getKPsyquismOutputCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5))
         ));
     }
 
@@ -1413,7 +1450,7 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getPsyquismDefenseBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKPsyquismDefensePhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6)
+                new AttributeBreakdown.Term("Phaxic Cerebelum", coeff().getKPsyquismDefensePhaxicCerebelum() * (neuralSystem().getPhaxicCerebelum() - 6))
         ));
     }
 
@@ -1429,9 +1466,9 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getCharmResistanceBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                -coeff().getKCharmResistanceVanity() * (generalPersonality().getVanity() - 5),
-                Math.floor(coeff().getKCharmResistanceDiscretion() * (getDiscretion() - coeff().getBaseline())),
-                -coeff().getKCharmResistanceProtagonist() * flag(hasTrait(Trait.PROTAGONIST))
+                new AttributeBreakdown.Term("Vanity", -coeff().getKCharmResistanceVanity() * (generalPersonality().getVanity() - 5)),
+                new AttributeBreakdown.Term("Discretion", Math.floor(coeff().getKCharmResistanceDiscretion() * (getDiscretion() - coeff().getBaseline()))),
+                new AttributeBreakdown.Term("Protagonist", -coeff().getKCharmResistanceProtagonist() * flag(hasTrait(Trait.PROTAGONIST)))
         ));
     }
 
@@ -1445,8 +1482,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getConcentrationBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKConcentrationFocus() * (generalPersonality().getFocus() - 5),
-                -coeff().getKConcentrationCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5)
+                new AttributeBreakdown.Term("Focus", coeff().getKConcentrationFocus() * (generalPersonality().getFocus() - 5)),
+                new AttributeBreakdown.Term("Cerebral Capacity", -coeff().getKConcentrationCerebralCapacity() * (neuralSystem().getCerebralCapacity() - 5))
         ));
     }
 
@@ -1462,8 +1499,8 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getReactionSpeedBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKReactionSpeedNeuralDrive() * (neuralSystem().getNeuralDrive() - 5),
-                coeff().getKReactionSpeedReflexes() * trainingAndConditioning().getReflexes()
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKReactionSpeedNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Reflexes", coeff().getKReactionSpeedReflexes() * trainingAndConditioning().getReflexes())
         ));
     }
 
@@ -1477,12 +1514,93 @@ public class PlayableCharacter {
      */
     public AttributeBreakdown getPurityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                coeff().getKPurityCleanVessel() * flag(hasTrait(Trait.CLEAN_VESSEL))
+                new AttributeBreakdown.Term("Clean Vessel", coeff().getKPurityCleanVessel() * flag(hasTrait(Trait.CLEAN_VESSEL)))
         ));
     }
 
     public double getPurity() {
         return getPurityBreakdown().total();
+    }
+
+    // -------------------------------------------------------------------------
+    // Skills (rpg-21) — Knowledge-level-driven craft/practice attributes. All baseline 60,
+    // additive-standard shape, no new exceptions.
+    // -------------------------------------------------------------------------
+
+    /** Alchemy (Skills) = baseline + kAlchemyChemistry x Chemistry + kAlchemyWizardry x Wizardry. */
+    public AttributeBreakdown getAlchemyBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Chemistry", coeff().getKAlchemyChemistry() * erudition().getLevel(Knowledge.CHEMISTRY)),
+                new AttributeBreakdown.Term("Wizardry", coeff().getKAlchemyWizardry() * erudition().getLevel(Knowledge.WIZARDRY))
+        ));
+    }
+
+    public double getAlchemy() {
+        return getAlchemyBreakdown().total();
+    }
+
+    /** MachineHandling (Skills) = baseline + kMachineHandlingEngineering x Engineering. */
+    public AttributeBreakdown getMachineHandlingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Engineering", coeff().getKMachineHandlingEngineering() * erudition().getLevel(Knowledge.ENGINEERING))
+        ));
+    }
+
+    public double getMachineHandling() {
+        return getMachineHandlingBreakdown().total();
+    }
+
+    /**
+     * Performance (Skills) = baseline + kPerformanceCoordination x Coordination +
+     * kPerformanceDancing x Dancing + kPerformanceShapeAesthetics x (ShapeAesthetics-5) +
+     * kPerformanceArt x Art.
+     */
+    public AttributeBreakdown getPerformanceBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Coordination", coeff().getKPerformanceCoordination() * trainingAndConditioning().getCoordination()),
+                new AttributeBreakdown.Term("Dancing", coeff().getKPerformanceDancing() * erudition().getLevel(Knowledge.DANCING)),
+                new AttributeBreakdown.Term("Shape Aesthetics", coeff().getKPerformanceShapeAesthetics() * (bodyStructure().getShapeAesthetics() - 5)),
+                new AttributeBreakdown.Term("Art", coeff().getKPerformanceArt() * erudition().getLevel(Knowledge.ART))
+        ));
+    }
+
+    public double getPerformance() {
+        return getPerformanceBreakdown().total();
+    }
+
+    /** SciencePractice (Skills) = baseline + kSciencePracticeBiology x Biology + kSciencePracticeChemistry x Chemistry. */
+    public AttributeBreakdown getSciencePracticeBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Biology", coeff().getKSciencePracticeBiology() * erudition().getLevel(Knowledge.BIOLOGY)),
+                new AttributeBreakdown.Term("Chemistry", coeff().getKSciencePracticeChemistry() * erudition().getLevel(Knowledge.CHEMISTRY))
+        ));
+    }
+
+    public double getSciencePractice() {
+        return getSciencePracticeBreakdown().total();
+    }
+
+    /** Healing (Skills) = baseline + kHealingMedicine x Medicine + kHealingBiology x Biology. */
+    public AttributeBreakdown getHealingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Medicine", coeff().getKHealingMedicine() * erudition().getLevel(Knowledge.MEDICINE)),
+                new AttributeBreakdown.Term("Biology", coeff().getKHealingBiology() * erudition().getLevel(Knowledge.BIOLOGY))
+        ));
+    }
+
+    public double getHealing() {
+        return getHealingBreakdown().total();
+    }
+
+    /** HackingAndPrograming (Skills) = baseline + kHackingAndProgramingComputerScience x ComputerScience. */
+    public AttributeBreakdown getHackingAndProgramingBreakdown() {
+        return new AttributeBreakdown(coeff().getBaseline(), List.of(
+                new AttributeBreakdown.Term("Computer Science", coeff().getKHackingAndProgramingComputerScience() * erudition().getLevel(Knowledge.COMPUTER_SCIENCE))
+        ));
+    }
+
+    public double getHackingAndPrograming() {
+        return getHackingAndProgramingBreakdown().total();
     }
 
     // -------------------------------------------------------------------------

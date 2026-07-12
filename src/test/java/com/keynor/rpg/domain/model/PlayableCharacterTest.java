@@ -450,46 +450,53 @@ class PlayableCharacterTest {
     }
 
     // -------------------------------------------------------------------------
-    // Durability
+    // Soft Tissue Durability / Bone Durability (rpg-21, replaces the old unified Durability)
     // -------------------------------------------------------------------------
 
     @Test
-    void getDurability_onHumanDefaults_equalsBaseline() {
+    void getSoftTissueDurability_onHumanDefaults_equalsTen() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getDurability()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getSoftTissueDurability()).isCloseTo(10.0, within(TOLERANCE));
     }
 
     @Test
-    void getDurability_usesBodyFatsOwnNeutralOfThreeNotFive() {
-        Body body = Body.humanTemplate();
-        body.getBiomechanics().getBodyComposition().setBodyFat(6);
-        PlayableCharacter character = new PlayableCharacter("test", body);
-
-        double expected = 60 + 1 * (6 - 3);
-        assertThat(character.getDurability()).isCloseTo(expected, within(TOLERANCE));
-    }
-
-    @Test
-    void getDurability_higherFlexibilityReducesDurability() {
+    void getSoftTissueDurability_higherFlexibility_decreasesSoftTissueDurability() {
         Body body = Body.humanTemplate();
         body.getBiomechanics().getBodyComposition().setFlexibility(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getDurability()).isLessThan(defaults.getDurability());
+        assertThat(character.getSoftTissueDurability()).isLessThan(defaults.getSoftTissueDurability());
     }
 
     @Test
-    void getDurability_higherSkinThickness_increasesDurability() {
-        // skinThickness is immutable, so a thicker-skinned character needs its own preview body.
-        BodyStructure thickSkin = new BodyStructure(4, 5, 5);
-        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), thickSkin, TrainingAndConditioning.defaults());
+    void getSoftTissueDurability_worstCaseCombination_isFlooredAtAttributeFloor() {
+        BodyComposition worstComposition = new BodyComposition(1, 30, 0, 5, 9, 5, 5);
+        Biomechanics biomechanics = new Biomechanics(new Genetics(5, 1, 5, 7, 3), worstComposition);
+        BodyStructure worstSkin = new BodyStructure(1, 5, 5);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), worstSkin, TrainingAndConditioning.defaults());
         PlayableCharacter character = new PlayableCharacter("test",
-                Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits));
+                Body.previewTemplate(biomechanics, BodySystems.defaults(), physicalTraits));
+
+        assertThat(character.getSoftTissueDurability()).isEqualTo(5.0);
+    }
+
+    @Test
+    void getBoneDurability_onHumanDefaults_equalsBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
+
+        assertThat(character.getBoneDurability()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getBoneDurability_higherBoneDensity_increasesBoneDurability() {
+        Body body = Body.humanTemplate();
+        body.getBiomechanics().getBodyComposition().setBoneDensity(9);
+        PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getDurability()).isGreaterThan(defaults.getDurability());
+        assertThat(character.getBoneDurability()).isGreaterThan(defaults.getBoneDurability());
     }
 
     // -------------------------------------------------------------------------
@@ -1924,5 +1931,190 @@ class PlayableCharacterTest {
         return new PlayableCharacter("test", Body.humanTemplate(),
                 Mind.previewTemplate(values, Erudition.defaults(), Personality.defaults(), Labours.defaults(),
                         GeneralPersonality.defaults(), WeaponProficiencies.defaults()));
+    }
+
+    // -------------------------------------------------------------------------
+    // Training and Conditioning (rpg-21) — Intensity/Coordination/Resilience/Fighting/
+    // WeaponPracticing/Shooting join Vigor/Reflexes, same raw-value shape
+    // -------------------------------------------------------------------------
+
+    @Test
+    void intensity_increasesMeanStrengthDrivenAttributesAndSpeed() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setIntensity(8));
+
+        assertThat(trained.getPushStrength()).isGreaterThan(defaults.getPushStrength());
+        assertThat(trained.getSpeed()).isGreaterThan(defaults.getSpeed());
+    }
+
+    @Test
+    void coordination_increasesAcrobaticsEvasionAndBalance() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setCoordination(8));
+
+        assertThat(trained.getAcrobatics()).isGreaterThan(defaults.getAcrobatics());
+        assertThat(trained.getEvasion()).isGreaterThan(defaults.getEvasion());
+        assertThat(trained.getBalance()).isGreaterThan(defaults.getBalance());
+    }
+
+    @Test
+    void resilience_increasesPainThresholdAndSoftTissueDurability() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setResilience(8));
+
+        assertThat(trained.getPainThreshold()).isGreaterThan(defaults.getPainThreshold());
+        assertThat(trained.getSoftTissueDurability()).isGreaterThan(defaults.getSoftTissueDurability());
+    }
+
+    @Test
+    void fighting_increasesCloseCombat() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setFighting(5));
+
+        assertThat(trained.getCloseCombat()).isGreaterThan(defaults.getCloseCombat());
+    }
+
+    @Test
+    void weaponPracticing_increasesLowRangeCombat() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setWeaponPracticing(5));
+
+        assertThat(trained.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
+    }
+
+    @Test
+    void shooting_increasesLongRangeCombatAndAim() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
+        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setShooting(5));
+
+        assertThat(trained.getLongRangeCombat()).isGreaterThan(defaults.getLongRangeCombat());
+        assertThat(trained.getAim()).isGreaterThan(defaults.getAim());
+    }
+
+    // -------------------------------------------------------------------------
+    // Athletism and Martial Arts (rpg-21) — Dancing/Fencing new Knowledge constants; Archery
+    // wired to a real formula effect for the first time
+    // -------------------------------------------------------------------------
+
+    @Test
+    void dancing_increasesAcrobaticsEvasionAndBalance() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter dancer = characterWithErudition(Knowledge.DANCING, 2);
+
+        assertThat(dancer.getAcrobatics()).isGreaterThan(defaults.getAcrobatics());
+        assertThat(dancer.getEvasion()).isGreaterThan(defaults.getEvasion());
+        assertThat(dancer.getBalance()).isGreaterThan(defaults.getBalance());
+    }
+
+    @Test
+    void fencing_increasesLowRangeCombat() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter fencer = characterWithErudition(Knowledge.FENCING, 2);
+
+        assertThat(fencer.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
+    }
+
+    @Test
+    void archery_increasesLongRangeCombatAndAim() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter archer = characterWithErudition(Knowledge.ARCHERY, 2);
+
+        assertThat(archer.getLongRangeCombat()).isGreaterThan(defaults.getLongRangeCombat());
+        assertThat(archer.getAim()).isGreaterThan(defaults.getAim());
+    }
+
+    // -------------------------------------------------------------------------
+    // Skills (rpg-21) — new Knowledge-level-driven craft/practice attributes
+    // -------------------------------------------------------------------------
+
+    @Test
+    void newSkillsAttributes_onHumanDefaults_allEqualBaseline() {
+        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+
+        assertThat(character.getAlchemy()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getMachineHandling()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getPerformance()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getSciencePractice()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getHealing()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getHackingAndPrograming()).isCloseTo(60.0, within(TOLERANCE));
+    }
+
+    @Test
+    void getAlchemy_withChemistryAndWizardryLevels_increasesAlchemy() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter alchemist = characterWithErudition(Knowledge.CHEMISTRY, 2, Knowledge.WIZARDRY, 2);
+
+        assertThat(alchemist.getAlchemy()).isGreaterThan(defaults.getAlchemy());
+    }
+
+    @Test
+    void getMachineHandling_withEngineeringLevel_increasesMachineHandling() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter engineer = characterWithErudition(Knowledge.ENGINEERING, 2);
+
+        assertThat(engineer.getMachineHandling()).isGreaterThan(defaults.getMachineHandling());
+    }
+
+    @Test
+    void getPerformance_withCoordinationDancingAndArt_increasesPerformance() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        Mind mind = Mind.previewTemplate(Values.defaults(),
+                new Erudition(java.util.Map.of(Knowledge.DANCING, 2, Knowledge.ART, 2)), Personality.defaults(),
+                Labours.defaults(), GeneralPersonality.defaults(), WeaponProficiencies.defaults());
+        PhysicalTraits trained = new PhysicalTraits(SensorialOrgans.defaults(), BodyStructure.defaults(),
+                new TrainingAndConditioning(0, 0, 0, 8, 0, 0, 0, 0));
+        PlayableCharacter performer = new PlayableCharacter("test",
+                Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), trained), mind);
+
+        assertThat(performer.getPerformance()).isGreaterThan(defaults.getPerformance());
+    }
+
+    @Test
+    void getSciencePractice_withBiologyAndChemistryLevels_increasesSciencePractice() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter scientist = characterWithErudition(Knowledge.BIOLOGY, 2, Knowledge.CHEMISTRY, 2);
+
+        assertThat(scientist.getSciencePractice()).isGreaterThan(defaults.getSciencePractice());
+    }
+
+    @Test
+    void getHealing_withMedicineAndBiologyLevels_increasesHealing() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter healer = characterWithErudition(Knowledge.MEDICINE, 2, Knowledge.BIOLOGY, 2);
+
+        assertThat(healer.getHealing()).isGreaterThan(defaults.getHealing());
+    }
+
+    @Test
+    void getHackingAndPrograming_withComputerScienceLevel_increasesHackingAndPrograming() {
+        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
+        PlayableCharacter hacker = characterWithErudition(Knowledge.COMPUTER_SCIENCE, 2);
+
+        assertThat(hacker.getHackingAndPrograming()).isGreaterThan(defaults.getHackingAndPrograming());
+    }
+
+    private static PlayableCharacter characterWithTrainingAndConditioning(
+            java.util.function.Consumer<TrainingAndConditioning> customize) {
+        TrainingAndConditioning trainingAndConditioning = TrainingAndConditioning.defaults();
+        customize.accept(trainingAndConditioning);
+        PhysicalTraits physicalTraits = new PhysicalTraits(SensorialOrgans.defaults(), BodyStructure.defaults(),
+                trainingAndConditioning);
+        Body body = Body.previewTemplate(Biomechanics.defaults(), BodySystems.defaults(), physicalTraits);
+        return new PlayableCharacter("test", body);
+    }
+
+    private static PlayableCharacter characterWithErudition(Knowledge knowledge, int level) {
+        Mind mind = Mind.previewTemplate(Values.defaults(), new Erudition(java.util.Map.of(knowledge, level)),
+                Personality.defaults(), Labours.defaults(), GeneralPersonality.defaults(),
+                WeaponProficiencies.defaults());
+        return new PlayableCharacter("test", Body.humanTemplate(), mind);
+    }
+
+    private static PlayableCharacter characterWithErudition(Knowledge first, int firstLevel, Knowledge second,
+                                                              int secondLevel) {
+        Mind mind = Mind.previewTemplate(Values.defaults(),
+                new Erudition(java.util.Map.of(first, firstLevel, second, secondLevel)), Personality.defaults(),
+                Labours.defaults(), GeneralPersonality.defaults(), WeaponProficiencies.defaults());
+        return new PlayableCharacter("test", Body.humanTemplate(), mind);
     }
 }

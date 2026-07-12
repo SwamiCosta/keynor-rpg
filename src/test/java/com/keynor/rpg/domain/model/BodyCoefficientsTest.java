@@ -108,7 +108,7 @@ class BodyCoefficientsTest {
     void defaults_rpg14WeightsMatchTheDesignDocument() {
         BodyCoefficients coeff = BodyCoefficients.defaults();
 
-        assertThat(coeff.getKDurabilitySkin()).isEqualTo(1);
+        assertThat(coeff.getKSoftTissueDurabilitySkin()).isEqualTo(1);
         assertThat(coeff.getKSightEyesSensitivity()).isEqualTo(6);
         assertThat(coeff.getKSightNeuralDrive()).isEqualTo(1);
         assertThat(coeff.getKSightPmod()).isEqualTo(2);
