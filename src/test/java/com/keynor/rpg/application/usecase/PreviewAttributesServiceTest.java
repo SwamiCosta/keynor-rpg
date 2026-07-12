@@ -46,7 +46,8 @@ class PreviewAttributesServiceTest {
         assertThat(result.getLiftStrength()).isEqualTo(expected.getLiftStrength());
         assertThat(result.getSpeed()).isEqualTo(expected.getSpeed());
         assertThat(result.getStaminaPool()).isEqualTo(expected.getStaminaPool());
-        assertThat(result.getDurability()).isEqualTo(expected.getDurability());
+        assertThat(result.getSoftTissueDurability()).isEqualTo(expected.getSoftTissueDurability());
+        assertThat(result.getBoneDurability()).isEqualTo(expected.getBoneDurability());
         assertThat(result.getFatigueResistance()).isEqualTo(expected.getFatigueResistance());
         assertThat(result.getStaminaRecovery()).isEqualTo(expected.getStaminaRecovery());
         assertThat(result.getSight()).isEqualTo(expected.getSight());

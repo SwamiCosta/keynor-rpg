@@ -22,7 +22,7 @@ class PhysicalTraitsTest {
     void constructor_storesEachGroupAsProvided() {
         SensorialOrgans sensorialOrgans = new SensorialOrgans(6, 7, 8);
         BodyStructure bodyStructure = new BodyStructure(4, 9, 2);
-        TrainingAndConditioning trainingAndConditioning = new TrainingAndConditioning(3, 4);
+        TrainingAndConditioning trainingAndConditioning = new TrainingAndConditioning(3, 4, 0, 0, 0, 0, 0, 0);
         PhysicalTraits physicalTraits = new PhysicalTraits(sensorialOrgans, bodyStructure, trainingAndConditioning);
 
         assertThat(physicalTraits.getSensorialOrgans()).isSameAs(sensorialOrgans);

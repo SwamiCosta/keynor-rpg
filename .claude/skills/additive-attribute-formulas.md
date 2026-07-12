@@ -412,6 +412,79 @@ Sneaking      = 60 + 1×(Agility-5)
 
 `PreviewAttributesUseCase.calculate(...)` grew from 8 to 9 parameters (`WeaponProficiencies` added).
 
+## Labeled breakdown terms, Durability split, Training and Conditioning expansion, Skills (rpg-21, 2026-07-08)
+
+### `AttributeBreakdown.Term` — every term now carries a label
+
+`AttributeBreakdown(double baseline, List<Double> terms)` became `AttributeBreakdown(double baseline, List<Term> terms)` with a nested `Term(String label, double value)` record. Every `getXxxBreakdown()` method across the whole file was updated to wrap each term in a `new AttributeBreakdown.Term("Label", value)`. `AttributeBreakdownResponse`/`TermResponse` mirror this on the DTO side. This backs a new frontend tooltip format — description, then `Affected By:` / `Base Value: X` / `<Label>: Y` per term — replacing the old unlabeled "60 + 4 + 0 + 0 = 64" sum-line format. Labels use the same Title Case wording as the formula's own javadoc term names (e.g. "Limb Ratio", "Tendons and Ligaments").
+
+### Durability replaced outright by Soft Tissue Durability + Bone Durability
+
+The old unified `Durability` (and `kDurabilityXxx` coefficients) is **deleted**, not aliased — same "replace, don't keep both" convention as every prior breaking rename in this file. Two new attributes:
+
+```
+SoftTissueDurability = 10 + kSoftTissueDurabilityMesomorphy×(Mesomorphy-5) + kSoftTissueDurabilityBodyFat×(BodyFat-3)
+                           - kSoftTissueDurabilityFlexibility×(Flexibility-5) + kSoftTissueDurabilitySkin×(SkinThickness-3)
+                           + kSoftTissueDurabilityResilience×Resilience
+BoneDurability        = baseline + kBoneDurabilityBoneDensity×(BoneDensity-5)
+```
+
+`SoftTissueDurability`'s baseline is **10, not the shared 60** — the only attribute besides the zero-baseline rate attributes to deviate from `BodyCoefficients.getBaseline()`, per explicit user spec (`BodyCoefficients.softTissueDurabilityBaseline`). It is also **floored** — the worst-case combination (Mesomorphy=1, BodyFat=1, Flexibility=9, SkinThickness=1, Resilience=0) computes to -2, below `attributeFloor` (5) — the first floor introduced outside the pre-existing eight (see "Safety floors" above). `BoneDurability` needs no floor (same magnitude as the old formula's bone term, which never needed one).
+
+### Training and Conditioning — 6 new raw-value inputs
+
+`Intensity`, `Coordination`, `Resilience`, `Fighting`, `WeaponPracticing`, `Shooting` join `Vigor`/`Reflexes` in `TrainingAndConditioning` — same shape (0-8, default 0, raw-value contribution, zero at the training-absent default):
+
+```
+MeanStrength   += kMeanStrengthIntensity × Intensity        (feeds all 4 specialized strengths via the hidden engine)
+Speed          += kSpeedIntensity × Intensity
+Acrobatics     += kAcrobaticsCoordination × Coordination
+Evasion        += kEvasionCoordination × Coordination
+Balance        += kBalanceCoordination × Coordination
+SoftTissueDurability += kSoftTissueDurabilityResilience × Resilience
+PainThreshold  += kPainThresholdResilience × Resilience
+CloseCombat    += kCloseCombatFighting × Fighting
+LowRangeCombat += kLowRangeCombatWeaponPracticing × WeaponPracticing
+LongRangeCombat += kLongRangeCombatShooting × Shooting
+Aim            += kAimShooting × Shooting
+```
+
+### Athletism and Martial Arts — Dancing/Fencing join Archery, Archery wired for the first time
+
+`Knowledge.ATHLETISM_AND_MARTIAL_ARTS` gains two new constants, `DANCING` and `FENCING` (level 0-4, `TRAINED`), alongside the pre-existing `ARCHERY` — which had no formula effect before this delta. All three use the standard `weight × level` shape (neutral 0), matching the Ecology/Biology precedent:
+
+```
+Acrobatics      += kAcrobaticsDancing × DancingLevel
+Evasion         += kEvasionDancing × DancingLevel
+Balance         += kBalanceDancing × DancingLevel
+LowRangeCombat  += kLowRangeCombatFencing × FencingLevel
+LongRangeCombat += kLongRangeCombatArchery × ArcheryLevel
+Aim             += kAimArchery × ArcheryLevel
+```
+
+### Rename: `ALCHEMY_CHEMISTRY` → `CHEMISTRY`
+
+Pure rename, no group or behavior change — done to remove the ambiguity once a dedicated `Alchemy` attribute existed.
+
+### Material Durability catalog — reference data, not yet consumed
+
+Two new domain types, `DamageType` (9 constants: Chop, Slice, Blunt, Piercing, Burning, Frost, Corrosive, Tear, Compress) and `Material` (21 constants, each with a base durability and a per-`DamageType` multiplier, translated to English identifiers from the design document's own Portuguese names — e.g. `MUSCLE_TISSUE`, `GLASS_OBSIDIAN`, `KERATIN_CARAPACE`, `ADAMANTINE`). **Not wired into any use case, DTO, or REST endpoint** — reserved as static reference data for a future strikes-against-objects mechanic, same "document intent, not yet implemented" precedent as `BodyComponent`'s reversible-damage regeneration.
+
+### 6 new Skills attributes
+
+All baseline 60, all driven by `Knowledge` levels (weight × level, neutral 0) plus a couple of existing raw/deviation inputs:
+
+```
+Alchemy               = 60 + 8×Chemistry + 8×Wizardry
+MachineHandling       = 60 + 8×Engineering
+Performance           = 60 + kPerformanceCoordination×Coordination + 8×Dancing + 2×(ShapeAesthetics-5) + 8×Art
+SciencePractice       = 60 + 8×Biology + 8×Chemistry
+Healing               = 60 + 8×Medicine + 4×Biology
+HackingAndPrograming  = 60 + 8×ComputerScience
+```
+
+`Performance`'s `Coordination` term reads the new `TrainingAndConditioning.coordination` raw value directly (`kPerformanceCoordination = 1`), the third input in this delta (after `Intensity`/`Resilience`) to use the raw-value shape inside a brand-new formula rather than an existing one.
+
 ## Extending this pattern
 
-When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`. See "Testing scope for formulas" above for what to actually write tests for.
+When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)` with each term wrapped in a labeled `AttributeBreakdown.Term`, and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`. See "Testing scope for formulas" above for what to actually write tests for.

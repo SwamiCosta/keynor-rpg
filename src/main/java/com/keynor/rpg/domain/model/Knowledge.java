@@ -11,6 +11,11 @@ package com.keynor.rpg.domain.model;
  * a formula, it now contributes {@code weight x level} directly — the same coefficient, doubled
  * or tripled by investing further levels instead of being all-or-nothing. See
  * {@link Erudition#getLevel(Knowledge)}.
+ *
+ * <p>{@code ALCHEMY_CHEMISTRY} was renamed {@code CHEMISTRY} (rpg-21, pure rename, no group or
+ * behavior change) once a dedicated {@code Alchemy} attribute existed and the combined name
+ * became ambiguous. {@code DANCING}/{@code FENCING} (rpg-21) are new
+ * {@code ATHLETISM_AND_MARTIAL_ARTS} constants alongside {@code ARCHERY}.
  */
 public enum Knowledge {
     CALLIGRAPHY(KnowledgeGroup.LANGUAGES_AND_COMMUNICATION),
@@ -18,7 +23,7 @@ public enum Knowledge {
     BIOLOGY(KnowledgeGroup.LIFE_STUDIES),
     MEDICINE(KnowledgeGroup.LIFE_STUDIES),
     HERBOLOGY(KnowledgeGroup.LIFE_STUDIES),
-    ALCHEMY_CHEMISTRY(KnowledgeGroup.MATTER_STUDIES),
+    CHEMISTRY(KnowledgeGroup.MATTER_STUDIES),
     METALLURGY(KnowledgeGroup.MATTER_STUDIES),
     POTTERY(KnowledgeGroup.MATTER_STUDIES),
     COMPUTER_SCIENCE(KnowledgeGroup.MATHEMATICS),
@@ -26,6 +31,8 @@ public enum Knowledge {
     WIZARDRY(KnowledgeGroup.ARCANE_STUDIES),
     SORCERY(KnowledgeGroup.ARCANE_STUDIES),
     ARCHERY(KnowledgeGroup.ATHLETISM_AND_MARTIAL_ARTS),
+    DANCING(KnowledgeGroup.ATHLETISM_AND_MARTIAL_ARTS),
+    FENCING(KnowledgeGroup.ATHLETISM_AND_MARTIAL_ARTS),
     HISTORY(KnowledgeGroup.VALKANI_STUDIES),
     PHILOSOPHY(KnowledgeGroup.VALKANI_STUDIES),
     CARTOGRAPHY(KnowledgeGroup.VALKANI_STUDIES),
