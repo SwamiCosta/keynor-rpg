@@ -1,5 +1,6 @@
 package com.keynor.rpg.application.dto;
 
+import com.keynor.rpg.domain.model.Language;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 
 /**
@@ -13,12 +14,12 @@ public record CharacterResponse(String id, String name, BodyResponse body, MindR
                                  PoolAttributesResponse poolAttributes, CalculatedValuesResponse calculatedValues,
                                  LoadCapacityResponse loadCapacity) {
 
-    public static CharacterResponse from(String id, PlayableCharacter character) {
+    public static CharacterResponse from(String id, PlayableCharacter character, Language language) {
         return new CharacterResponse(id, character.getName(),
                 BodyResponse.from(character.getBody()),
                 MindResponse.from(character.getMind(), character),
                 AttributesResponse.from(character),
-                AttributeBreakdownsResponse.from(character),
+                AttributeBreakdownsResponse.from(character, language),
                 PoolAttributesResponse.from(character),
                 CalculatedValuesResponse.from(character),
                 LoadCapacityResponse.from(character));

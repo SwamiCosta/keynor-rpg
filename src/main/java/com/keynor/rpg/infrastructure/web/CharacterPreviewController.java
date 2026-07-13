@@ -3,10 +3,13 @@ package com.keynor.rpg.infrastructure.web;
 import com.keynor.rpg.application.dto.CharacterPreviewRequest;
 import com.keynor.rpg.application.dto.CharacterPreviewResponse;
 import com.keynor.rpg.domain.model.Biomechanics;
+import com.keynor.rpg.domain.model.Language;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
+import com.keynor.rpg.infrastructure.web.shared.LanguageRequestParser;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -25,7 +28,9 @@ public class CharacterPreviewController {
     }
 
     @PostMapping("/preview")
-    public CharacterPreviewResponse preview(@RequestBody CharacterPreviewRequest request) {
+    public CharacterPreviewResponse preview(@RequestBody CharacterPreviewRequest request,
+                                             @RequestParam(defaultValue = "EN") String language) {
+        Language parsedLanguage = LanguageRequestParser.parse(language);
         Biomechanics biomechanics = new Biomechanics(
                 request.body().genetics().toDomain(), request.body().bodyComposition().toDomain());
         return CharacterPreviewResponse.from(
@@ -33,6 +38,7 @@ public class CharacterPreviewController {
                         request.body().physicalTraits().toDomain(), request.mind().values().toDomain(),
                         request.mind().erudition().toDomain(), request.mind().personality().toDomain(),
                         request.mind().labours().toDomain(), request.mind().generalPersonality().toDomain(),
-                        request.mind().weaponProficiencies().toDomain()));
+                        request.mind().weaponProficiencies().toDomain()),
+                parsedLanguage);
     }
 }

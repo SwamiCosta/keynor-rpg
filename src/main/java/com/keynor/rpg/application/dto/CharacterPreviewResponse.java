@@ -1,5 +1,6 @@
 package com.keynor.rpg.application.dto;
 
+import com.keynor.rpg.domain.model.Language;
 import com.keynor.rpg.domain.model.PlayableCharacter;
 
 /**
@@ -13,9 +14,9 @@ public record CharacterPreviewResponse(AttributesResponse attributes,
                                         CalculatedValuesResponse calculatedValues,
                                         LoadCapacityResponse loadCapacity) {
 
-    public static CharacterPreviewResponse from(PlayableCharacter character) {
+    public static CharacterPreviewResponse from(PlayableCharacter character, Language language) {
         return new CharacterPreviewResponse(AttributesResponse.from(character),
-                AttributeBreakdownsResponse.from(character), PoolAttributesResponse.from(character),
+                AttributeBreakdownsResponse.from(character, language), PoolAttributesResponse.from(character),
                 CalculatedValuesResponse.from(character),
                 LoadCapacityResponse.from(character));
     }
