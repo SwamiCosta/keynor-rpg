@@ -1492,20 +1492,20 @@ public class PlayableCharacter {
     }
 
     /**
-     * ReactionSpeed (Cognitive) = baseline + kReactionSpeedNeuralDrive x (NeuralDrive-5) +
-     * kReactionSpeedReflexes x Reflexes. The Reflexes term reads the raw input value directly,
+     * CognitiveSpeed (Cognitive) = baseline + kCognitiveSpeedNeuralDrive x (NeuralDrive-5) +
+     * kCognitiveSpeedReflexes x Reflexes. The Reflexes term reads the raw input value directly,
      * not a deviation from a neutral point — it defaults to 0 (no training investment), so a
-     * fresh character's Reaction Speed is driven by Neural Drive alone until Reflexes is trained.
+     * fresh character's Cognitive Speed is driven by Neural Drive alone until Reflexes is trained.
      */
-    public AttributeBreakdown getReactionSpeedBreakdown() {
+    public AttributeBreakdown getCognitiveSpeedBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                new AttributeBreakdown.Term("Neural Drive", coeff().getKReactionSpeedNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
-                new AttributeBreakdown.Term("Reflexes", coeff().getKReactionSpeedReflexes() * trainingAndConditioning().getReflexes())
+                new AttributeBreakdown.Term("Neural Drive", coeff().getKCognitiveSpeedNeuralDrive() * (neuralSystem().getNeuralDrive() - 5)),
+                new AttributeBreakdown.Term("Reflexes", coeff().getKCognitiveSpeedReflexes() * trainingAndConditioning().getReflexes())
         ));
     }
 
-    public double getReactionSpeed() {
-        return getReactionSpeedBreakdown().total();
+    public double getCognitiveSpeed() {
+        return getCognitiveSpeedBreakdown().total();
     }
 
     /**

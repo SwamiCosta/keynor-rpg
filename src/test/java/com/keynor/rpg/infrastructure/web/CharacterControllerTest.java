@@ -128,7 +128,7 @@ class CharacterControllerTest {
                 .andExpect(jsonPath("$.attributes.charmResistance").value(60.0))
                 .andExpect(jsonPath("$.attributes.concentration").value(60.0))
                 .andExpect(jsonPath("$.attributes.purity").value(60.0))
-                .andExpect(jsonPath("$.attributes.reactionSpeed").exists())
+                .andExpect(jsonPath("$.attributes.cognitiveSpeed").exists())
                 .andExpect(jsonPath("$.attributes.hiding").exists())
                 .andExpect(jsonPath("$.attributes.sneaking").exists())
                 .andExpect(jsonPath("$.attributes.cardiovascularCapacity").doesNotExist())

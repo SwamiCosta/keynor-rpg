@@ -31,7 +31,7 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double illusionResistance, double creativity, double analysis,
                                   double closeCombat, double lowRangeCombat, double longRangeCombat,
                                   double psyquismOutput, double psyquismDefense, double charmResistance,
-                                  double concentration, double purity, double reactionSpeed, double hiding,
+                                  double concentration, double purity, double cognitiveSpeed, double hiding,
                                   double sneaking, double alchemy, double machineHandling, double performance,
                                   double sciencePractice, double healing, double hackingAndPrograming) {
 
@@ -112,7 +112,7 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getCharmResistance(),
                 character.getConcentration(),
                 character.getPurity(),
-                character.getReactionSpeed(),
+                character.getCognitiveSpeed(),
                 character.getHiding(),
                 character.getSneaking(),
                 character.getAlchemy(),
