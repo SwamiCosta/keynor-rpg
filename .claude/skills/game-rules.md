@@ -153,7 +153,44 @@ Combat proceeds as an increasing time count. There is a count for each character
 
 **Example:** general count = 10, Character A's count = 11, Character B's count = 16. Nothing happens; general count increments. General count = 11, matching Character A — they act, choosing to move; the move takes 6 time units, so their count becomes 17. Nothing happens for 5 more units. Now the count is 16, matching Character B — they act, choosing to fire an arrow at Character A. And so on.
 
-> `*TODO*` — no table exists yet mapping an actual action (attack, move 1 meter, reload, block, cast, etc.) to a number of time units; the "6 units" figure above is illustrative, not a real value. The user has confirmed (2026-07-08) that an action's time cost will be **derived from the character's Speed**, with the exact formula to follow in a future delta. Do not invent the formula or any per-action values in the meantime — this remains a foundational gap until it lands.
+**Time units are called UT (Unidade de Tempo) — 1 UT = 0.1 second.** This resolves the prior open question: an action's time cost is derived from the acting character's attributes via the formula below (confirmed by the user 2026-07-14, UT balancing report).
+
+**UT formula:**
+
+```
+S  = Σ (attribute_i × weight_i)      — the action's attribute score, a weighted combination
+UT = max(1, floor(UT_Base × (60 / S)))
+```
+
+`floor` rounds the result down; `max(1, ...)` guarantees no active combat action ever costs 0 UT. When every attribute feeding an action sits at 60 (the baseline every additive-standard attribute equals at its inputs' neutral values — see `additive-attribute-formulas.md`), `S = 60` and `UT` resolves to exactly `UT_Base`, regardless of how many attributes the action combines (every action's weights sum to 1.0).
+
+**Per-action UT_Base and formula:**
+
+| Action | UT_Base | Score (S) formula |
+|---|---|---|
+| Move 1m, careful step | 5 | Speed |
+| Move 1m, running | 2 | Speed |
+| Jab (quick body strike) | 2 | 0.7×Speed + 0.3×Close Combat |
+| Standard body strike (cross, kick) | 4 | 0.6×Speed + 0.4×Close Combat |
+| Piercing attack (rapier, spear) | 3 | 0.7×Speed + 0.3×Short Range Combat |
+| Light swing attack (hatchet, sword, hammer) | 4 | 0.7×Speed + 0.3×Short Range Combat |
+| Heavy swing attack (war hammer, greatsword) | 8 | 0.65×Speed + 0.35×Short Range Combat |
+| Drink a potion (already in hand) | 12 | Speed |
+| Draw light/medium melee weapon | 5 | 0.6×Speed + 0.4×Short Range Combat |
+| Draw ranged weapon (bow, firearm) | 5 | 0.6×Speed + 0.4×Long Range Combat |
+| Draw item from backpack | 40 | Speed |
+| Reload pistol | 15 | 0.7×Long Range Combat + 0.3×Speed |
+| Reload long gun (rifle) | 25 | 0.75×Long Range Combat + 0.25×Speed |
+| Evasion (dodge an incoming attack) | 3 | 0.7×Evasion + 0.3×Speed |
+| Block/parry (shield or weapon) | 2 | 0.4×Cognitive Speed + 0.3×Short Range Combat + 0.3×Speed |
+| Stand up from the ground | 10 | Speed |
+| Aim (adjust aim before next shot) | 4 | 0.7×Long Range Combat + 0.3×Speed |
+| Draw heavy weapon (greatsword, war hammer) | 8 | 0.7×Speed + 0.3×Short Range Combat |
+| Turn around (quick pivot) | 2 | Speed |
+| Analyze surroundings / assess the enemy | 3 | Cognitive Speed |
+| Cast a spell (basic) | 10 | Speed |
+
+Only movement (the first two rows) is currently reachable from the board's frontend client; every other action above is implemented backend-side (`POST /api/v1/combat/action-time`, `CombatActionType`) ahead of the frontend gaining a way to trigger them.
 
 **Shared actions:** if two or more characters are tied on count, all of them choose their action and submit it simultaneously. This can be done secretly, so as not to grant an advantage, if they are opponents.
 
