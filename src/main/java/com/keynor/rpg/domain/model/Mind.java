@@ -62,6 +62,17 @@ public class Mind {
                 new AttributePointBudget(20));
     }
 
+    /**
+     * Rebuilds a Mind from persisted data groups and a persisted event-points budget — used
+     * only by the persistence layer when loading a character.
+     */
+    public static Mind reconstruct(Values values, Erudition erudition, Personality personality,
+                                    Labours labours, GeneralPersonality generalPersonality,
+                                    WeaponProficiencies weaponProficiencies, AttributePointBudget eventPoints) {
+        return new Mind(values, erudition, personality, labours, generalPersonality, weaponProficiencies,
+                eventPoints);
+    }
+
     public Values getValues() {
         return values;
     }

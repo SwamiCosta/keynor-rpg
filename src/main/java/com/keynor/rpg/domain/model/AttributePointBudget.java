@@ -12,7 +12,16 @@ public class AttributePointBudget {
     private int spentPoints;
 
     public AttributePointBudget(int totalPoints) {
+        this(totalPoints, 0);
+    }
+
+    /**
+     * Restores a budget with an already-spent amount — used when reloading a persisted
+     * character, where {@code spentPoints} is real stored state rather than a fresh count.
+     */
+    public AttributePointBudget(int totalPoints, int spentPoints) {
         this.totalPoints = totalPoints;
+        this.spentPoints = spentPoints;
     }
 
     public void spend(int amount) {

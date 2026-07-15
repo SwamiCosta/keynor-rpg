@@ -44,6 +44,7 @@ import java.util.List;
  */
 public class PlayableCharacter {
 
+    private Long id;
     private final String name;
     private final Body body;
     private final Mind mind;
@@ -1609,6 +1610,18 @@ public class PlayableCharacter {
 
     public void linkToLore(String loreReference) {
         this.loreReference = loreReference;
+    }
+
+    /**
+     * Assigns the storage identity once this character has been saved — {@code null} until
+     * then. Set only by the persistence layer, never by domain/formula logic.
+     */
+    public void assignId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     // -------------------------------------------------------------------------

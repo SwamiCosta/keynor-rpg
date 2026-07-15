@@ -1,6 +1,8 @@
 package com.keynor.rpg.domain.model;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Body {
 
@@ -63,6 +65,13 @@ public class Body {
 
     private static Body fromDataGroups(Biomechanics biomechanics, BodySystems bodySystems,
                                         PhysicalTraits physicalTraits) {
+        return fromDataGroups(biomechanics, bodySystems, physicalTraits,
+                new AttributePointBudget(20), new AttributePointBudget(20));
+    }
+
+    private static Body fromDataGroups(Biomechanics biomechanics, BodySystems bodySystems,
+                                        PhysicalTraits physicalTraits, AttributePointBudget geneticPoints,
+                                        AttributePointBudget trainingPoints) {
         BodyComponent skull = buildSkull();
         BodyComponent neck = buildNeck();
         BodyComponent rightFlank = buildFlank("Right");
@@ -76,7 +85,36 @@ public class Body {
 
         return new Body(skull, neck, rightFlank, leftFlank, torso, rightHip, leftHip, genitals, buttocks,
                 lowerBody, biomechanics, bodySystems, physicalTraits,
-                BodyCoefficients.defaults(), new AttributePointBudget(20), new AttributePointBudget(20));
+                BodyCoefficients.defaults(), geneticPoints, trainingPoints);
+    }
+
+    /**
+     * Rebuilds a full human-shaped body from persisted data groups and point budgets, then
+     * restores each wound-tree node's live damage state from {@code woundState} (matched by
+     * {@link BodyComponent#getName()}). Used only by the persistence layer when loading a
+     * character — the anatomical tree shape itself is always rebuilt from the standard human
+     * template, not persisted as static data.
+     */
+    public static Body reconstruct(Biomechanics biomechanics, BodySystems bodySystems, PhysicalTraits physicalTraits,
+                                    AttributePointBudget geneticPoints, AttributePointBudget trainingPoints,
+                                    List<BodyComponentState> woundState) {
+        Body body = fromDataGroups(biomechanics, bodySystems, physicalTraits, geneticPoints, trainingPoints);
+        Map<String, BodyComponentState> stateByName = woundState.stream()
+                .collect(Collectors.toMap(BodyComponentState::name, state -> state));
+        for (BodyComponent root : body.rootComponents()) {
+            restoreWoundState(root, stateByName);
+        }
+        return body;
+    }
+
+    private static void restoreWoundState(BodyComponent component, Map<String, BodyComponentState> stateByName) {
+        BodyComponentState state = stateByName.get(component.getName());
+        if (state != null) {
+            component.restoreState(state.currentHitPoints(), state.irreversibleDamage());
+        }
+        for (BodyComponent child : component.getChildren()) {
+            restoreWoundState(child, stateByName);
+        }
     }
 
     private static BodyComponent buildSkull() {
