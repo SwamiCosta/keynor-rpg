@@ -167,7 +167,7 @@ Combat proceeds as an increasing time count. There is a count for each character
 - **Lunge Attack** — the character makes a short forward movement (up to 2 meters) and an attack at the same time.
 - **Charge Attack** — the character runs a longer distance (more than 2 meters) and executes an attack at the end of the run. If the distance is greater than 4 meters, damage increases by +5.
 
-**Combat start:** at the start of combat, every character makes a Reaction Speed test to determine turn order. Divide each result by 10 and round down.
+**Combat start:** at the start of combat, every character makes a Cognitive Speed test to determine turn order. Divide each result by 10 and round down.
 
 **Example:** if one character gets 110, another gets 109, and another gets 100, the order is: the first character starts at count 0, and the other two start at count 1.
 

@@ -98,7 +98,7 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("concentration", AttributeBreakdownResponse.from(character.getConcentrationBreakdown(), language));
         map.put("purity", AttributeBreakdownResponse.from(character.getPurityBreakdown(), language));
         map.put("chiPool", AttributeBreakdownResponse.from(character.getChiPoolBreakdown(), language));
-        map.put("reactionSpeed", AttributeBreakdownResponse.from(character.getReactionSpeedBreakdown(), language));
+        map.put("cognitiveSpeed", AttributeBreakdownResponse.from(character.getCognitiveSpeedBreakdown(), language));
         map.put("hiding", AttributeBreakdownResponse.from(character.getHidingBreakdown(), language));
         map.put("sneaking", AttributeBreakdownResponse.from(character.getSneakingBreakdown(), language));
         map.put("alchemy", AttributeBreakdownResponse.from(character.getAlchemyBreakdown(), language));
