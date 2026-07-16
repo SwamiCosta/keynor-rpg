@@ -117,6 +117,28 @@ public class Body {
         }
     }
 
+    /**
+     * Flattens the current wound tree (every root, recursively) into one {@link BodyComponentState}
+     * per node — the inverse of the overlay {@link #reconstruct} applies. Used by the persistence
+     * layer to save current damage state, and by character updates to carry existing damage state
+     * forward onto a body rebuilt from new inputs.
+     */
+    public List<BodyComponentState> woundState() {
+        List<BodyComponentState> states = new java.util.ArrayList<>();
+        for (BodyComponent root : rootComponents()) {
+            collectWoundState(root, states);
+        }
+        return states;
+    }
+
+    private static void collectWoundState(BodyComponent component, List<BodyComponentState> out) {
+        out.add(new BodyComponentState(component.getName(), component.getCurrentHitPoints(),
+                component.getIrreversibleDamage()));
+        for (BodyComponent child : component.getChildren()) {
+            collectWoundState(child, out);
+        }
+    }
+
     private static BodyComponent buildSkull() {
         BodyComponent skull = BodyComponent.structural("Skull", 20, 5, true, 8);
         skull.addChild(BodyComponent.protectedInternal("Brain", 10, 5, true, 18));

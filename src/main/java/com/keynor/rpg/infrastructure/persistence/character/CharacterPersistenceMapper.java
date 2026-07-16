@@ -2,7 +2,6 @@ package com.keynor.rpg.infrastructure.persistence.character;
 
 import com.keynor.rpg.domain.model.BloodSystem;
 import com.keynor.rpg.domain.model.Body;
-import com.keynor.rpg.domain.model.BodyComponent;
 import com.keynor.rpg.domain.model.BodyComponentState;
 import com.keynor.rpg.domain.model.BodyComposition;
 import com.keynor.rpg.domain.model.BodyStructure;
@@ -134,21 +133,14 @@ public class CharacterPersistenceMapper {
                 generalPersonality.getFocus());
     }
 
-    /** Flattens the wound tree (10 roots, recursively) into one row per node. */
+    /** Flattens the wound tree (via {@link Body#woundState()}) into one row per node. */
     public List<BodyComponentEntity> toWoundStateEntities(Long characterId, Body body) {
         List<BodyComponentEntity> entities = new ArrayList<>();
-        for (BodyComponent root : body.rootComponents()) {
-            collectWoundState(characterId, root, entities);
+        for (BodyComponentState state : body.woundState()) {
+            entities.add(new BodyComponentEntity(characterId, state.name(), state.currentHitPoints(),
+                    state.irreversibleDamage()));
         }
         return entities;
-    }
-
-    private void collectWoundState(Long characterId, BodyComponent component, List<BodyComponentEntity> out) {
-        out.add(new BodyComponentEntity(characterId, component.getName(), component.getCurrentHitPoints(),
-                component.getIrreversibleDamage()));
-        for (BodyComponent child : component.getChildren()) {
-            collectWoundState(characterId, child, out);
-        }
     }
 
     public List<MindEruditionLevelEntity> toEruditionEntities(Long characterId, Erudition erudition) {

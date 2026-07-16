@@ -12,13 +12,13 @@ import com.keynor.rpg.domain.model.Values;
 import com.keynor.rpg.domain.model.WeaponProficiencies;
 
 /**
- * Same parameter shape as {@link PreviewAttributesUseCase} plus {@code name} — creation starts
- * a character from the same Body/Mind data groups the stateless preview already accepts, then
- * persists it. Returned {@link PlayableCharacter} has its id assigned.
+ * Same Body/Mind shape as {@link CreateCharacterUseCase}, targeting an existing character by
+ * id. Existing wound-tree damage and point-budget spend counts are preserved across the
+ * update — only the raw input groups this method receives are replaced.
  */
-public interface CreateCharacterUseCase {
+public interface UpdateCharacterUseCase {
 
-    PlayableCharacter create(String name, Biomechanics biomechanics, BodySystems bodySystems,
+    PlayableCharacter update(String id, String name, Biomechanics biomechanics, BodySystems bodySystems,
                               PhysicalTraits physicalTraits, Values values, Erudition erudition,
                               Personality personality, Labours labours, GeneralPersonality generalPersonality,
                               WeaponProficiencies weaponProficiencies, String actor);
