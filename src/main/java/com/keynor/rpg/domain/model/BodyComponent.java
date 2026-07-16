@@ -76,6 +76,15 @@ public class BodyComponent {
         return (maxHitPoints - irreversibleDamage) - currentHitPoints;
     }
 
+    /**
+     * Restores persisted wound state directly, bypassing {@link #applyDamage(int, boolean)}'s
+     * delta/logging semantics — used only when reconstructing a character from storage.
+     */
+    public void restoreState(int currentHitPoints, int irreversibleDamage) {
+        this.currentHitPoints = currentHitPoints;
+        this.irreversibleDamage = irreversibleDamage;
+    }
+
     public String getName() {
         return name;
     }

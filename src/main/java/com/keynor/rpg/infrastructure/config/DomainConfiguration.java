@@ -1,14 +1,17 @@
 package com.keynor.rpg.infrastructure.config;
 
 import com.keynor.rpg.application.usecase.CombatActionTimeService;
+import com.keynor.rpg.application.usecase.CreateCharacterService;
 import com.keynor.rpg.application.usecase.GetPlayableCharacterService;
 import com.keynor.rpg.application.usecase.PreviewAttributesService;
 import com.keynor.rpg.domain.port.in.CalculateCombatActionTimeUseCase;
+import com.keynor.rpg.domain.port.in.CreateCharacterUseCase;
 import com.keynor.rpg.domain.port.in.GetPlayableCharacterUseCase;
 import com.keynor.rpg.domain.port.in.PreviewAttributesUseCase;
 import com.keynor.rpg.domain.port.out.RandomSource;
 import com.keynor.rpg.domain.service.BodyCascadeResolver;
 import com.keynor.rpg.domain.service.CombatActionTimeCalculator;
+import com.keynor.rpg.infrastructure.persistence.character.CharacterRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,8 +24,13 @@ public class DomainConfiguration {
     }
 
     @Bean
-    public GetPlayableCharacterUseCase getPlayableCharacterUseCase() {
-        return new GetPlayableCharacterService();
+    public GetPlayableCharacterUseCase getPlayableCharacterUseCase(CharacterRepository characterRepository) {
+        return new GetPlayableCharacterService(characterRepository);
+    }
+
+    @Bean
+    public CreateCharacterUseCase createCharacterUseCase(CharacterRepository characterRepository) {
+        return new CreateCharacterService(characterRepository);
     }
 
     @Bean
