@@ -1408,16 +1408,118 @@ public class PlayableCharacter {
         return getLowRangeCombatBreakdown().total();
     }
 
-    /** LongRangeCombat = baseline + kLongRangeCombatArchery x Archery + kLongRangeCombatShooting x Shooting (rpg-21). */
-    public AttributeBreakdown getLongRangeCombatBreakdown() {
+    /**
+     * Valor = baseline + kValorBellicose x hasBellicose + kValorTestosterone x Tmod
+     * (2026-07-18). Combat/Competition pool attribute representing a character's resolve to
+     * keep fighting. {@code current} is not {@code atFull(total)} like every other pool — see
+     * {@link #getValorAttribute()}, the first pool where the two genuinely diverge.
+     */
+    public AttributeBreakdown getValorBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                new AttributeBreakdown.Term("Archery", coeff().getKLongRangeCombatArchery() * erudition().getLevel(Knowledge.ARCHERY)),
-                new AttributeBreakdown.Term("Shooting", coeff().getKLongRangeCombatShooting() * trainingAndConditioning().getShooting())
+                new AttributeBreakdown.Term("Bellicose", coeff().getKValorBellicose() * flag(hasTrait(Trait.BELLICOSE))),
+                new AttributeBreakdown.Term("Testosterone Modifier", coeff().getKValorTestosterone() * testosteroneModifier())
         ));
     }
 
-    public double getLongRangeCombat() {
-        return getLongRangeCombatBreakdown().total();
+    public double getValor() {
+        return getValorBreakdown().total();
+    }
+
+    /**
+     * Every point of Physical Integrity lost reduces Valor by the same amount (2026-07-18
+     * design: "se um personagem perdeu 40 pontos de Integridade, ele recebe 40 pontos de dano
+     * em Valor"). {@code current} is allowed to go negative — see {@link #hasFallen()}. Other
+     * Valor-draining effects (fear, demoralization, confusion, pain beyond Pain Threshold) are
+     * documented intent only in game-rules.md, not implemented here — see the linked TODOs
+     * blocking Physical Integrity's own time-based loss mechanic below.
+     */
+    public PoolAttribute getValorAttribute() {
+        double total = getValor();
+        double integrityLoss = 100 - getPhysicalIntegrity();
+        return new PoolAttribute(total, total - integrityLoss);
+    }
+
+    /**
+     * True once Valor has been driven to zero or below — the character "falls" (loses the will
+     * to fight) but is not necessarily dead; see {@link #getPhysicalIntegrity()} for death.
+     */
+    public boolean hasFallen() {
+        return getValorAttribute().current() <= 0;
+    }
+
+    /**
+     * PhysicalIntegrity — 0 to 100, a weighted-average summary of the wound tree's current
+     * damage state (2026-07-18). Not an additive-standard formula (no breakdown) — it aggregates
+     * the anatomical tree rather than combining Body/Mind inputs, same "no breakdown" precedent
+     * as SwingPower/GrapplingSelfLifting. Each component's contribution is weighted by an
+     * importance tier derived from CascadeRelation + vital (not 45 hand-authored per-node
+     * values — see BodyCoefficients' kIntegrityWeightXxx fields) and by severity: irreversible
+     * damage weighs kIntegrityIrreversibleSeverity/kIntegrityReversibleSeverity times more than
+     * reversible damage, so "um personagem que receba um único golpe e tenha seu braço
+     * decepado (irreversível) está em situação pior do que um personagem que ... acumulou
+     * apenas hematomas e ralados." A fully-destroyed vital component (irreversibleDamage >=
+     * maxHitPoints) forces Integrity straight to 0 regardless of the weighted average — "um
+     * personagem pode estar com 100% de integridade e ser eliminado por um único golpe bem
+     * aplicado no coração."
+     *
+     * <p><b>Explicitly not implemented (linked TODOs, do not invent):</b> bleeding/poison/
+     * disease/starvation/dehydration time-based loss (every 5 UT, floored at -1, slowed but
+     * never stopped by BleedingResistance/DiseaseResistance/PoisonResistance/etc.) depends on
+     * "damage after resistance calculation," which depends on the damage-vs-resistance formula
+     * game-rules.md's "Damage vs. resistance" section already marks as an unresolved *TODO*
+     * (2026-07-08 decision: "do not invent this formula"). A component already at max
+     * irreversible damage taking another hit should still cost Integrity even though no more HP
+     * is lost on that component — also blocked on the same missing pipeline (there is no attack
+     * resolution use case yet to hook this into). See game-rules.md's new section for both
+     * TODOs, kept explicitly cross-referenced so neither is resolved without the other being
+     * revisited.
+     */
+    public double getPhysicalIntegrity() {
+        List<BodyComponent> components = allComponents();
+        boolean vitalComponentDestroyed = components.stream()
+                .anyMatch(c -> c.isVital() && c.getIrreversibleDamage() >= c.getMaxHitPoints());
+        if (vitalComponentDestroyed) {
+            return 0;
+        }
+        double totalWeight = 0;
+        double weightedLoss = 0;
+        for (BodyComponent component : components) {
+            double weight = componentImportanceWeight(component);
+            double reversibleFraction = (double) component.getReversibleDamage() / component.getMaxHitPoints();
+            double irreversibleFraction = (double) component.getIrreversibleDamage() / component.getMaxHitPoints();
+            double severity = reversibleFraction * coeff().getKIntegrityReversibleSeverity()
+                    + irreversibleFraction * coeff().getKIntegrityIrreversibleSeverity();
+            double componentLossPercent = Math.min(100, severity / coeff().getKIntegrityIrreversibleSeverity() * 100);
+            weightedLoss += componentLossPercent * weight;
+            totalWeight += weight;
+        }
+        double lossPercent = totalWeight == 0 ? 0 : weightedLoss / totalWeight;
+        return Math.max(0, Math.min(100, 100 - lossPercent));
+    }
+
+    private List<BodyComponent> allComponents() {
+        List<BodyComponent> all = new ArrayList<>();
+        for (BodyComponent root : body.rootComponents()) {
+            collectComponents(root, all);
+        }
+        return all;
+    }
+
+    private void collectComponents(BodyComponent component, List<BodyComponent> out) {
+        out.add(component);
+        for (BodyComponent child : component.getChildren()) {
+            collectComponents(child, out);
+        }
+    }
+
+    private double componentImportanceWeight(BodyComponent component) {
+        if (component.getCascadeRelation() == CascadeRelation.PROTECTED_INTERNAL) {
+            return component.isVital() ? coeff().getKIntegrityWeightVitalInternal() : coeff().getKIntegrityWeightInternal();
+        }
+        if (component.getCascadeRelation() == CascadeRelation.ATTACHED_APPENDAGE) {
+            return coeff().getKIntegrityWeightAppendage();
+        }
+        return coeff().getKIntegrityWeightStructural();
     }
 
     // -------------------------------------------------------------------------

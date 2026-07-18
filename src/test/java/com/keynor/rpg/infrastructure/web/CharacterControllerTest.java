@@ -122,7 +122,6 @@ class CharacterControllerTest {
                 .andExpect(jsonPath("$.attributes.analysis").value(60.0))
                 .andExpect(jsonPath("$.attributes.closeCombat").value(60.0))
                 .andExpect(jsonPath("$.attributes.lowRangeCombat").value(60.0))
-                .andExpect(jsonPath("$.attributes.longRangeCombat").value(60.0))
                 .andExpect(jsonPath("$.attributes.psyquismOutput").value(12.0))
                 .andExpect(jsonPath("$.attributes.psyquismDefense").value(12.0))
                 .andExpect(jsonPath("$.attributes.charmResistance").value(60.0))

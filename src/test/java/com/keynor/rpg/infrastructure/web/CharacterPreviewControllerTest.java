@@ -163,7 +163,6 @@ class CharacterPreviewControllerTest {
                 .andExpect(jsonPath("$.attributes.analysis").exists())
                 .andExpect(jsonPath("$.attributes.closeCombat").exists())
                 .andExpect(jsonPath("$.attributes.lowRangeCombat").exists())
-                .andExpect(jsonPath("$.attributes.longRangeCombat").exists())
                 .andExpect(jsonPath("$.attributes.psyquismOutput").exists())
                 .andExpect(jsonPath("$.attributes.psyquismDefense").exists())
                 .andExpect(jsonPath("$.attributes.charmResistance").exists())

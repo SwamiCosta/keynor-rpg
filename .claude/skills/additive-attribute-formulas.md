@@ -495,6 +495,40 @@ HackingAndPrograming  = 60 + 8×ComputerScience
 
 Pure rename, no formula/weight change — `getReactionSpeed()`/`getReactionSpeedBreakdown()` → `getCognitiveSpeed()`/`getCognitiveSpeedBreakdown()`, `AttributesResponse.reactionSpeed`/`AttributeBreakdownsResponse`'s `reactionSpeed` key → `cognitiveSpeed`, and `kReactionSpeedNeuralDrive`/`kReactionSpeedReflexes` → `kCognitiveSpeedNeuralDrive`/`kCognitiveSpeedReflexes`. Driven by the new combat-timing UT system (`game-rules.md`'s Time tracking section) needing a clearer name for the attribute that governs both initiative order and several action-speed formulas. The rpg-20 section above still says "Reaction Speed" — describing the model as it existed at the time, same convention already applied to the `nutrientAbsorption`→`digestiveAbsorption` and `HormonalSystem`→`HormonalGlandularSystem` renames.
 
+## Removal: LongRangeCombat (2026-07-18)
+
+`getLongRangeCombat()`/`getLongRangeCombatBreakdown()`, `kLongRangeCombatShooting`, `kLongRangeCombatArchery`, and the `longRangeCombat` field on `AttributesResponse`/`AttributeBreakdownsResponse`/`CombatAttributeInputs`/`CombatActionTimeRequest` are all deleted outright — user-requested removal, not a rename. The four `CombatActionType` formulas that used to weight it (`DRAW_RANGED_WEAPON`, `RELOAD_PISTOL`, `RELOAD_LONG_GUN`, `AIM`) now score on Speed alone at weight 1.0 (not the old partial Speed weight left standing) — see `game-rules.md`'s Time tracking table. `Archery`/`Shooting` (the two inputs `LongRangeCombat` used to read) are untouched and still feed `Aim` via `kAimArchery`/`kAimShooting`, so neither input became dead. Sections above describing rpg-19/rpg-21 formulas that included `LongRangeCombat` are left as-is — accurate history of what those deltas shipped, per this file's own convention (see the rpg-20 "Reaction Speed" note just above).
+
+## Physical Integrity and Valor (2026-07-18)
+
+Two new values, added alongside the `LongRangeCombat` removal. Full narrative/design rationale lives in `game-rules.md` (new "Physical Integrity" subsection under Damage, new "Valor" subsection under Combat) — this section covers only the formula-level detail.
+
+**`PhysicalIntegrity` — not an additive-standard formula, no breakdown** (same "no breakdown" precedent as `SwingPower`/`GrapplingSelfLifting`/Load Capacity — it aggregates the wound tree, not Body/Mind inputs):
+
+```
+componentSeverity   = (ReversibleDamage/MaxHitPoints) × kIntegrityReversibleSeverity
+                     + (IrreversibleDamage/MaxHitPoints) × kIntegrityIrreversibleSeverity
+componentLossPercent = min(100, componentSeverity / kIntegrityIrreversibleSeverity × 100)
+componentWeight      = CascadeRelation == PROTECTED_INTERNAL
+                          ? (vital ? kIntegrityWeightVitalInternal : kIntegrityWeightInternal)
+                          : (CascadeRelation == ATTACHED_APPENDAGE ? kIntegrityWeightAppendage
+                                                                    : kIntegrityWeightStructural)
+PhysicalIntegrity    = 100 − Σ(componentLossPercent × componentWeight) / Σ(componentWeight)
+```
+
+...except that any `vital` component with `IrreversibleDamage >= MaxHitPoints` (fully destroyed) forces `PhysicalIntegrity = 0` outright, bypassing the weighted average — a single destroyed Heart/Brain/etc. kills regardless of the rest of the body's condition. Defaults: `kIntegrityReversibleSeverity = 1`, `kIntegrityIrreversibleSeverity = 8`, `kIntegrityWeightVitalInternal = 5`, `kIntegrityWeightInternal = 3`, `kIntegrityWeightStructural = 2`, `kIntegrityWeightAppendage = 1` — first-pass, not balanced game data, tune through play like every other coefficient in this class. The importance tiers are derived from each `BodyComponent`'s existing `CascadeRelation`/`vital` fields rather than 45 hand-authored per-node weights, a deliberate simplification.
+
+**`Valor` — additive-standard baseline, Combat/Competition group, new sixth Pool Attribute:**
+
+```
+Valor(total)   = 60 + kValorBellicose×hasBellicose + kValorTestosterone×Tmod
+Valor(current) = Valor(total) − (100 − PhysicalIntegrity)
+```
+
+`kValorBellicose = 8`, `kValorTestosterone = 4` (first-pass, tune through play). `current` is the **first Pool Attribute whose value doesn't always equal `total`** (see `PoolAttribute`'s own javadoc — every other pool's `current` still mirrors `total` today, pending its own future spend/damage/rest mechanic). `current` is allowed to go negative; `PlayableCharacter.hasFallen()` (`current <= 0`) is a new plain boolean, not part of the REST contract.
+
+**Explicitly not implemented — see game-rules.md's linked TODOs:** bleeding/poison/disease/starvation/dehydration as a 5-UT periodic Integrity drain (resisted-but-never-fully-stopped by Bleeding/Disease/Poison Resistance etc.), damage-type-triggered bleeding status (Slice/Pierce/Chop), and every non-Integrity Valor drain (Fear, Demoralization, Confusion, pain beyond Pain Threshold). All of these need the still-open damage-vs-resistance formula (`game-rules.md`'s "Damage vs. resistance" `*TODO*`, 2026-07-08 decision, "do not invent") as a prerequisite — do not build them ahead of that formula landing.
+
 ## Extending this pattern
 
 When adding a new derived attribute: pick its neutral-anchored inputs, decide their weights, add one `BodyCoefficients` field per weight (named `k<Formula><Term>`), write the formula as `baseline + Σ weight × (input - neutral)` with each term wrapped in a labeled `AttributeBreakdown.Term`, add the label's Portuguese translation to `TermLabelTranslations` in the same delta (see "Localization" above), and only add a floor if the actual worst-case combination (compute it — don't guess) lands at or below `attributeFloor`. See "Testing scope for formulas" above for what to actually write tests for.

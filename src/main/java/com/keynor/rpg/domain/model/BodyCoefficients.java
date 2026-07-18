@@ -337,7 +337,6 @@ public class BodyCoefficients {
     private double kPainThresholdResilience = 2;
     private double kCloseCombatFighting = 5;
     private double kLowRangeCombatWeaponPracticing = 5;
-    private double kLongRangeCombatShooting = 4;
     private double kAimShooting = 3;
 
     // Athletism and Martial Arts (rpg-21) — Dancing/Fencing are new Knowledge constants (level
@@ -348,8 +347,22 @@ public class BodyCoefficients {
     private double kLowRangeCombatFencing = 3;
 
     // Archery (rpg-21) — first real formula effect for this pre-existing Knowledge constant.
-    private double kLongRangeCombatArchery = 4;
     private double kAimArchery = 3;
+
+    // Physical Integrity (2026-07-18) — per-component importance tiers, derived from
+    // CascadeRelation + vital rather than 45 hand-authored per-node weights. Severity weights
+    // make irreversible damage far more devastating to Integrity than reversible damage.
+    private double kIntegrityWeightVitalInternal = 5;
+    private double kIntegrityWeightInternal = 3;
+    private double kIntegrityWeightStructural = 2;
+    private double kIntegrityWeightAppendage = 1;
+    private double kIntegrityReversibleSeverity = 1;
+    private double kIntegrityIrreversibleSeverity = 8;
+
+    // Valor (2026-07-18) — Combat/Competition pool attribute; baseline formula only. `current`
+    // is coupled to Physical Integrity loss directly in PlayableCharacter, not a weighted term.
+    private double kValorBellicose = 8;
+    private double kValorTestosterone = 4;
 
     // Skills (rpg-21) — new craft/practice attributes, all baseline 60, Knowledge-level-driven.
     private double kAlchemyChemistry = 8;
@@ -1072,9 +1085,6 @@ public class BodyCoefficients {
     public double getKLowRangeCombatWeaponPracticing() { return kLowRangeCombatWeaponPracticing; }
     public void setKLowRangeCombatWeaponPracticing(double v) { this.kLowRangeCombatWeaponPracticing = v; }
 
-    public double getKLongRangeCombatShooting() { return kLongRangeCombatShooting; }
-    public void setKLongRangeCombatShooting(double v) { this.kLongRangeCombatShooting = v; }
-
     public double getKAimShooting() { return kAimShooting; }
     public void setKAimShooting(double v) { this.kAimShooting = v; }
 
@@ -1090,11 +1100,32 @@ public class BodyCoefficients {
     public double getKLowRangeCombatFencing() { return kLowRangeCombatFencing; }
     public void setKLowRangeCombatFencing(double v) { this.kLowRangeCombatFencing = v; }
 
-    public double getKLongRangeCombatArchery() { return kLongRangeCombatArchery; }
-    public void setKLongRangeCombatArchery(double v) { this.kLongRangeCombatArchery = v; }
-
     public double getKAimArchery() { return kAimArchery; }
     public void setKAimArchery(double v) { this.kAimArchery = v; }
+
+    public double getKIntegrityWeightVitalInternal() { return kIntegrityWeightVitalInternal; }
+    public void setKIntegrityWeightVitalInternal(double v) { this.kIntegrityWeightVitalInternal = v; }
+
+    public double getKIntegrityWeightInternal() { return kIntegrityWeightInternal; }
+    public void setKIntegrityWeightInternal(double v) { this.kIntegrityWeightInternal = v; }
+
+    public double getKIntegrityWeightStructural() { return kIntegrityWeightStructural; }
+    public void setKIntegrityWeightStructural(double v) { this.kIntegrityWeightStructural = v; }
+
+    public double getKIntegrityWeightAppendage() { return kIntegrityWeightAppendage; }
+    public void setKIntegrityWeightAppendage(double v) { this.kIntegrityWeightAppendage = v; }
+
+    public double getKIntegrityReversibleSeverity() { return kIntegrityReversibleSeverity; }
+    public void setKIntegrityReversibleSeverity(double v) { this.kIntegrityReversibleSeverity = v; }
+
+    public double getKIntegrityIrreversibleSeverity() { return kIntegrityIrreversibleSeverity; }
+    public void setKIntegrityIrreversibleSeverity(double v) { this.kIntegrityIrreversibleSeverity = v; }
+
+    public double getKValorBellicose() { return kValorBellicose; }
+    public void setKValorBellicose(double v) { this.kValorBellicose = v; }
+
+    public double getKValorTestosterone() { return kValorTestosterone; }
+    public void setKValorTestosterone(double v) { this.kValorTestosterone = v; }
 
     public double getKAlchemyChemistry() { return kAlchemyChemistry; }
     public void setKAlchemyChemistry(double v) { this.kAlchemyChemistry = v; }
