@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -247,6 +248,18 @@ public class CharacterRepository {
             character.linkToLore(entity.get().getLoreReference());
         }
         return Optional.of(character);
+    }
+
+    /**
+     * Relies entirely on {@code ON DELETE CASCADE} (see every child table's foreign key in
+     * {@code db/schema.sql}) to remove every related row — no per-table delete calls needed.
+     */
+    @Transactional
+    public void deleteById(Long id) {
+        if (!characterJpaRepository.existsById(id)) {
+            throw new NoSuchElementException("Character not found: " + id);
+        }
+        characterJpaRepository.deleteById(id);
     }
 
     private AttributePointBudget toBudget(CharacterPointBudgetEntity entity) {

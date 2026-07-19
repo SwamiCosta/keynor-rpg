@@ -223,3 +223,25 @@ CREATE TABLE mind_selected_traits (
     trait          VARCHAR(64) NOT NULL,
     PRIMARY KEY (character_id, trait)
 );
+
+-- =============================================================================================
+-- Audit log (new, 2026-07-16)
+--
+-- Records who performed every mutating action (create/update/delete), even though this project
+-- has no authentication system yet — `actor` is whatever the caller supplies via the
+-- `X-Actor` request header (defaults to 'unknown' when absent), not a verified identity. No
+-- foreign key to `characters` on purpose: a deleted character's audit trail must survive the
+-- delete, and this table is generic enough to log any future entity type without a schema
+-- change (mirrors the same key-value-catalog philosophy as the mind_*_levels tables above).
+-- =============================================================================================
+
+CREATE TABLE audit_logs (
+    id           BIGSERIAL PRIMARY KEY,
+    actor        VARCHAR(255) NOT NULL,
+    action       VARCHAR(32) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE')),
+    entity_type  VARCHAR(64) NOT NULL,
+    entity_id    VARCHAR(64) NOT NULL,
+    occurred_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
