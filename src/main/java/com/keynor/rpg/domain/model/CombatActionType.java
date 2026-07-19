@@ -29,13 +29,13 @@ public enum CombatActionType {
     DRINK_POTION,
     /** Ação 09A — Sacar Arma Corpo a Corpo Leve/Média. S = 0.6×Speed + 0.4×ShortRangeCombat. */
     DRAW_MELEE_WEAPON,
-    /** Ação 09B — Sacar Arma de Longa Distância (arco, arma de fogo). S = 0.6×Speed + 0.4×LongRangeCombat. */
+    /** Ação 09B — Sacar Arma de Longa Distância (arco, arma de fogo). S = Speed. */
     DRAW_RANGED_WEAPON,
     /** Ação 10 — Sacar Objeto da Mochila. S = Speed. */
     DRAW_FROM_BACKPACK,
-    /** Ação 11 — Recarregar Pistola. S = 0.7×LongRangeCombat + 0.3×Speed. */
+    /** Ação 11 — Recarregar Pistola. S = Speed. */
     RELOAD_PISTOL,
-    /** Ação 12 — Recarregar Arma de Fogo Maior (rifles, fuzis). S = 0.75×LongRangeCombat + 0.25×Speed. */
+    /** Ação 12 — Recarregar Arma de Fogo Maior (rifles, fuzis). S = Speed. */
     RELOAD_LONG_GUN,
     /** Ação 13 — Evasão (sair da frente de um ataque). S = 0.7×Evasion + 0.3×Speed. */
     EVASION,
@@ -43,7 +43,7 @@ public enum CombatActionType {
     BLOCK,
     /** Ação 15 — Levantar-se do Chão. S = Speed. */
     STAND_UP,
-    /** Ação 16 — Mirar (ajustar a mira para o próximo disparo). S = 0.7×LongRangeCombat + 0.3×Speed. */
+    /** Ação 16 — Mirar (ajustar a mira para o próximo disparo). S = Speed. */
     AIM,
     /** Ação 17 — Sacar Arma Pesada (espadões, martelos de guerra). S = 0.7×Speed + 0.3×ShortRangeCombat. */
     DRAW_HEAVY_WEAPON,

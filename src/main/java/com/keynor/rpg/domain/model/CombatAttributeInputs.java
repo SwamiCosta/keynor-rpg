@@ -9,5 +9,5 @@ package com.keynor.rpg.domain.model;
  * {@link com.keynor.rpg.domain.port.in.PreviewAttributesUseCase}.
  */
 public record CombatAttributeInputs(Double speed, Double cognitiveSpeed, Double closeCombat,
-                                     Double shortRangeCombat, Double longRangeCombat, Double evasion) {
+                                     Double shortRangeCombat, Double evasion) {
 }

@@ -11,10 +11,9 @@ import com.keynor.rpg.domain.model.CombatAttributeInputs;
  * {@link BodyPreviewRequest}'s sibling input DTOs.
  */
 public record CombatActionTimeRequest(CombatActionType action, Double speed, Double cognitiveSpeed,
-                                       Double closeCombat, Double shortRangeCombat, Double longRangeCombat,
-                                       Double evasion) {
+                                       Double closeCombat, Double shortRangeCombat, Double evasion) {
 
     public CombatAttributeInputs toAttributeInputs() {
-        return new CombatAttributeInputs(speed, cognitiveSpeed, closeCombat, shortRangeCombat, longRangeCombat, evasion);
+        return new CombatAttributeInputs(speed, cognitiveSpeed, closeCombat, shortRangeCombat, evasion);
     }
 }

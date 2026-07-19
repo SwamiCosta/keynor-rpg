@@ -43,19 +43,16 @@ public class CombatTimingCoefficients {
     private double kDrawMeleeWeaponShortRangeCombat = 0.4;
 
     private int utBaseDrawRangedWeapon = 5;
-    private double kDrawRangedWeaponSpeed = 0.6;
-    private double kDrawRangedWeaponLongRangeCombat = 0.4;
+    private double kDrawRangedWeaponSpeed = 1.0;
 
     private int utBaseDrawFromBackpack = 40;
     private double kDrawFromBackpackSpeed = 1.0;
 
     private int utBaseReloadPistol = 15;
-    private double kReloadPistolLongRangeCombat = 0.7;
-    private double kReloadPistolSpeed = 0.3;
+    private double kReloadPistolSpeed = 1.0;
 
     private int utBaseReloadLongGun = 25;
-    private double kReloadLongGunLongRangeCombat = 0.75;
-    private double kReloadLongGunSpeed = 0.25;
+    private double kReloadLongGunSpeed = 1.0;
 
     private int utBaseEvasion = 3;
     private double kEvasionEvasion = 0.7;
@@ -70,8 +67,7 @@ public class CombatTimingCoefficients {
     private double kStandUpSpeed = 1.0;
 
     private int utBaseAim = 4;
-    private double kAimLongRangeCombat = 0.7;
-    private double kAimSpeed = 0.3;
+    private double kAimSpeed = 1.0;
 
     private int utBaseDrawHeavyWeapon = 8;
     private double kDrawHeavyWeaponSpeed = 0.7;
@@ -164,9 +160,6 @@ public class CombatTimingCoefficients {
     public double getKDrawRangedWeaponSpeed() { return kDrawRangedWeaponSpeed; }
     public void setKDrawRangedWeaponSpeed(double v) { this.kDrawRangedWeaponSpeed = v; }
 
-    public double getKDrawRangedWeaponLongRangeCombat() { return kDrawRangedWeaponLongRangeCombat; }
-    public void setKDrawRangedWeaponLongRangeCombat(double v) { this.kDrawRangedWeaponLongRangeCombat = v; }
-
     public int getUtBaseDrawFromBackpack() { return utBaseDrawFromBackpack; }
     public void setUtBaseDrawFromBackpack(int v) { this.utBaseDrawFromBackpack = v; }
 
@@ -176,17 +169,11 @@ public class CombatTimingCoefficients {
     public int getUtBaseReloadPistol() { return utBaseReloadPistol; }
     public void setUtBaseReloadPistol(int v) { this.utBaseReloadPistol = v; }
 
-    public double getKReloadPistolLongRangeCombat() { return kReloadPistolLongRangeCombat; }
-    public void setKReloadPistolLongRangeCombat(double v) { this.kReloadPistolLongRangeCombat = v; }
-
     public double getKReloadPistolSpeed() { return kReloadPistolSpeed; }
     public void setKReloadPistolSpeed(double v) { this.kReloadPistolSpeed = v; }
 
     public int getUtBaseReloadLongGun() { return utBaseReloadLongGun; }
     public void setUtBaseReloadLongGun(int v) { this.utBaseReloadLongGun = v; }
-
-    public double getKReloadLongGunLongRangeCombat() { return kReloadLongGunLongRangeCombat; }
-    public void setKReloadLongGunLongRangeCombat(double v) { this.kReloadLongGunLongRangeCombat = v; }
 
     public double getKReloadLongGunSpeed() { return kReloadLongGunSpeed; }
     public void setKReloadLongGunSpeed(double v) { this.kReloadLongGunSpeed = v; }
@@ -220,9 +207,6 @@ public class CombatTimingCoefficients {
 
     public int getUtBaseAim() { return utBaseAim; }
     public void setUtBaseAim(int v) { this.utBaseAim = v; }
-
-    public double getKAimLongRangeCombat() { return kAimLongRangeCombat; }
-    public void setKAimLongRangeCombat(double v) { this.kAimLongRangeCombat = v; }
 
     public double getKAimSpeed() { return kAimSpeed; }
     public void setKAimSpeed(double v) { this.kAimSpeed = v; }

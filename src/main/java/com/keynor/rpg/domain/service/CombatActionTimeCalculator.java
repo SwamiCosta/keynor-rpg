@@ -45,21 +45,17 @@ public class CombatActionTimeCalculator {
             case DRINK_POTION -> coeff.getKDrinkPotionSpeed() * speed(inputs, action);
             case DRAW_MELEE_WEAPON -> coeff.getKDrawMeleeWeaponSpeed() * speed(inputs, action)
                     + coeff.getKDrawMeleeWeaponShortRangeCombat() * shortRangeCombat(inputs, action);
-            case DRAW_RANGED_WEAPON -> coeff.getKDrawRangedWeaponSpeed() * speed(inputs, action)
-                    + coeff.getKDrawRangedWeaponLongRangeCombat() * longRangeCombat(inputs, action);
+            case DRAW_RANGED_WEAPON -> coeff.getKDrawRangedWeaponSpeed() * speed(inputs, action);
             case DRAW_FROM_BACKPACK -> coeff.getKDrawFromBackpackSpeed() * speed(inputs, action);
-            case RELOAD_PISTOL -> coeff.getKReloadPistolLongRangeCombat() * longRangeCombat(inputs, action)
-                    + coeff.getKReloadPistolSpeed() * speed(inputs, action);
-            case RELOAD_LONG_GUN -> coeff.getKReloadLongGunLongRangeCombat() * longRangeCombat(inputs, action)
-                    + coeff.getKReloadLongGunSpeed() * speed(inputs, action);
+            case RELOAD_PISTOL -> coeff.getKReloadPistolSpeed() * speed(inputs, action);
+            case RELOAD_LONG_GUN -> coeff.getKReloadLongGunSpeed() * speed(inputs, action);
             case EVASION -> coeff.getKEvasionEvasion() * evasion(inputs, action)
                     + coeff.getKEvasionSpeed() * speed(inputs, action);
             case BLOCK -> coeff.getKBlockCognitiveSpeed() * cognitiveSpeed(inputs, action)
                     + coeff.getKBlockShortRangeCombat() * shortRangeCombat(inputs, action)
                     + coeff.getKBlockSpeed() * speed(inputs, action);
             case STAND_UP -> coeff.getKStandUpSpeed() * speed(inputs, action);
-            case AIM -> coeff.getKAimLongRangeCombat() * longRangeCombat(inputs, action)
-                    + coeff.getKAimSpeed() * speed(inputs, action);
+            case AIM -> coeff.getKAimSpeed() * speed(inputs, action);
             case DRAW_HEAVY_WEAPON -> coeff.getKDrawHeavyWeaponSpeed() * speed(inputs, action)
                     + coeff.getKDrawHeavyWeaponShortRangeCombat() * shortRangeCombat(inputs, action);
             case TURN_AROUND -> coeff.getKTurnAroundSpeed() * speed(inputs, action);
@@ -108,10 +104,6 @@ public class CombatActionTimeCalculator {
 
     private double shortRangeCombat(CombatAttributeInputs inputs, CombatActionType action) {
         return require(inputs.shortRangeCombat(), action, "shortRangeCombat");
-    }
-
-    private double longRangeCombat(CombatAttributeInputs inputs, CombatActionType action) {
-        return require(inputs.longRangeCombat(), action, "longRangeCombat");
     }
 
     private double evasion(CombatAttributeInputs inputs, CombatActionType action) {

@@ -1643,7 +1643,6 @@ class PlayableCharacterTest {
 
         assertThat(character.getCloseCombat()).isCloseTo(60.0, within(TOLERANCE));
         assertThat(character.getLowRangeCombat()).isCloseTo(60.0, within(TOLERANCE));
-        assertThat(character.getLongRangeCombat()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
@@ -1653,7 +1652,6 @@ class PlayableCharacterTest {
 
         assertThat(bellicose.getCloseCombat()).isGreaterThan(defaults.getCloseCombat());
         assertThat(bellicose.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
-        assertThat(bellicose.getLongRangeCombat()).isEqualTo(defaults.getLongRangeCombat());
     }
 
     // -------------------------------------------------------------------------
@@ -1983,11 +1981,10 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void shooting_increasesLongRangeCombatAndAim() {
+    void shooting_increasesAim() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
         PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setShooting(5));
 
-        assertThat(trained.getLongRangeCombat()).isGreaterThan(defaults.getLongRangeCombat());
         assertThat(trained.getAim()).isGreaterThan(defaults.getAim());
     }
 
@@ -2015,11 +2012,10 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void archery_increasesLongRangeCombatAndAim() {
+    void archery_increasesAim() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
         PlayableCharacter archer = characterWithErudition(Knowledge.ARCHERY, 2);
 
-        assertThat(archer.getLongRangeCombat()).isGreaterThan(defaults.getLongRangeCombat());
         assertThat(archer.getAim()).isGreaterThan(defaults.getAim());
     }
 

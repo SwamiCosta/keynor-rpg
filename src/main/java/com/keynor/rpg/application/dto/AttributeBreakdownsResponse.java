@@ -91,7 +91,7 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("analysis", AttributeBreakdownResponse.from(character.getAnalysisBreakdown(), language));
         map.put("closeCombat", AttributeBreakdownResponse.from(character.getCloseCombatBreakdown(), language));
         map.put("lowRangeCombat", AttributeBreakdownResponse.from(character.getLowRangeCombatBreakdown(), language));
-        map.put("longRangeCombat", AttributeBreakdownResponse.from(character.getLongRangeCombatBreakdown(), language));
+        map.put("valor", AttributeBreakdownResponse.from(character.getValorBreakdown(), language));
         map.put("psyquismOutput", AttributeBreakdownResponse.from(character.getPsyquismOutputBreakdown(), language));
         map.put("psyquismDefense", AttributeBreakdownResponse.from(character.getPsyquismDefenseBreakdown(), language));
         map.put("charmResistance", AttributeBreakdownResponse.from(character.getCharmResistanceBreakdown(), language));

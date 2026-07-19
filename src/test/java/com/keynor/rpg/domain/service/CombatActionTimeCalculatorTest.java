@@ -23,7 +23,7 @@ class CombatActionTimeCalculatorTest {
     private final CombatTimingCoefficients coeff = CombatTimingCoefficients.defaults();
 
     private static CombatAttributeInputs fullProfile(double value) {
-        return new CombatAttributeInputs(value, value, value, value, value, value);
+        return new CombatAttributeInputs(value, value, value, value, value);
     }
 
     private int ut(CombatActionType action, double profileValue) {
@@ -79,7 +79,7 @@ class CombatActionTimeCalculatorTest {
 
     @Test
     void calculate_missingRequiredAttribute_throws() {
-        CombatAttributeInputs missingSpeed = new CombatAttributeInputs(null, null, 60.0, null, null, null);
+        CombatAttributeInputs missingSpeed = new CombatAttributeInputs(null, null, 60.0, null, null);
         assertThrows(IllegalArgumentException.class,
                 () -> calculator.calculate(CombatActionType.WALK_1M, missingSpeed, coeff));
     }

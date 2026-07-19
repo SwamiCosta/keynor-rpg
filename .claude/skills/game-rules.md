@@ -58,6 +58,8 @@ This section documents the narrative/gameplay meaning of each derived attribute,
 | **Soft Tissue Durability** | Resistance of the character's soft-tissue body components — muscle, skin. Represents natural protection against damage. |
 | **Bone Durability** | Resistance of the character's bones. Represents natural protection against damage. |
 | **Total Mass** | The character's approximate total weight. Has little use beyond determining how easily the character can be displaced by others. |
+| **Physical Integrity** | 0-100% summary of overall body condition, from the wound tree. Reaching 0% kills the character; a destroyed vital organ (e.g. Heart) can kill outright regardless of the rest. See the Damage section's own subsection below. |
+| **Valor** | A character's resolve to keep fighting rather than give up. Falls 1:1 with Physical Integrity loss; reaching 0 or below makes the character "fall" (afraid, avoids conflict) without necessarily dying. See the Combat section's own subsection below. |
 
 > **OPEN QUESTION — table coverage.** Only the attributes the user has described so far are listed above. As Clown and Doraxes are used, every derived attribute in `additive-attribute-formulas.md` should eventually get an entry here (Sight/Hearing/Smell, the Cognitive group, the Mind-driven Skills/Social/Supernatural attributes, etc.) — currently absent, not yet a gap to chase down proactively, just an acknowledged incompleteness.
 
@@ -108,6 +110,16 @@ Once a raw damage value and a target material/damage-type pair are known, a calc
 Each body component defined in the Wound Tree has its own irreversible-damage limit based on its size, plus its own natural resistance values based on its material (bone, flesh, or both). When a body component is damaged, it starts to penalize the attributes that depend on it.
 
 **Biological damage:** characters with biological bodies can suffer direct damage to internal organs tied to disease, poisoning, and similar effects. Here the deterioration can simulate a damage application (e.g. wasting muscle, corroding organs) or adverse effects depending on the situation (e.g. exhaustion from lack of air, paralysis, etc.)
+
+### Physical Integrity (2026-07-18)
+
+A single 0-100% summary of the character's overall body condition, derived from the wound tree (`PlayableCharacter.getPhysicalIntegrity()`). 100% at full health; cannot exceed 100%. Reaching 0% kills the character.
+
+- **Severity:** irreversible damage counts far more against Integrity than reversible damage on the same component (a severed, irreversibly-damaged arm is worse than dozens of reversible bruises spread across the body) — implemented as a weighted per-component severity (`kIntegrityReversibleSeverity` vs. `kIntegrityIrreversibleSeverity`, see `additive-attribute-formulas.md`).
+- **Component importance:** not every component matters equally — a hit to the stomach costs more Integrity than the same raw damage to a thigh. Implemented as an importance tier derived from each component's `CascadeRelation` + `vital` flag (protected-internal-and-vital > protected-internal > structural > attached-appendage), not 45 hand-authored per-node numbers.
+- **Instant death by vital organ:** a character can sit at 100% Integrity everywhere else and still die outright the instant a `vital` component (Heart, Brain, etc.) is fully, irreversibly destroyed — independent of the weighted-average calculation above.
+
+> **OPEN QUESTION / linked TODOs — bleeding, poison, disease, starvation, dehydration as time-based Integrity loss (2026-07-18).** The user's design: any of these statuses drains Integrity every 5 UT, slowed but never fully stopped (floor of -1 per tick) by the matching resistance (Bleeding Resistance, Disease Resistance, Poison Resistance, etc.); accumulated wound count matters more than any single resistance value. Slice/Pierce/Chop damage can trigger a bleeding status even on non-irreversible damage (Slice most likely to); all irreversible damage always triggers some bleeding rate, scaled by the damage dealt **after resistance is applied**. A component already fully irreversibly damaged should still cost Integrity on a further hit even though no more HP is lost on that component. **None of this is implemented** — it depends directly on the damage-vs-resistance formula in the "Damage vs. resistance — outcome categories" `*TODO*` above (2026-07-08, "do not invent this formula"), which is itself still unresolved. **These two TODOs are deliberately kept cross-referenced — do not resolve one without revisiting the other**, since the bleeding/tick design is unbuildable until the damage-vs-resistance formula exists, and that formula's shape should account for what the bleeding mechanic will need from it (a post-resistance damage value) once it's defined.
 
 ### Protection
 
@@ -177,20 +189,22 @@ UT = max(1, floor(UT_Base × (60 / S)))
 | Heavy swing attack (war hammer, greatsword) | 8 | 0.65×Speed + 0.35×Short Range Combat |
 | Drink a potion (already in hand) | 12 | Speed |
 | Draw light/medium melee weapon | 5 | 0.6×Speed + 0.4×Short Range Combat |
-| Draw ranged weapon (bow, firearm) | 5 | 0.6×Speed + 0.4×Long Range Combat |
+| Draw ranged weapon (bow, firearm) | 5 | Speed |
 | Draw item from backpack | 40 | Speed |
-| Reload pistol | 15 | 0.7×Long Range Combat + 0.3×Speed |
-| Reload long gun (rifle) | 25 | 0.75×Long Range Combat + 0.25×Speed |
+| Reload pistol | 15 | Speed |
+| Reload long gun (rifle) | 25 | Speed |
 | Evasion (dodge an incoming attack) | 3 | 0.7×Evasion + 0.3×Speed |
 | Block/parry (shield or weapon) | 2 | 0.4×Cognitive Speed + 0.3×Short Range Combat + 0.3×Speed |
 | Stand up from the ground | 10 | Speed |
-| Aim (adjust aim before next shot) | 4 | 0.7×Long Range Combat + 0.3×Speed |
+| Aim (adjust aim before next shot) | 4 | Speed |
 | Draw heavy weapon (greatsword, war hammer) | 8 | 0.7×Speed + 0.3×Short Range Combat |
 | Turn around (quick pivot) | 2 | Speed |
 | Analyze surroundings / assess the enemy | 3 | Cognitive Speed |
 | Cast a spell (basic) | 10 | Speed |
 
 Only movement (the first two rows) is currently reachable from the board's frontend client; every other action above is implemented backend-side (`POST /api/v1/combat/action-time`, `CombatActionType`) ahead of the frontend gaining a way to trigger them.
+
+**Long Range Combat removed (2026-07-18).** The attribute itself is gone (see `additive-attribute-formulas.md`'s Removals section); the four actions that used to read it (Draw ranged weapon, Reload pistol, Reload long gun, Aim) now score on Speed alone, at weight 1.0 — not the old partial Speed weight left standing on its own. No game-balance rebalancing beyond that was requested; revisit if the four actions feel mistimed in play.
 
 **Shared actions:** if two or more characters are tied on count, all of them choose their action and submit it simultaneously. This can be done secretly, so as not to grant an advantage, if they are opponents.
 
@@ -221,6 +235,16 @@ Only movement (the first two rows) is currently reachable from the board's front
 When a character's stamina is driven to 0 or below, they are considered exhausted and cannot take any further action until stamina is restored, except for actions that don't consume stamina. A character automatically restores stamina while standing still; the rate is determined by their Stamina Recovery and how long they rest. The maximum stamina recoverable this way is one third of the character's total pool — recovering beyond that requires several minutes of rest after combat ends.
 
 **Actions that don't consume stamina:** walking (not running), blocking (only raising or moving the arms for protection — anything beyond that requires stamina), dropping or picking up small objects, drinking potions, etc.
+
+### Valor (2026-07-18)
+
+A Combat/Competition pool attribute (`PlayableCharacter.getValorAttribute()`) representing a character's resolve to keep fighting rather than give up. Baseline 60, raised by the `Bellicose` trait and the testosterone modifier.
+
+- **Coupled 1:1 to Physical Integrity loss:** every point of Integrity lost costs Valor the same amount (lose 40 Integrity, lose 40 Valor) — implemented directly, not as a triggered event. `current` is allowed to go negative.
+- **Falling vs. dying:** Valor at 0 or below means the character "falls" — loses the will to fight — but is **not necessarily dead** (that's Physical Integrity reaching 0). A character whose max Valor exceeds 100 can, in principle, keep fighting all the way to death by Integrity loss alone.
+- **Fallen behavior:** becomes easily frightened, will do everything possible to avoid conflict or continued pain. A player who wants their fallen character to resist this (stay on the field, withhold information under torture) can still attempt Will tests, at escalating penalties.
+
+> **OPEN QUESTION — everything beyond the Integrity coupling (2026-07-18).** Fear, Demoralization, Confusion, Affection, and Intense Pain effects are all meant to drain Valor independently of Integrity loss, resisted by Fear Resistance/Will/etc. Pain Threshold is the most important of these: an attack that causes significant pain should reduce Valor via a pain effect if the target's Pain Threshold isn't high enough to resist — and pain can occur without a severe wound (torture scenarios: heavy pain, light wounds). **None of this is implemented** — no formulas or thresholds have been given yet; only the baseline Integrity-coupled formula above is built. The exact size of "escalating penalties" for a fallen character's resistance Will tests is likewise undefined — a DM-adjudicated call for now (Doraxes' domain), not a fixed table.
 
 > `*TODO*` — no action has a stated stamina cost yet (the "14 stamina" example above is illustrative, not a real value). The user has confirmed (2026-07-08) that, like the time-cost table, an action's stamina cost will be **derived from the character's Fatigue Resistance**, with the exact formula to follow in a future delta. The exact formula relating Stamina Recovery + rest duration to stamina restored is likewise still pending. Do not invent either in the meantime.
 

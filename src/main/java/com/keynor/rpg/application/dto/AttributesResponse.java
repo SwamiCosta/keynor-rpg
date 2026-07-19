@@ -29,11 +29,12 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                                   double survivalSkills, double animalCaring, double manipulation,
                                   double behaviorReading, double discretion, double bluffing, double faith,
                                   double illusionResistance, double creativity, double analysis,
-                                  double closeCombat, double lowRangeCombat, double longRangeCombat,
+                                  double closeCombat, double lowRangeCombat,
                                   double psyquismOutput, double psyquismDefense, double charmResistance,
                                   double concentration, double purity, double cognitiveSpeed, double hiding,
                                   double sneaking, double alchemy, double machineHandling, double performance,
-                                  double sciencePractice, double healing, double hackingAndPrograming) {
+                                  double sciencePractice, double healing, double hackingAndPrograming,
+                                  double physicalIntegrity) {
 
     public static AttributesResponse from(PlayableCharacter character) {
         return new AttributesResponse(
@@ -106,7 +107,6 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getAnalysis(),
                 character.getCloseCombat(),
                 character.getLowRangeCombat(),
-                character.getLongRangeCombat(),
                 character.getPsyquismOutput(),
                 character.getPsyquismDefense(),
                 character.getCharmResistance(),
@@ -120,6 +120,7 @@ public record AttributesResponse(double pushStrength, double legDrive, double gr
                 character.getPerformance(),
                 character.getSciencePractice(),
                 character.getHealing(),
-                character.getHackingAndPrograming());
+                character.getHackingAndPrograming(),
+                character.getPhysicalIntegrity());
     }
 }
