@@ -28,7 +28,7 @@ Two characters test against each other; bonuses or penalties can favor either si
 
 ### Combined tests
 
-Some tests require combining attributes. Moving without being noticed might need Hiding, Sneaking, and Discretion combined; attacking an enemy might need Swing Power combined with Close Combat. **Each attribute rolls its own random number independently — its own d100 plus that attribute — and the resulting totals are then averaged** (with different weights per attribute where the situation calls for it), not the raw attribute values averaged before a single roll. Confirmed by the user 2026-07-08.
+Some tests require combining attributes. Moving without being noticed might need Hiding, Sneaking, and Discretion combined; attacking an enemy might need Swing Power combined with Melee Dexterity. **Each attribute rolls its own random number independently — its own d100 plus that attribute — and the resulting totals are then averaged** (with different weights per attribute where the situation calls for it), not the raw attribute values averaged before a single roll. Confirmed by the user 2026-07-08.
 
 ### Assistance
 
@@ -87,11 +87,15 @@ Every `Material` (see `keynor-rpg`'s `Material`/`DamageType` domain catalog) has
 
 ### Resolving a hit's damage value
 
-**An attack resolves in two steps: a hit check, then a damage value.** Before any damage is rolled, there is always a separate accuracy check against the target's Evasion (a contested test, per the Contested tests rule above) — an attack that doesn't land deals no damage at all. Only once a hit is confirmed does the damage value get resolved. Confirmed by the user 2026-07-08; the exact accuracy-check mechanics (which attribute the attacker rolls, how any weapon/situational modifiers apply) are pending — see `*TODO*` below.
+**Resolved (2026-07-20) — supersedes the 2026-07-08 "contested test against Evasion" decision.** For melee, thrown, firearm/crossbow, and bow attacks, the hit check is the fixed-threshold Special Attack Test roll (e.g. `Tmd > 40`) described in `special-attack-test.md` — **not** a contested roll against the target's Evasion. Evasion still matters, but only as the target's *optional reaction*, not as part of the attacker's own hit check:
 
-A damage value comes from either a test or a fixed value. Example: an axe swing uses a test combining Swing Power + Close Combat; a falling rock or a fired bullet has a fixed damage value. Damage tests do **not** follow the "success or failure" (>100) rule of an ordinary test — only the final total is applied directly. A character who rolls 70 and has +60 Swing Power deals 130 points of damage.
+- The target may only attempt to evade if they are at rest (per the "Reactions" rule below — their combat clock is at or below the attacker's).
+- If they choose to, they roll their own Evasion via a Special Attack Test (`Evasion - 10 + 1d20`) and compare it **directly against the attacker's already-resolved attack-test result** (the same Tmd/Taim/Tpst-derived roll the hit check used) — not a fresh attacker roll.
+- **Higher wins.** If the target's Evasion roll is higher, the attack misses entirely. **A tie is a glancing blow — final damage is halved**, not a resister-wins tie the way the general Contested Tests rule above works; this is a deliberate exception for this specific contest. If the attacker's roll is higher, the attack lands at full damage.
 
-> `*TODO*` — the exact accuracy-check mechanics (attacker's attribute(s), modifiers) are not yet specified beyond "a contested test against Evasion." Do not invent the specific attribute pairing or modifier rules; wait for the user.
+See `special-attack-test.md`'s "Evasion reaction" section for the implementation (`EvasionResolver`).
+
+A damage value comes from either a test or a fixed value. Example: an axe swing uses a test combining Swing Power + Melee Dexterity; a falling rock or a fired bullet has a fixed damage value. Damage tests do **not** follow the "success or failure" (>100) rule of an ordinary test — only the final total is applied directly. A character who rolls 70 and has +60 Swing Power deals 130 points of damage. See `special-attack-test.md` for the concrete melee/thrown/firearm/bow resolution mechanics that supersede this general example.
 
 ### Damage vs. resistance — outcome categories
 
@@ -101,7 +105,7 @@ Once a raw damage value and a target material/damage-type pair are known, a calc
 2. **Significant damage** — the damage overcomes the material's resistance and causes deformation or alteration: cuts, burns, bends, cracks, etc. The amount of deformation depends on the damage dealt. This is where negative effects begin to apply — a cut arm applies less force, a bent sword deals less damage, a shattered shield has lower durability, etc. Significant damage **accumulates**: a new instance of significant damage is added to the prior total to check whether the object's limit is exceeded.
 3. **Irreversible damage** — the final damage value exceeds the target's limit and it is completely destroyed: broken weapon blades, destroyed shields, severed limbs, etc. Afterward the object is no longer functional, or at minimum imposes a severe penalty when used in tests.
 
-> `*TODO*` — the three-category *outcome* is described above, but the calculation that turns `(raw damage, Material.baseDurability, Material.getMultiplier(damageType))` into one of the three categories — and into a specific deformation/accumulation number for the Significant case — is explicitly deferred by the user (2026-07-08) to a future delta. Do not invent this formula in the meantime.
+**Resolved (2026-07-20) — see `special-attack-test.md`.** The calculation this `*TODO*` used to defer now exists: `Protection (P) = Vb × Md × Dm` (reusing `Material.baseDurability`/`getMultiplier` for Vb/Md, plus a new per-equipment `Dm`) and `FinalDamage = (Db − P) × Ae` if `Db > P`, else `0`. This maps directly onto the three categories above: `FinalDamage == 0` is Irrelevant; a nonzero `FinalDamage` that keeps the object under its irreversible-damage limit is Significant (still accumulates, per the rule above); a `FinalDamage` that exceeds that limit is Irreversible. `Db` (raw damage) itself now comes from one of four concrete per-attack-type formulas (melee, thrown, firearm/crossbow, bow) — see that file for the full detail. Not yet wired into a REST endpoint or `PlayableCharacter` — reference data and pure calculators only, for now.
 
 **Combined damage types:** an attack can combine more than one damage type, but each type is calculated separately. Example: an explosion might deal 30 Blunt, 40 Burning, and 20 Piercing (from shrapnel) — each application goes through its own resistance calculation, and the amounts that get through are summed to determine whether the total damage is Irrelevant, Significant, or Irreversible.
 
@@ -190,22 +194,22 @@ UT = max(1, floor(UT_Base × (60 / S)))
 |---|---|---|
 | Move 1m, careful step | 5 | Speed |
 | Move 1m, running | 2 | Speed |
-| Jab (quick body strike) | 2 | 0.7×Speed + 0.3×Close Combat |
-| Standard body strike (cross, kick) | 4 | 0.6×Speed + 0.4×Close Combat |
-| Piercing attack (rapier, spear) | 3 | 0.7×Speed + 0.3×Short Range Combat |
-| Light swing attack (hatchet, sword, hammer) | 4 | 0.7×Speed + 0.3×Short Range Combat |
-| Heavy swing attack (war hammer, greatsword) | 8 | 0.65×Speed + 0.35×Short Range Combat |
+| Jab (quick body strike) | 2 | 0.7×Speed + 0.3×Melee Dexterity |
+| Standard body strike (cross, kick) | 4 | 0.6×Speed + 0.4×Melee Dexterity |
+| Piercing attack (rapier, spear) | 3 | 0.7×Speed + 0.3×Melee Dexterity |
+| Light swing attack (hatchet, sword, hammer) | 4 | 0.7×Speed + 0.3×Melee Dexterity |
+| Heavy swing attack (war hammer, greatsword) | 8 | 0.65×Speed + 0.35×Melee Dexterity |
 | Drink a potion (already in hand) | 12 | Speed |
-| Draw light/medium melee weapon | 5 | 0.6×Speed + 0.4×Short Range Combat |
+| Draw light/medium melee weapon | 5 | 0.6×Speed + 0.4×Melee Dexterity |
 | Draw ranged weapon (bow, firearm) | 5 | Speed |
 | Draw item from backpack | 40 | Speed |
 | Reload pistol | 15 | Speed |
 | Reload long gun (rifle) | 25 | Speed |
 | Evasion (dodge an incoming attack) | 3 | 0.7×Evasion + 0.3×Speed |
-| Block/parry (shield or weapon) | 2 | 0.4×Cognitive Speed + 0.3×Short Range Combat + 0.3×Speed |
+| Block/parry (shield or weapon) | 2 | 0.4×Cognitive Speed + 0.3×Melee Dexterity + 0.3×Speed |
 | Stand up from the ground | 10 | Speed |
 | Aim (adjust aim before next shot) | 4 | Speed |
-| Draw heavy weapon (greatsword, war hammer) | 8 | 0.7×Speed + 0.3×Short Range Combat |
+| Draw heavy weapon (greatsword, war hammer) | 8 | 0.7×Speed + 0.3×Melee Dexterity |
 | Turn around (quick pivot) | 2 | Speed |
 | Analyze surroundings / assess the enemy | 3 | Cognitive Speed |
 | Cast a spell (basic) | 10 | Speed |
@@ -213,6 +217,8 @@ UT = max(1, floor(UT_Base × (60 / S)))
 Only movement (the first two rows) is currently reachable from the board's frontend client; every other action above is implemented backend-side (`POST /api/v1/combat/action-time`, `CombatActionType`) ahead of the frontend gaining a way to trigger them.
 
 **Long Range Combat removed (2026-07-18).** The attribute itself is gone (see `additive-attribute-formulas.md`'s Removals section); the four actions that used to read it (Draw ranged weapon, Reload pistol, Reload long gun, Aim) now score on Speed alone, at weight 1.0 — not the old partial Speed weight left standing on its own. No game-balance rebalancing beyond that was requested; revisit if the four actions feel mistimed in play.
+
+**Close Combat and Short Range Combat merged into Melee Dexterity (2026-07-20).** Both attributes read by the table above under two different names for the same underlying concept — melee proficiency — are gone; every action that used to weight either one now reads the single `Melee Dexterity` (MD) attribute instead, at the same weights as before (only the attribute name changed, not the formula shape or its numbers). `Melee Dexterity` (renamed from `Melee Accuracy`) is also the attribute rolled for every melee attack's hit-check test — see `special-attack-test.md`.
 
 **Shared actions:** if two or more characters are tied on count, all of them choose their action and submit it simultaneously. This can be done secretly, so as not to grant an advantage, if they are opponents.
 
