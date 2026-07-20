@@ -62,7 +62,6 @@ class PreviewAttributesServiceTest {
         assertThat(result.getSelfConcern()).isEqualTo(expected.getSelfConcern());
         assertThat(result.getSurvivalSkills()).isEqualTo(expected.getSurvivalSkills());
         assertThat(result.getAnalysis()).isEqualTo(expected.getAnalysis());
-        assertThat(result.getCloseCombat()).isEqualTo(expected.getCloseCombat());
     }
 
     @Test

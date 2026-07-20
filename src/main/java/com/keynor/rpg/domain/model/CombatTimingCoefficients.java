@@ -17,30 +17,30 @@ public class CombatTimingCoefficients {
 
     private int utBaseJab = 2;
     private double kJabSpeed = 0.7;
-    private double kJabCloseCombat = 0.3;
+    private double kJabMeleeDexterity = 0.3;
 
     private int utBaseBodyStrike = 4;
     private double kBodyStrikeSpeed = 0.6;
-    private double kBodyStrikeCloseCombat = 0.4;
+    private double kBodyStrikeMeleeDexterity = 0.4;
 
     private int utBasePiercingAttack = 3;
     private double kPiercingAttackSpeed = 0.7;
-    private double kPiercingAttackShortRangeCombat = 0.3;
+    private double kPiercingAttackMeleeDexterity = 0.3;
 
     private int utBaseLightSwingAttack = 4;
     private double kLightSwingAttackSpeed = 0.7;
-    private double kLightSwingAttackShortRangeCombat = 0.3;
+    private double kLightSwingAttackMeleeDexterity = 0.3;
 
     private int utBaseHeavySwingAttack = 8;
     private double kHeavySwingAttackSpeed = 0.65;
-    private double kHeavySwingAttackShortRangeCombat = 0.35;
+    private double kHeavySwingAttackMeleeDexterity = 0.35;
 
     private int utBaseDrinkPotion = 12;
     private double kDrinkPotionSpeed = 1.0;
 
     private int utBaseDrawMeleeWeapon = 5;
     private double kDrawMeleeWeaponSpeed = 0.6;
-    private double kDrawMeleeWeaponShortRangeCombat = 0.4;
+    private double kDrawMeleeWeaponMeleeDexterity = 0.4;
 
     private int utBaseDrawRangedWeapon = 5;
     private double kDrawRangedWeaponSpeed = 1.0;
@@ -60,7 +60,7 @@ public class CombatTimingCoefficients {
 
     private int utBaseBlock = 2;
     private double kBlockCognitiveSpeed = 0.4;
-    private double kBlockShortRangeCombat = 0.3;
+    private double kBlockMeleeDexterity = 0.3;
     private double kBlockSpeed = 0.3;
 
     private int utBaseStandUp = 10;
@@ -71,7 +71,7 @@ public class CombatTimingCoefficients {
 
     private int utBaseDrawHeavyWeapon = 8;
     private double kDrawHeavyWeaponSpeed = 0.7;
-    private double kDrawHeavyWeaponShortRangeCombat = 0.3;
+    private double kDrawHeavyWeaponMeleeDexterity = 0.3;
 
     private int utBaseTurnAround = 2;
     private double kTurnAroundSpeed = 1.0;
@@ -100,8 +100,8 @@ public class CombatTimingCoefficients {
     public double getKJabSpeed() { return kJabSpeed; }
     public void setKJabSpeed(double v) { this.kJabSpeed = v; }
 
-    public double getKJabCloseCombat() { return kJabCloseCombat; }
-    public void setKJabCloseCombat(double v) { this.kJabCloseCombat = v; }
+    public double getKJabMeleeDexterity() { return kJabMeleeDexterity; }
+    public void setKJabMeleeDexterity(double v) { this.kJabMeleeDexterity = v; }
 
     public int getUtBaseBodyStrike() { return utBaseBodyStrike; }
     public void setUtBaseBodyStrike(int v) { this.utBaseBodyStrike = v; }
@@ -109,8 +109,8 @@ public class CombatTimingCoefficients {
     public double getKBodyStrikeSpeed() { return kBodyStrikeSpeed; }
     public void setKBodyStrikeSpeed(double v) { this.kBodyStrikeSpeed = v; }
 
-    public double getKBodyStrikeCloseCombat() { return kBodyStrikeCloseCombat; }
-    public void setKBodyStrikeCloseCombat(double v) { this.kBodyStrikeCloseCombat = v; }
+    public double getKBodyStrikeMeleeDexterity() { return kBodyStrikeMeleeDexterity; }
+    public void setKBodyStrikeMeleeDexterity(double v) { this.kBodyStrikeMeleeDexterity = v; }
 
     public int getUtBasePiercingAttack() { return utBasePiercingAttack; }
     public void setUtBasePiercingAttack(int v) { this.utBasePiercingAttack = v; }
@@ -118,8 +118,8 @@ public class CombatTimingCoefficients {
     public double getKPiercingAttackSpeed() { return kPiercingAttackSpeed; }
     public void setKPiercingAttackSpeed(double v) { this.kPiercingAttackSpeed = v; }
 
-    public double getKPiercingAttackShortRangeCombat() { return kPiercingAttackShortRangeCombat; }
-    public void setKPiercingAttackShortRangeCombat(double v) { this.kPiercingAttackShortRangeCombat = v; }
+    public double getKPiercingAttackMeleeDexterity() { return kPiercingAttackMeleeDexterity; }
+    public void setKPiercingAttackMeleeDexterity(double v) { this.kPiercingAttackMeleeDexterity = v; }
 
     public int getUtBaseLightSwingAttack() { return utBaseLightSwingAttack; }
     public void setUtBaseLightSwingAttack(int v) { this.utBaseLightSwingAttack = v; }
@@ -127,8 +127,8 @@ public class CombatTimingCoefficients {
     public double getKLightSwingAttackSpeed() { return kLightSwingAttackSpeed; }
     public void setKLightSwingAttackSpeed(double v) { this.kLightSwingAttackSpeed = v; }
 
-    public double getKLightSwingAttackShortRangeCombat() { return kLightSwingAttackShortRangeCombat; }
-    public void setKLightSwingAttackShortRangeCombat(double v) { this.kLightSwingAttackShortRangeCombat = v; }
+    public double getKLightSwingAttackMeleeDexterity() { return kLightSwingAttackMeleeDexterity; }
+    public void setKLightSwingAttackMeleeDexterity(double v) { this.kLightSwingAttackMeleeDexterity = v; }
 
     public int getUtBaseHeavySwingAttack() { return utBaseHeavySwingAttack; }
     public void setUtBaseHeavySwingAttack(int v) { this.utBaseHeavySwingAttack = v; }
@@ -136,8 +136,8 @@ public class CombatTimingCoefficients {
     public double getKHeavySwingAttackSpeed() { return kHeavySwingAttackSpeed; }
     public void setKHeavySwingAttackSpeed(double v) { this.kHeavySwingAttackSpeed = v; }
 
-    public double getKHeavySwingAttackShortRangeCombat() { return kHeavySwingAttackShortRangeCombat; }
-    public void setKHeavySwingAttackShortRangeCombat(double v) { this.kHeavySwingAttackShortRangeCombat = v; }
+    public double getKHeavySwingAttackMeleeDexterity() { return kHeavySwingAttackMeleeDexterity; }
+    public void setKHeavySwingAttackMeleeDexterity(double v) { this.kHeavySwingAttackMeleeDexterity = v; }
 
     public int getUtBaseDrinkPotion() { return utBaseDrinkPotion; }
     public void setUtBaseDrinkPotion(int v) { this.utBaseDrinkPotion = v; }
@@ -151,8 +151,8 @@ public class CombatTimingCoefficients {
     public double getKDrawMeleeWeaponSpeed() { return kDrawMeleeWeaponSpeed; }
     public void setKDrawMeleeWeaponSpeed(double v) { this.kDrawMeleeWeaponSpeed = v; }
 
-    public double getKDrawMeleeWeaponShortRangeCombat() { return kDrawMeleeWeaponShortRangeCombat; }
-    public void setKDrawMeleeWeaponShortRangeCombat(double v) { this.kDrawMeleeWeaponShortRangeCombat = v; }
+    public double getKDrawMeleeWeaponMeleeDexterity() { return kDrawMeleeWeaponMeleeDexterity; }
+    public void setKDrawMeleeWeaponMeleeDexterity(double v) { this.kDrawMeleeWeaponMeleeDexterity = v; }
 
     public int getUtBaseDrawRangedWeapon() { return utBaseDrawRangedWeapon; }
     public void setUtBaseDrawRangedWeapon(int v) { this.utBaseDrawRangedWeapon = v; }
@@ -193,8 +193,8 @@ public class CombatTimingCoefficients {
     public double getKBlockCognitiveSpeed() { return kBlockCognitiveSpeed; }
     public void setKBlockCognitiveSpeed(double v) { this.kBlockCognitiveSpeed = v; }
 
-    public double getKBlockShortRangeCombat() { return kBlockShortRangeCombat; }
-    public void setKBlockShortRangeCombat(double v) { this.kBlockShortRangeCombat = v; }
+    public double getKBlockMeleeDexterity() { return kBlockMeleeDexterity; }
+    public void setKBlockMeleeDexterity(double v) { this.kBlockMeleeDexterity = v; }
 
     public double getKBlockSpeed() { return kBlockSpeed; }
     public void setKBlockSpeed(double v) { this.kBlockSpeed = v; }
@@ -217,8 +217,8 @@ public class CombatTimingCoefficients {
     public double getKDrawHeavyWeaponSpeed() { return kDrawHeavyWeaponSpeed; }
     public void setKDrawHeavyWeaponSpeed(double v) { this.kDrawHeavyWeaponSpeed = v; }
 
-    public double getKDrawHeavyWeaponShortRangeCombat() { return kDrawHeavyWeaponShortRangeCombat; }
-    public void setKDrawHeavyWeaponShortRangeCombat(double v) { this.kDrawHeavyWeaponShortRangeCombat = v; }
+    public double getKDrawHeavyWeaponMeleeDexterity() { return kDrawHeavyWeaponMeleeDexterity; }
+    public void setKDrawHeavyWeaponMeleeDexterity(double v) { this.kDrawHeavyWeaponMeleeDexterity = v; }
 
     public int getUtBaseTurnAround() { return utBaseTurnAround; }
     public void setUtBaseTurnAround(int v) { this.utBaseTurnAround = v; }

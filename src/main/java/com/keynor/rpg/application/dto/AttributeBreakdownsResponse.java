@@ -32,7 +32,7 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("smell", AttributeBreakdownResponse.from(character.getSmellBreakdown(), language));
         map.put("evasion", AttributeBreakdownResponse.from(character.getEvasionBreakdown(), language));
         map.put("acrobatics", AttributeBreakdownResponse.from(character.getAcrobaticsBreakdown(), language));
-        map.put("meleeAccuracy", AttributeBreakdownResponse.from(character.getMeleeAccuracyBreakdown(), language));
+        map.put("meleeDexterity", AttributeBreakdownResponse.from(character.getMeleeDexterityBreakdown(), language));
         map.put("aim", AttributeBreakdownResponse.from(character.getAimBreakdown(), language));
         map.put("memoryPool", AttributeBreakdownResponse.from(character.getMemoryPoolBreakdown(), language));
         map.put("reasoning", AttributeBreakdownResponse.from(character.getReasoningBreakdown(), language));
@@ -89,8 +89,6 @@ public record AttributeBreakdownsResponse(Map<String, AttributeBreakdownResponse
         map.put("illusionResistance", AttributeBreakdownResponse.from(character.getIllusionResistanceBreakdown(), language));
         map.put("creativity", AttributeBreakdownResponse.from(character.getCreativityBreakdown(), language));
         map.put("analysis", AttributeBreakdownResponse.from(character.getAnalysisBreakdown(), language));
-        map.put("closeCombat", AttributeBreakdownResponse.from(character.getCloseCombatBreakdown(), language));
-        map.put("lowRangeCombat", AttributeBreakdownResponse.from(character.getLowRangeCombatBreakdown(), language));
         map.put("valor", AttributeBreakdownResponse.from(character.getValorBreakdown(), language));
         map.put("psyquismOutput", AttributeBreakdownResponse.from(character.getPsyquismOutputBreakdown(), language));
         map.put("psyquismDefense", AttributeBreakdownResponse.from(character.getPsyquismDefenseBreakdown(), language));

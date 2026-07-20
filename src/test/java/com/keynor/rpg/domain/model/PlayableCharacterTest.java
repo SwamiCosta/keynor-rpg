@@ -634,7 +634,7 @@ class PlayableCharacterTest {
     }
 
     // -------------------------------------------------------------------------
-    // Acrobatics / MeleeAccuracy / Aim
+    // Acrobatics / MeleeDexterity / Aim
     // -------------------------------------------------------------------------
 
     @Test
@@ -656,20 +656,20 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void getMeleeAccuracy_onHumanDefaults_equalsBaseline() {
+    void getMeleeDexterity_onHumanDefaults_equalsBaseline() {
         PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getMeleeAccuracy()).isCloseTo(60.0, within(TOLERANCE));
+        assertThat(character.getMeleeDexterity()).isCloseTo(60.0, within(TOLERANCE));
     }
 
     @Test
-    void getMeleeAccuracy_higherPrecision_increasesMeleeAccuracy() {
+    void getMeleeDexterity_higherPrecision_increasesMeleeDexterity() {
         Body body = Body.humanTemplate();
         body.getBodySystems().getNeuralSystem().setPrecision(9);
         PlayableCharacter character = new PlayableCharacter("test", body);
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
 
-        assertThat(character.getMeleeAccuracy()).isGreaterThan(defaults.getMeleeAccuracy());
+        assertThat(character.getMeleeDexterity()).isGreaterThan(defaults.getMeleeDexterity());
     }
 
     @Test
@@ -1637,23 +1637,6 @@ class PlayableCharacterTest {
         assertThat(sharper.getAnalysis()).isGreaterThan(defaults.getAnalysis());
     }
 
-    @Test
-    void getCloseCombatAndLowRangeCombat_onHumanDefaults_equalBaseline() {
-        PlayableCharacter character = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
-
-        assertThat(character.getCloseCombat()).isCloseTo(60.0, within(TOLERANCE));
-        assertThat(character.getLowRangeCombat()).isCloseTo(60.0, within(TOLERANCE));
-    }
-
-    @Test
-    void getCloseCombatAndLowRangeCombat_bellicoseTrait_increasesBoth() {
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
-        PlayableCharacter bellicose = withTrait(Values.defaults(), Trait.BELLICOSE);
-
-        assertThat(bellicose.getCloseCombat()).isGreaterThan(defaults.getCloseCombat());
-        assertThat(bellicose.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
-    }
-
     // -------------------------------------------------------------------------
     // rpg-19 — Values-trait forced value and prerequisite gating (Personality)
     // -------------------------------------------------------------------------
@@ -1965,22 +1948,6 @@ class PlayableCharacterTest {
     }
 
     @Test
-    void fighting_increasesCloseCombat() {
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setFighting(5));
-
-        assertThat(trained.getCloseCombat()).isGreaterThan(defaults.getCloseCombat());
-    }
-
-    @Test
-    void weaponPracticing_increasesLowRangeCombat() {
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
-        PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setWeaponPracticing(5));
-
-        assertThat(trained.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
-    }
-
-    @Test
     void shooting_increasesAim() {
         PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate());
         PlayableCharacter trained = characterWithTrainingAndConditioning(t -> t.setShooting(5));
@@ -2001,14 +1968,6 @@ class PlayableCharacterTest {
         assertThat(dancer.getAcrobatics()).isGreaterThan(defaults.getAcrobatics());
         assertThat(dancer.getEvasion()).isGreaterThan(defaults.getEvasion());
         assertThat(dancer.getBalance()).isGreaterThan(defaults.getBalance());
-    }
-
-    @Test
-    void fencing_increasesLowRangeCombat() {
-        PlayableCharacter defaults = new PlayableCharacter("test", Body.humanTemplate(), Mind.humanTemplate());
-        PlayableCharacter fencer = characterWithErudition(Knowledge.FENCING, 2);
-
-        assertThat(fencer.getLowRangeCombat()).isGreaterThan(defaults.getLowRangeCombat());
     }
 
     @Test
