@@ -130,9 +130,9 @@ public class BodyCoefficients {
     private double kAcrobaticsAgility = 2;
     private double kAcrobaticsFlexibility = 2;
 
-    // MeleeAccuracy
-    private double kMeleeAccuracyPrecision = 3;
-    private double kMeleeAccuracyAgility = 1;
+    // MeleeDexterity (renamed from MeleeAccuracy, 2026-07-20)
+    private double kMeleeDexterityPrecision = 3;
+    private double kMeleeDexterityAgility = 1;
 
     // Aim (Delta V4: Precision reweighted, Hippocampus swapped for Thalamus and reweighted)
     private double kAimPrecision = 5; // was 3
@@ -275,12 +275,10 @@ public class BodyCoefficients {
     private double kBehaviorReadingDogEatDog = 5;
     private double kAnalysisReasoning = 0.5;
     private double kAnalysisDogEatDog = 5;
-    private double kMeleeAccuracyDogEatDog = 5;
+    private double kMeleeDexterityDogEatDog = 5;
     private double kAimDogEatDog = 5;
     private double kArcaneOutputConservative = 5;
     private double kManaPoolConservative = 5;
-    private double kCloseCombatBellicose = 4;
-    private double kLowRangeCombatBellicose = 4;
 
     // Psyquism Output / Psyquism Defense — Phaxic Cerebelum, another organ absent (0) for the
     // human default template, neutral point 6 like the arcane organs above.
@@ -335,8 +333,6 @@ public class BodyCoefficients {
     private double kEvasionCoordination = 1;
     private double kBalanceCoordination = 2;
     private double kPainThresholdResilience = 2;
-    private double kCloseCombatFighting = 5;
-    private double kLowRangeCombatWeaponPracticing = 5;
     private double kAimShooting = 3;
 
     // Athletism and Martial Arts (rpg-21) — Dancing/Fencing are new Knowledge constants (level
@@ -344,7 +340,6 @@ public class BodyCoefficients {
     private double kAcrobaticsDancing = 2;
     private double kEvasionDancing = 1;
     private double kBalanceDancing = 2;
-    private double kLowRangeCombatFencing = 3;
 
     // Archery (rpg-21) — first real formula effect for this pre-existing Knowledge constant.
     private double kAimArchery = 3;
@@ -620,11 +615,11 @@ public class BodyCoefficients {
     public double getKAcrobaticsFlexibility() { return kAcrobaticsFlexibility; }
     public void setKAcrobaticsFlexibility(double v) { this.kAcrobaticsFlexibility = v; }
 
-    public double getKMeleeAccuracyPrecision() { return kMeleeAccuracyPrecision; }
-    public void setKMeleeAccuracyPrecision(double v) { this.kMeleeAccuracyPrecision = v; }
+    public double getKMeleeDexterityPrecision() { return kMeleeDexterityPrecision; }
+    public void setKMeleeDexterityPrecision(double v) { this.kMeleeDexterityPrecision = v; }
 
-    public double getKMeleeAccuracyAgility() { return kMeleeAccuracyAgility; }
-    public void setKMeleeAccuracyAgility(double v) { this.kMeleeAccuracyAgility = v; }
+    public double getKMeleeDexterityAgility() { return kMeleeDexterityAgility; }
+    public void setKMeleeDexterityAgility(double v) { this.kMeleeDexterityAgility = v; }
 
     public double getKAimPrecision() { return kAimPrecision; }
     public void setKAimPrecision(double v) { this.kAimPrecision = v; }
@@ -959,8 +954,8 @@ public class BodyCoefficients {
     public double getKAnalysisDogEatDog() { return kAnalysisDogEatDog; }
     public void setKAnalysisDogEatDog(double v) { this.kAnalysisDogEatDog = v; }
 
-    public double getKMeleeAccuracyDogEatDog() { return kMeleeAccuracyDogEatDog; }
-    public void setKMeleeAccuracyDogEatDog(double v) { this.kMeleeAccuracyDogEatDog = v; }
+    public double getKMeleeDexterityDogEatDog() { return kMeleeDexterityDogEatDog; }
+    public void setKMeleeDexterityDogEatDog(double v) { this.kMeleeDexterityDogEatDog = v; }
 
     public double getKAimDogEatDog() { return kAimDogEatDog; }
     public void setKAimDogEatDog(double v) { this.kAimDogEatDog = v; }
@@ -970,12 +965,6 @@ public class BodyCoefficients {
 
     public double getKManaPoolConservative() { return kManaPoolConservative; }
     public void setKManaPoolConservative(double v) { this.kManaPoolConservative = v; }
-
-    public double getKCloseCombatBellicose() { return kCloseCombatBellicose; }
-    public void setKCloseCombatBellicose(double v) { this.kCloseCombatBellicose = v; }
-
-    public double getKLowRangeCombatBellicose() { return kLowRangeCombatBellicose; }
-    public void setKLowRangeCombatBellicose(double v) { this.kLowRangeCombatBellicose = v; }
 
     public double getKPsyquismOutputPhaxicCerebelum() { return kPsyquismOutputPhaxicCerebelum; }
     public void setKPsyquismOutputPhaxicCerebelum(double v) { this.kPsyquismOutputPhaxicCerebelum = v; }
@@ -1079,12 +1068,6 @@ public class BodyCoefficients {
     public double getKPainThresholdResilience() { return kPainThresholdResilience; }
     public void setKPainThresholdResilience(double v) { this.kPainThresholdResilience = v; }
 
-    public double getKCloseCombatFighting() { return kCloseCombatFighting; }
-    public void setKCloseCombatFighting(double v) { this.kCloseCombatFighting = v; }
-
-    public double getKLowRangeCombatWeaponPracticing() { return kLowRangeCombatWeaponPracticing; }
-    public void setKLowRangeCombatWeaponPracticing(double v) { this.kLowRangeCombatWeaponPracticing = v; }
-
     public double getKAimShooting() { return kAimShooting; }
     public void setKAimShooting(double v) { this.kAimShooting = v; }
 
@@ -1096,9 +1079,6 @@ public class BodyCoefficients {
 
     public double getKBalanceDancing() { return kBalanceDancing; }
     public void setKBalanceDancing(double v) { this.kBalanceDancing = v; }
-
-    public double getKLowRangeCombatFencing() { return kLowRangeCombatFencing; }
-    public void setKLowRangeCombatFencing(double v) { this.kLowRangeCombatFencing = v; }
 
     public double getKAimArchery() { return kAimArchery; }
     public void setKAimArchery(double v) { this.kAimArchery = v; }
