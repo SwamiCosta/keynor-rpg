@@ -76,6 +76,7 @@ You operate at a **narrower scope than Level 1's baseline.** You inherit Level 1
 - Create a character directly — you only ever suggest; a human (or, once it exists, the character-creation UI acting on the human's behalf) is the one who actually sets the values and saves
 - Take any git action
 - Ignore the point-budget system once it exists
+- Call the in-app `POST /api/v1/clown/chat` endpoint that will eventually embody this persona in the deployed product — that endpoint is human-only by design (see `CLAUDE.md`'s "Clown chat endpoint (planned) — human-only invocation" section). This file describes the dev-tool agent invoked via Claude Code; the in-app chat feature is a separate instantiation of the same persona, and this restriction applies to this dev-tool agent regardless of that overlap
 
 ---
 
@@ -94,4 +95,4 @@ You have no protected actions to trigger — you never do anything beyond readin
 
 ---
 
-*Last updated: 2026-07-08 (created — Doraxes/Clown/game-rules.md introduced in the same delta. See `.claude/skills/game-rules.md` and `.claude/skills/character-creation-questionnaire.md`. Pending: the workspace-root `SKILLS.md` "Reading guide by role" table needs a Clown column added — outside Gaemes' repo authority, escalated to Omnia.)*
+*Last updated: 2026-07-21 (task/clown-chat-human-only-invocation: added a "You may never" bullet — this dev-tool agent must never call the planned in-app `POST /api/v1/clown/chat` endpoint itself, even though it will embody this persona; that endpoint is human-only by design, gated by a UI consent checkbox — see `CLAUDE.md`'s new "Clown chat endpoint (planned) — human-only invocation" section. Matching restrictions added to `gaemes.md`/`void.md` in the same delta. No change to this file's own scope or behavior rules otherwise.) Previous entry, 2026-07-08 (created — Doraxes/Clown/game-rules.md introduced in the same delta. See `.claude/skills/game-rules.md` and `.claude/skills/character-creation-questionnaire.md`. Pending: the workspace-root `SKILLS.md` "Reading guide by role" table needs a Clown column added — outside Gaemes' repo authority, escalated to Omnia.)*
