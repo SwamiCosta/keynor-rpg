@@ -206,8 +206,6 @@ class BodyCoefficientsTest {
         assertThat(coeff.getKMemoryPoolIliterate()).isEqualTo(20);
         assertThat(coeff.getKAnalysisReasoning()).isEqualTo(0.5);
         assertThat(coeff.getKAnalysisDogEatDog()).isEqualTo(5);
-        assertThat(coeff.getKCloseCombatBellicose()).isEqualTo(4);
-        assertThat(coeff.getKLowRangeCombatBellicose()).isEqualTo(4);
     }
 
     @Test

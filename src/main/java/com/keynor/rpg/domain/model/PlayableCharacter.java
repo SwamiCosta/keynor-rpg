@@ -464,19 +464,23 @@ public class PlayableCharacter {
     }
 
     /**
-     * MeleeAccuracy = baseline + kMeleeAccuracyPrecision x (Precision-5) +
-     * kMeleeAccuracyAgility x (Agility-5).
+     * MeleeDexterity (MD) = baseline + kMeleeDexterityPrecision x (Precision-5) +
+     * kMeleeDexterityAgility x (Agility-5). Renamed from MeleeAccuracy (2026-07-20) — now the
+     * single attribute read by the Special Attack Test's melee Tmd roll (see
+     * {@code special-attack-test.md}). Bellicose/Fighting/WeaponPracticing/Fencing are documented,
+     * not-yet-implemented situational future modifiers on top of this baseline formula — see that
+     * skill file's "Deferred inputs" section.
      */
-    public AttributeBreakdown getMeleeAccuracyBreakdown() {
+    public AttributeBreakdown getMeleeDexterityBreakdown() {
         return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                new AttributeBreakdown.Term("Precision", coeff().getKMeleeAccuracyPrecision() * (neuralSystem().getPrecision() - 5)),
-                new AttributeBreakdown.Term("Agility", coeff().getKMeleeAccuracyAgility() * (neuralSystem().getAgility() - 5)),
-                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKMeleeAccuracyDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG)))
+                new AttributeBreakdown.Term("Precision", coeff().getKMeleeDexterityPrecision() * (neuralSystem().getPrecision() - 5)),
+                new AttributeBreakdown.Term("Agility", coeff().getKMeleeDexterityAgility() * (neuralSystem().getAgility() - 5)),
+                new AttributeBreakdown.Term("Dog Eat Dog", coeff().getKMeleeDexterityDogEatDog() * flag(hasTrait(Trait.DOG_EAT_DOG)))
         ));
     }
 
-    public double getMeleeAccuracy() {
-        return getMeleeAccuracyBreakdown().total();
+    public double getMeleeDexterity() {
+        return getMeleeDexterityBreakdown().total();
     }
 
     /**
@@ -1376,37 +1380,6 @@ public class PlayableCharacter {
         return getAnalysisBreakdown().total();
     }
 
-    /**
-     * CloseCombat = baseline + kCloseCombatBellicose x hasBellicose + kCloseCombatFighting x
-     * Fighting (rpg-21).
-     */
-    public AttributeBreakdown getCloseCombatBreakdown() {
-        return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                new AttributeBreakdown.Term("Bellicose", coeff().getKCloseCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))),
-                new AttributeBreakdown.Term("Fighting", coeff().getKCloseCombatFighting() * trainingAndConditioning().getFighting())
-        ));
-    }
-
-    public double getCloseCombat() {
-        return getCloseCombatBreakdown().total();
-    }
-
-    /**
-     * LowRangeCombat = baseline + kLowRangeCombatBellicose x hasBellicose +
-     * kLowRangeCombatWeaponPracticing x WeaponPracticing + kLowRangeCombatFencing x Fencing
-     * (rpg-21).
-     */
-    public AttributeBreakdown getLowRangeCombatBreakdown() {
-        return new AttributeBreakdown(coeff().getBaseline(), List.of(
-                new AttributeBreakdown.Term("Bellicose", coeff().getKLowRangeCombatBellicose() * flag(hasTrait(Trait.BELLICOSE))),
-                new AttributeBreakdown.Term("Weapon Practicing", coeff().getKLowRangeCombatWeaponPracticing() * trainingAndConditioning().getWeaponPracticing()),
-                new AttributeBreakdown.Term("Fencing", coeff().getKLowRangeCombatFencing() * erudition().getLevel(Knowledge.FENCING))
-        ));
-    }
-
-    public double getLowRangeCombat() {
-        return getLowRangeCombatBreakdown().total();
-    }
 
     /**
      * Valor = baseline + kValorBellicose x hasBellicose + kValorTestosterone x Tmod

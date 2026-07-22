@@ -33,18 +33,18 @@ public class CombatActionTimeCalculator {
             case WALK_1M -> coeff.getKWalk1mSpeed() * speed(inputs, action);
             case RUN_1M -> coeff.getKRun1mSpeed() * speed(inputs, action);
             case JAB -> coeff.getKJabSpeed() * speed(inputs, action)
-                    + coeff.getKJabCloseCombat() * closeCombat(inputs, action);
+                    + coeff.getKJabMeleeDexterity() * meleeDexterity(inputs, action);
             case BODY_STRIKE -> coeff.getKBodyStrikeSpeed() * speed(inputs, action)
-                    + coeff.getKBodyStrikeCloseCombat() * closeCombat(inputs, action);
+                    + coeff.getKBodyStrikeMeleeDexterity() * meleeDexterity(inputs, action);
             case PIERCING_ATTACK -> coeff.getKPiercingAttackSpeed() * speed(inputs, action)
-                    + coeff.getKPiercingAttackShortRangeCombat() * shortRangeCombat(inputs, action);
+                    + coeff.getKPiercingAttackMeleeDexterity() * meleeDexterity(inputs, action);
             case LIGHT_SWING_ATTACK -> coeff.getKLightSwingAttackSpeed() * speed(inputs, action)
-                    + coeff.getKLightSwingAttackShortRangeCombat() * shortRangeCombat(inputs, action);
+                    + coeff.getKLightSwingAttackMeleeDexterity() * meleeDexterity(inputs, action);
             case HEAVY_SWING_ATTACK -> coeff.getKHeavySwingAttackSpeed() * speed(inputs, action)
-                    + coeff.getKHeavySwingAttackShortRangeCombat() * shortRangeCombat(inputs, action);
+                    + coeff.getKHeavySwingAttackMeleeDexterity() * meleeDexterity(inputs, action);
             case DRINK_POTION -> coeff.getKDrinkPotionSpeed() * speed(inputs, action);
             case DRAW_MELEE_WEAPON -> coeff.getKDrawMeleeWeaponSpeed() * speed(inputs, action)
-                    + coeff.getKDrawMeleeWeaponShortRangeCombat() * shortRangeCombat(inputs, action);
+                    + coeff.getKDrawMeleeWeaponMeleeDexterity() * meleeDexterity(inputs, action);
             case DRAW_RANGED_WEAPON -> coeff.getKDrawRangedWeaponSpeed() * speed(inputs, action);
             case DRAW_FROM_BACKPACK -> coeff.getKDrawFromBackpackSpeed() * speed(inputs, action);
             case RELOAD_PISTOL -> coeff.getKReloadPistolSpeed() * speed(inputs, action);
@@ -52,12 +52,12 @@ public class CombatActionTimeCalculator {
             case EVASION -> coeff.getKEvasionEvasion() * evasion(inputs, action)
                     + coeff.getKEvasionSpeed() * speed(inputs, action);
             case BLOCK -> coeff.getKBlockCognitiveSpeed() * cognitiveSpeed(inputs, action)
-                    + coeff.getKBlockShortRangeCombat() * shortRangeCombat(inputs, action)
+                    + coeff.getKBlockMeleeDexterity() * meleeDexterity(inputs, action)
                     + coeff.getKBlockSpeed() * speed(inputs, action);
             case STAND_UP -> coeff.getKStandUpSpeed() * speed(inputs, action);
             case AIM -> coeff.getKAimSpeed() * speed(inputs, action);
             case DRAW_HEAVY_WEAPON -> coeff.getKDrawHeavyWeaponSpeed() * speed(inputs, action)
-                    + coeff.getKDrawHeavyWeaponShortRangeCombat() * shortRangeCombat(inputs, action);
+                    + coeff.getKDrawHeavyWeaponMeleeDexterity() * meleeDexterity(inputs, action);
             case TURN_AROUND -> coeff.getKTurnAroundSpeed() * speed(inputs, action);
             case ANALYZE_SURROUNDINGS -> coeff.getKAnalyzeSurroundingsCognitiveSpeed() * cognitiveSpeed(inputs, action);
             case CAST_SPELL -> coeff.getKCastSpellSpeed() * speed(inputs, action);
@@ -98,12 +98,8 @@ public class CombatActionTimeCalculator {
         return require(inputs.cognitiveSpeed(), action, "cognitiveSpeed");
     }
 
-    private double closeCombat(CombatAttributeInputs inputs, CombatActionType action) {
-        return require(inputs.closeCombat(), action, "closeCombat");
-    }
-
-    private double shortRangeCombat(CombatAttributeInputs inputs, CombatActionType action) {
-        return require(inputs.shortRangeCombat(), action, "shortRangeCombat");
+    private double meleeDexterity(CombatAttributeInputs inputs, CombatActionType action) {
+        return require(inputs.meleeDexterity(), action, "meleeDexterity");
     }
 
     private double evasion(CombatAttributeInputs inputs, CombatActionType action) {

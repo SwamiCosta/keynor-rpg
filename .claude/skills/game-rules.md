@@ -89,9 +89,7 @@ Every `Material` (see `keynor-rpg`'s `Material`/`DamageType` domain catalog) has
 
 **Resolved (2026-07-20) — supersedes the 2026-07-08 "contested test against Evasion" decision.** For melee, thrown, firearm/crossbow, and bow attacks, the hit check is the fixed-threshold Special Attack Test roll (e.g. `Tmd > 40`) described in `special-attack-test.md` — **not** a contested roll against the target's Evasion. Evasion still matters, but only as the target's *optional reaction*, not as part of the attacker's own hit check:
 
-- The target may only attempt to evade if they are at rest (per the "Reactions" rule below — their combat clock is at or below the attacker's).
-- If they choose to, they roll their own Evasion via a Special Attack Test (`Evasion - 10 + 1d20`) and compare it **directly against the attacker's already-resolved attack-test result** (the same Tmd/Taim/Tpst-derived roll the hit check used) — not a fresh attacker roll.
-- **Higher wins.** If the target's Evasion roll is higher, the attack misses entirely. **A tie is a glancing blow — final damage is halved**, not a resister-wins tie the way the general Contested Tests rule above works; this is a deliberate exception for this specific contest. If the attacker's roll is higher, the attack lands at full damage.
+A damage value comes from either a test or a fixed value. Example: an axe swing uses a test combining Swing Power + Melee Dexterity; a falling rock or a fired bullet has a fixed damage value. Damage tests do **not** follow the "success or failure" (>100) rule of an ordinary test — only the final total is applied directly. A character who rolls 70 and has +60 Swing Power deals 130 points of damage. See the Special Attack Test section below for the concrete melee/thrown/firearm/bow resolution mechanics that supersede this general example.
 
 See `special-attack-test.md`'s "Evasion reaction" section for the implementation (`EvasionResolver`).
 
@@ -218,7 +216,7 @@ Only movement (the first two rows) is currently reachable from the board's front
 
 **Long Range Combat removed (2026-07-18).** The attribute itself is gone (see `additive-attribute-formulas.md`'s Removals section); the four actions that used to read it (Draw ranged weapon, Reload pistol, Reload long gun, Aim) now score on Speed alone, at weight 1.0 — not the old partial Speed weight left standing on its own. No game-balance rebalancing beyond that was requested; revisit if the four actions feel mistimed in play.
 
-**Close Combat and Short Range Combat merged into Melee Dexterity (2026-07-20).** Both attributes read by the table above under two different names for the same underlying concept — melee proficiency — are gone; every action that used to weight either one now reads the single `Melee Dexterity` (MD) attribute instead, at the same weights as before (only the attribute name changed, not the formula shape or its numbers). `Melee Dexterity` (renamed from `Melee Accuracy`) is also the attribute rolled for every melee attack's hit-check test — see `special-attack-test.md`.
+**Close Combat and Short Range Combat merged into Melee Dexterity (2026-07-20).** Both attributes read by the table above under two different names for the same underlying concept — melee proficiency — are gone; every action that used to weight either one now reads the single `Melee Dexterity` (MD) attribute instead, at the same weights as before (only the attribute name changed, not the formula shape or its numbers). `Melee Dexterity` (renamed from `Melee Accuracy`) is also the attribute rolled for every melee attack's hit-check test — see the new Special Attack Test section below.
 
 **Shared actions:** if two or more characters are tied on count, all of them choose their action and submit it simultaneously. This can be done secretly, so as not to grant an advantage, if they are opponents.
 

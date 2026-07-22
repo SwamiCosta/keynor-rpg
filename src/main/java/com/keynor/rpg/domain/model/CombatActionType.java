@@ -15,19 +15,19 @@ public enum CombatActionType {
     WALK_1M,
     /** Ação 02 — Deslocamento de 1m em Corrida. S = Speed. */
     RUN_1M,
-    /** Ação 03 — Golpe Corporal Rápido (Jab). S = 0.7×Speed + 0.3×CloseCombat. */
+    /** Ação 03 — Golpe Corporal Rápido (Jab). S = 0.7×Speed + 0.3×MeleeDexterity. */
     JAB,
-    /** Ação 04 — Golpe Corporal Padrão (soco cruzado, chute). S = 0.6×Speed + 0.4×CloseCombat. */
+    /** Ação 04 — Golpe Corporal Padrão (soco cruzado, chute). S = 0.6×Speed + 0.4×MeleeDexterity. */
     BODY_STRIKE,
-    /** Ação 05 — Ataque Perfurante (rapieira, lança). S = 0.7×Speed + 0.3×ShortRangeCombat. */
+    /** Ação 05 — Ataque Perfurante (rapieira, lança). S = 0.7×Speed + 0.3×MeleeDexterity. */
     PIERCING_ATTACK,
-    /** Ação 06 — Ataque de Balanço Leve (machadinha, espada, martelo). S = 0.7×Speed + 0.3×ShortRangeCombat. */
+    /** Ação 06 — Ataque de Balanço Leve (machadinha, espada, martelo). S = 0.7×Speed + 0.3×MeleeDexterity. */
     LIGHT_SWING_ATTACK,
-    /** Ação 07 — Ataque de Balanço Pesado (martelo de guerra, espadão). S = 0.65×Speed + 0.35×ShortRangeCombat. */
+    /** Ação 07 — Ataque de Balanço Pesado (martelo de guerra, espadão). S = 0.65×Speed + 0.35×MeleeDexterity. */
     HEAVY_SWING_ATTACK,
     /** Ação 08 — Beber uma Poção (já na mão). S = Speed. */
     DRINK_POTION,
-    /** Ação 09A — Sacar Arma Corpo a Corpo Leve/Média. S = 0.6×Speed + 0.4×ShortRangeCombat. */
+    /** Ação 09A — Sacar Arma Corpo a Corpo Leve/Média. S = 0.6×Speed + 0.4×MeleeDexterity. */
     DRAW_MELEE_WEAPON,
     /** Ação 09B — Sacar Arma de Longa Distância (arco, arma de fogo). S = Speed. */
     DRAW_RANGED_WEAPON,
@@ -39,13 +39,13 @@ public enum CombatActionType {
     RELOAD_LONG_GUN,
     /** Ação 13 — Evasão (sair da frente de um ataque). S = 0.7×Evasion + 0.3×Speed. */
     EVASION,
-    /** Ação 14 — Aparar/Bloquear (escudo ou arma). S = 0.4×CognitiveSpeed + 0.3×ShortRangeCombat + 0.3×Speed. */
+    /** Ação 14 — Aparar/Bloquear (escudo ou arma). S = 0.4×CognitiveSpeed + 0.3×MeleeDexterity + 0.3×Speed. */
     BLOCK,
     /** Ação 15 — Levantar-se do Chão. S = Speed. */
     STAND_UP,
     /** Ação 16 — Mirar (ajustar a mira para o próximo disparo). S = Speed. */
     AIM,
-    /** Ação 17 — Sacar Arma Pesada (espadões, martelos de guerra). S = 0.7×Speed + 0.3×ShortRangeCombat. */
+    /** Ação 17 — Sacar Arma Pesada (espadões, martelos de guerra). S = 0.7×Speed + 0.3×MeleeDexterity. */
     DRAW_HEAVY_WEAPON,
     /** Ação 18 — Dar Meia Volta (pivô rápido sobre o próprio eixo). S = Speed. */
     TURN_AROUND,

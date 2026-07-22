@@ -11,7 +11,7 @@ package com.keynor.rpg.domain.model;
  * {@link PlayableCharacter#getSpeed()}. {@code hippocampus}/{@code neuralDrive} feed the
  * senses ({@link PlayableCharacter#getSight()}, etc.) and {@link PlayableCharacter#getBalance()}.
  * {@code agility}/{@code precision} feed {@link PlayableCharacter#getEvasion()},
- * {@link PlayableCharacter#getAcrobatics()}, {@link PlayableCharacter#getMeleeAccuracy()},
+ * {@link PlayableCharacter#getAcrobatics()}, {@link PlayableCharacter#getMeleeDexterity()},
  * {@link PlayableCharacter#getAim()}. {@code cerebralCapacity}/{@code synapsisQuality} feed
  * the new cognitive attributes ({@link PlayableCharacter#getMemoryPool()},
  * {@link PlayableCharacter#getReasoning()}, {@link PlayableCharacter#getShortMemory()}).
